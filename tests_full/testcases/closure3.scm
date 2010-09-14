@@ -1,0 +1,25 @@
+(define (make-account balance)
+    (define (withdraw amount)
+        (if (>= balance amount)
+            (set! balance (- balance amount))))
+    (define (deposit amount)
+        (set! balance (+ balance amount)))
+    (define (dispatch m)
+        (cond 
+            ((eqv? m 'withdraw) withdraw)
+            ((eqv? m 'deposit) deposit)
+            ((eqv? m 'query) balance)
+            (else 'unknown-command)))
+    dispatch)
+
+(define acc1 (make-account 50))
+((acc1 'deposit) 20)
+(write (acc1 'query))
+
+(define acc2 (make-account 200))
+((acc2 'deposit) 100)
+((acc2 'withdraw) 150)
+(write (acc2 'query))
+
+((acc1 'withdraw) 70)
+(write (acc1 'query))

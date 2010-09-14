@@ -1,0 +1,6 @@
+a-symbol
+a-null
+a-number
+a-boolean
+a-pair
+unknown

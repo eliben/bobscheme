@@ -1,0 +1,101 @@
+NEXT STEPS:
+
+(**) compiler&VM tests run. wee-heeeee!
+1) --> can I think of other tests - something really convoluted with closures
+maybe? --> Y combinator (see misc/Lisp/articles for it and more lambda calculus
+stuff)
+
+2) Must to some checking to see that VM functions properly, i.e. print out
+stacks in strategic places and make sure everything's alright
+
+,------------------
+
+3) After the VM is done and tests run, implement additional constructs correctly
+(see RANDOM THOUGHTS).
+4) Implement serialization and deserialization of CodeObject
+5) VM in C
+
+
+VM instructions
+===============
+
+The following are instructions in their original form, before being assembled
+to actual bytecode.
+
+SP - stack pointer
+TOS - value at top of stack
+
+
+Opcode              Args        Description
+------              ----        -----------
+
+CONST               val         Push constant value to stack
+
+LOADVAR             sym         Push var value to stack
+
+STOREVAR            sym         Place TOS in var and pop stack
+
+DEFVAR              sym         Define var to be the value in TOS and pop stack
+
+FUNCTION            fn          Make closure from fn and current env, and push
+                                it onto stack.
+
+POP                             Pop value from stack
+
+FJUMP               label       Jump if TOS is false to label and pop stack
+
+JUMP                label       Jump to label
+
+RETURN                          Return from function to last return point
+
+CALL                n           Call function that's in TOS, saving
+                                return point. n - number of arguments passed.
+
+
+
+Bytecode
+========
+
+Each instruction is coded into a 4-byte word. First byte encodes the instruction
+and the other 3 its argument(s).
+
+Bytecode has to be serializable into a binary file that can be loaded by a VM
+written in other languages (and later, by the same VM - to separate the
+compilation stage from VM interpretation)
+
+
+
+Data structures
+===============
+
+I see at least 3 different data structures that should be used for code:
+
+1) CompiledProcedure that's created during compilation and before assembling.
+Holds name, args, code
+2) CodeObject: an assembled version of CompiledProcedure. All the labels are 
+resolved, constants / names are in tables, etc. This is what's also serialized,
+so it will be used by the VM as well (in C too).
+3) Some kind of closure object for the VM: includes an env pointer as well and
+is created when a function is defined. Can the same CodeObject be reused?
+
+
+RANDOM THOUGHTS
+===============
+
+(**) how are defines implemented?!
+(**) Is 'ARGS' instruction required - can't CALL setup the new env?!
+(**) Separate call and value stack?
+(**) why keep TJUMP if it isn't used by the compiler at all?
+
+(**) to make nested definitions work correctly in both interpreter and compiler,
+the approach described in SICP should be used: nested definitions are detected
+and changed for initial (let ...) and then set!. 
+Or alternatively, as R5RS defines, convert them to 'letrec'
+
+* What happens when the VM executes a call instruction?
+It has the number of args in the argument, and the function on TOS. It takes
+the function from TOS, the arguments from TOS and assigns them to the args of
+the function extending the current environment. So when the function started
+running hte stack is "cleaned". What about the return address? Does CALL put it
+there, or maybe we'll use a separate call stack??
+
