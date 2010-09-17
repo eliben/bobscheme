@@ -43,6 +43,9 @@ def builtin_symbol_p(args):
 def builtin_number_p(args):
     return Boolean(isinstance(args[0], Number))
 
+def builtin_zero_p(args):
+    return Boolean(isinstance(args[0], Number) and args[0].value == 0)
+
 def builtin_null_p(args):
     return Boolean(args[0] is None)
 
@@ -65,6 +68,9 @@ def builtin_caddr(args):
     return args[0].second.second.first
 
 def builtin_eqv(args):
+    # A rough approximation of Scheme's eqv? that's good enough for most
+    # practical purposes
+    #
     left, right = args[0], args[1]
     
     if isinstance(left, Pair) and isinstance(right, Pair):
@@ -91,7 +97,9 @@ def make_num_operator_builtin(opfunc, returntype):
 
 builtins_map = {
     'eqv?':         builtin_eqv,
+    'ev?':          builtin_eqv,
     'pair?':        builtin_pair_p,
+    'zero?':        builtin_zero_p,
     'boolean?':     builtin_boolean_p,
     'symbol?':      builtin_symbol_p,
     'number?':      builtin_number_p,

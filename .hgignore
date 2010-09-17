@@ -3,5 +3,9 @@ syntax: glob
 *.pyc
 *.o
 *.cover
+*.swp
+tags
+cscope.*
+
 
 

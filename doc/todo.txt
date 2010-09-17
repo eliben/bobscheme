@@ -64,21 +64,6 @@ written in other languages (and later, by the same VM - to separate the
 compilation stage from VM interpretation)
 
 
-
-Data structures
-===============
-
-I see at least 3 different data structures that should be used for code:
-
-1) CompiledProcedure that's created during compilation and before assembling.
-Holds name, args, code
-2) CodeObject: an assembled version of CompiledProcedure. All the labels are 
-resolved, constants / names are in tables, etc. This is what's also serialized,
-so it will be used by the VM as well (in C too).
-3) Some kind of closure object for the VM: includes an env pointer as well and
-is created when a function is defined. Can the same CodeObject be reused?
-
-
 RANDOM THOUGHTS
 ===============
 
