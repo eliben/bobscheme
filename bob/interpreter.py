@@ -18,7 +18,7 @@ DEBUG = False
 
 
 class Procedure(object):
-    """ Represents a compound procedure.
+    """ Represents a compound procedure (closure).
     
         Consists of a list of arguments and body (both nested Pairs), together
         with a link to the environment in which the procedure was defined.
@@ -183,12 +183,35 @@ class BobInterpreter(object):
 
 def interpret_code(code_str, output_stream=None):
     """ Convenience function for interpeting a string containing Scheme code.
+        Doesn't return anything, so the only visible outcome is side effects
+        from the Scheme code (such as invocations of the (write) function).
     """
     parsed_exprs = BobParser().parse(code_str)    
     
-    intrp = BobInterpreter(output_stream)
+    interp = BobInterpreter(output_stream)
     for expr in parsed_exprs:
-        intrp.interpret(expr)
+        interp.interpret(expr)
+
+
+def interactive_interpreter():
+    """ Interactive interpreter 
+    """
+    interp = BobInterpreter() # by default output_stream is sys.stdout
+    parser = BobParser()
+    print "Interactive Bob interpreter. Type a Scheme expression or 'quit'"
+
+    while True:
+        inp = raw_input("[bob] >> ")
+        if inp == 'quit':
+            break
+        parsed = parser.parse(inp)
+        val = interp.interpret(parsed[0])
+        if val is None:
+            pass
+        elif isinstance(val, Procedure):
+            print ": <procedure object>"
+        else:
+            print ":", expr_repr(val)
 
 
 #-------------------------------------------------------------------------------
@@ -196,6 +219,8 @@ if __name__ == '__main__':
     import sys
     import StringIO
     
+    interactive_interpreter()
+    sys.exit(1)
     #~ DEBUG = True
     
     #~ parsecode = '''
@@ -218,26 +243,29 @@ if __name__ == '__main__':
     #~ print expr_repr(appl)
     
     code_str = '''
-      (define F*
-    (lambda (func-arg)
-      (lambda (n)
-        (if (zero? n)
-            1
-            (* n (func-arg (- n 1)))))))
 
-  (define Y
-    (lambda (X)
-      ((lambda (procedure)
-         (X (lambda (arg) ((procedure procedure) arg))))
-       (lambda (procedure)
-         (X (lambda (arg) ((procedure procedure) arg)))))))
+(define (append lst1 lst2)
+    (if (null? lst1)
+        lst2
+        (cons (car lst1) (append (cdr lst1) lst2))))
 
-(define fact (Y F*))
+(define (binary-tree-next x)
+    (list (* 2 x) (+ 1 (* 2 x))))
 
-(write (fact 6))
+(define (tree-search states goal-p successors combiner)
+    (write states)
+    (cond
+        ((null? states) #f)
+        ((goal-p (car states)) (car states))
+        (else (tree-search 
+                (combiner (successors (car states)) (cdr states))
+                goal-p successors combiner))))
 
+(define (dfs start goal-p successors)
+    (tree-search (list start) goal-p successors append))
+
+(dfs 1 (lambda (x) (= 8 x)) binary-tree-next)
 '''
-
     sio = StringIO.StringIO()
     interpret_code(code_str, sio)
     

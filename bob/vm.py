@@ -173,9 +173,10 @@ class BobVM(object):
         for name, func in builtins_map.items():
             global_binding[name] = BuiltinProcedure(name, func)
 
-        # Add the 'write' builtin which requires access to the VM state 
+        # Add builtins which require access to the VM state.
         #
         global_binding['write'] = BuiltinProcedure('write', self._write)
+        global_binding['debug-vm'] = BuiltinProcedure('debug-vm', self._hook_debug_vm)
         return Environment(global_binding)
 
     def _write(self, args):
@@ -183,6 +184,9 @@ class BobVM(object):
         # list of arguments.
         #
         self.output_stream.write(expr_repr(args[0]) + '\n')
+
+    def _hook_debug_vm(self, args):
+        print self._show_vm_state()
 
     def _show_vm_state(self):
         def value_printer(item):
@@ -212,7 +216,7 @@ class BobVM(object):
                     str += 'TOS:  '
                 else:
                     str += '      '
-                item = self.valuestack.peek(-1 - i)
+                item = stack.peek(-1 - i)
                 str += item_printer(item)
                 i += 1
             str += '      |--------\n'
@@ -227,27 +231,21 @@ class BobVM(object):
 if __name__ == '__main__':
     from compiler import compile_code
     code_str = '''
-(write (eqv? #f #t))
-(write (eqv? #f #f))
-(write (eqv? '() '()))
-(write (eqv? 5 (+ 1 4)))
-(write (eqv? 6 #f))
+    (define (foo)
+        (debug-vm)
+        50)
+    (define (func a b)
+        (+ b (foo)))
 
-(define zara 'zara)
-(write (eqv? zara 'zara))
-(write (eqv? 'zara 'zara))
-
-(define joe '(1 2 3))
-(write (eqv? joe '(1 2 3)))
-(write (eqv? joe joe))
+    (func 1 2)
 '''
 
     co = compile_code(code_str)    
-    #~ print co
+    #print co
     
     vm = BobVM()
     vm.run(co)
-    #~ print vm._show_vm_state()
+    #print vm._show_vm_state()
 
     
 

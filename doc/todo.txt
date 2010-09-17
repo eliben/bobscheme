@@ -1,14 +1,5 @@
 NEXT STEPS:
 
-(**) compiler&VM tests run. wee-heeeee!
-1) --> can I think of other tests - something really convoluted with closures
-maybe? --> Y combinator (see misc/Lisp/articles for it and more lambda calculus
-stuff)
-
-2) Must to some checking to see that VM functions properly, i.e. print out
-stacks in strategic places and make sure everything's alright
-
-,------------------
 
 3) After the VM is done and tests run, implement additional constructs correctly
 (see RANDOM THOUGHTS).

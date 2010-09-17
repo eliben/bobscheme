@@ -19,7 +19,7 @@ class TestCase(object):
 
 
 def all_testcases(dir='testcases/'):
-    for filename in os.listdir(dir):
+    for filename in sorted(os.listdir(dir)):
         if filename.endswith('.scm'):
             testname = os.path.splitext(filename)[0]
             fullpath = os.path.join(dir, filename)
