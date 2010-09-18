@@ -81,6 +81,8 @@ class Boolean(object):
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.value == other.value
+        else:
+            return False
 
 
 # An exception that can be raised by the various functions in this module when

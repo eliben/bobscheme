@@ -7,6 +7,7 @@
 # This code is in the public domain
 #-------------------------------------------------------------------------------
 import operator
+import functools
 from expr import *
 
 
@@ -84,20 +85,47 @@ def builtin_not(args):
     else:
         return Boolean(False)
 
-def make_num_operator_builtin(opfunc, returntype):
+# The 'and' and 'or' builtins are conforming to the definition in 
+# R5RS, section 4.2
+#
+def builtin_and(args):
+    for v in args:
+        if v == Boolean(False):
+            return v
+    if len(args) > 0:
+        return args[-1]
+    else:
+        return Boolean(True)
+
+def builtin_or(args):
+    for v in args:
+        if v == Boolean(True):
+            return v
+    if len(args) > 0:
+        return args[-1]
+    else:
+        return Boolean(False)
+
+def make_comparison_operator_builtin(opfunc):
     def op(args):
-        left, right = args[0], args[1]
-        
-        if isinstance(left, Number) and isinstance(right, Number):
-            return returntype(opfunc(left.value, right.value))
-        else:
-            raise BuiltinError('Builtin called with invalid types: %s & %s' % (type(left), type(right)))
+        a = args[0]
+        for b in args[1:]:
+            if opfunc(a.value, b.value):
+                a = b
+            else:
+                return Boolean(False)
+        return Boolean(True)
+    return op
+
+def make_arith_operator_builtin(opfunc):
+    def op(args):
+        return Number(functools.reduce(opfunc, [v.value for v in args]))
     return op
 
 
 builtins_map = {
     'eqv?':         builtin_eqv,
-    'ev?':          builtin_eqv,
+    'eq?':          builtin_eqv,
     'pair?':        builtin_pair_p,
     'zero?':        builtin_zero_p,
     'boolean?':     builtin_boolean_p,
@@ -111,12 +139,14 @@ builtins_map = {
     'cadr':         builtin_cadr,
     'caddr':        builtin_caddr,
     'not':          builtin_not,
-    '+':            make_num_operator_builtin(operator.add, Number),
-    '-':            make_num_operator_builtin(operator.sub, Number),
-    '*':            make_num_operator_builtin(operator.mul, Number),
-    '=':            make_num_operator_builtin(operator.eq, Boolean),
-    '>=':           make_num_operator_builtin(operator.ge, Boolean),
-    '<=':           make_num_operator_builtin(operator.le, Boolean),
-    '>':            make_num_operator_builtin(operator.gt, Boolean),
-    '<':            make_num_operator_builtin(operator.lt, Boolean),
+    'and':          builtin_and,
+    'or':           builtin_or,
+    '+':            make_arith_operator_builtin(operator.add),
+    '-':            make_arith_operator_builtin(operator.sub),
+    '*':            make_arith_operator_builtin(operator.mul),
+    '=':            make_comparison_operator_builtin(operator.eq),
+    '>=':           make_comparison_operator_builtin(operator.ge),
+    '<=':           make_comparison_operator_builtin(operator.le),
+    '>':            make_comparison_operator_builtin(operator.gt),
+    '<':            make_comparison_operator_builtin(operator.lt),
 }                   

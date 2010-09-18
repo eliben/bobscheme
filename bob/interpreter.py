@@ -78,9 +78,7 @@ class BobInterpreter(object):
             return None
         elif is_if(expr):
             predicate = self._eval(if_predicate(expr), env)
-            # Only #f counts as false in a predicate
-            #
-            if isinstance(predicate, Boolean) and predicate.value is False:
+            if predicate == Boolean(False):
                 return self._eval(if_alternative(expr), env)
             else:
                 return self._eval(if_consequent(expr), env)
@@ -219,8 +217,9 @@ if __name__ == '__main__':
     import sys
     import StringIO
     
-    interactive_interpreter()
-    sys.exit(1)
+    #interactive_interpreter()
+    #sys.exit(1)
+
     #~ DEBUG = True
     
     #~ parsecode = '''
@@ -243,28 +242,41 @@ if __name__ == '__main__':
     #~ print expr_repr(appl)
     
     code_str = '''
+    (define (variable? x) (symbol? x))
 
-(define (append lst1 lst2)
-    (if (null? lst1)
-        lst2
-        (cons (car lst1) (append (cdr lst1) lst2))))
+    (define (same-variable? v1 v2)
+        (and (variable? v1) (variable? v2) (eq? v1 v2)))
 
-(define (binary-tree-next x)
-    (list (* 2 x) (+ 1 (* 2 x))))
+    (define (make-sum a1 a2) (list '+ a1 a2))
+    (define (make-product m1 m2) (list '* m1 m2))
 
-(define (tree-search states goal-p successors combiner)
-    (write states)
-    (cond
-        ((null? states) #f)
-        ((goal-p (car states)) (car states))
-        (else (tree-search 
-                (combiner (successors (car states)) (cdr states))
-                goal-p successors combiner))))
+    (define (sum? x) (and (pair? x) (eq? (car x) '+)))
+    (define (addend s) (cadr s))
+    (define (augend s) (caddr s))
 
-(define (dfs start goal-p successors)
-    (tree-search (list start) goal-p successors append))
+    (define (product? x) (and (pair? x) (eq? (car x) '*)))
+    (define (multiplier p) (cadr p))
+    (define (multiplicand p) (caddr p))
 
-(dfs 1 (lambda (x) (= 8 x)) binary-tree-next)
+    (define (deriv exp var)
+        (cond   
+            ((number? exp) 0)
+            ((variable? exp)
+                (if (same-variable? exp var) 1 0))
+            ((sum? exp)
+                (make-sum 
+                    (deriv (addend exp) var)
+                    (deriv (augend exp) var)))
+            ((product? exp)
+                (make-sum
+                    (make-product (multiplier exp) (deriv (multiplicand exp) var))
+                    (make-product (deriv (multiplier exp) var) (multiplicand exp))))
+            (else
+                (write 'error-deriv))))
+
+    (write
+        (deriv '(+ x (* x y)) 'x))
+                            
 '''
     sio = StringIO.StringIO()
     interpret_code(code_str, sio)
