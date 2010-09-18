@@ -6,8 +6,10 @@
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
 #-------------------------------------------------------------------------------
-from bytecode import *
-from expr import *
+from bytecode import (  
+        OP_CONST, OP_LOADVAR, OP_STOREVAR, OP_DEFVAR, OP_FUNCTION, OP_POP,
+        OP_JUMP, OP_FJUMP, OP_RETURN, OP_CALL)
+from expr import expr_repr, Boolean
 from builtins import BuiltinProcedure, builtins_map
 from environment import Environment
 from utils import Stack
@@ -231,6 +233,7 @@ class BobVM(object):
 if __name__ == '__main__':
     from compiler import compile_code
     code_str = '''
+    (write 2)
     (define (foo)
         (debug-vm)
         50)

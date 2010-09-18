@@ -1,8 +1,5 @@
 NEXT STEPS:
 
-
-3) After the VM is done and tests run, implement additional constructs correctly
-(see RANDOM THOUGHTS).
 4) Implement serialization and deserialization of CodeObject
 5) VM in C
 
@@ -58,20 +55,8 @@ compilation stage from VM interpretation)
 RANDOM THOUGHTS
 ===============
 
-(**) how are defines implemented?!
-(**) Is 'ARGS' instruction required - can't CALL setup the new env?!
-(**) Separate call and value stack?
-(**) why keep TJUMP if it isn't used by the compiler at all?
-
-(**) to make nested definitions work correctly in both interpreter and compiler,
-the approach described in SICP should be used: nested definitions are detected
-and changed for initial (let ...) and then set!. 
-Or alternatively, as R5RS defines, convert them to 'letrec'
-
-* What happens when the VM executes a call instruction?
-It has the number of args in the argument, and the function on TOS. It takes
-the function from TOS, the arguments from TOS and assigns them to the args of
-the function extending the current environment. So when the function started
-running hte stack is "cleaned". What about the return address? Does CALL put it
-there, or maybe we'll use a separate call stack??
-
+(*) I think I'll leave internal definitions be. R5RS allows internal definitions
+    only in the beginning of blocks anyway. Doing the scanning out and convertion
+    to letrec will just convolute the resulting bytecode with another layer of 
+    'lambda'. This is tangential to my goals with Bob.
+ 
