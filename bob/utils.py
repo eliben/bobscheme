@@ -7,6 +7,7 @@
 # This code is in the public domain
 #-------------------------------------------------------------------------------
 from collections import deque
+import time
 
 
 def flatten(iterables):
@@ -58,4 +59,15 @@ class Stack(object):
         return len(self.d)
 
 
+class Timer(object):
+    def __init__(self, name=None):
+        self.name = name
+    
+    def __enter__(self):
+        self.tstart = time.time()
+        
+    def __exit__(self, type, value, traceback):
+        if self.name:
+            print '[%s]' % self.name,
+        print 'Elapsed: %s' % (time.time() - self.tstart)
 

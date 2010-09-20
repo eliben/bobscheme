@@ -222,61 +222,24 @@ if __name__ == '__main__':
 
     #~ DEBUG = True
     
-    #~ parsecode = '''
-#~ (let ((x 1) (y 2))
-    #~ (+ x y)
-    #~ (- x y))
-
-#~ (lambda (x y)
-    #~ (* x y)
-    #~ (* x 2))
-#~ '''
-    #~ bp = BobParser()
-    #~ tree = bp.parse(parsecode)
-    #~ print expr_repr(tree[0])
-    #~ print is_let(tree[0])
-    #~ print expr_repr(let_body(tree[0]))
-
-    #~ appl = convert_let_to_application(tree[0])
-    
-    #~ print expr_repr(appl)
-    
     code_str = '''
-    (define (variable? x) (symbol? x))
+    (define (divides k n)
+        (= (modulo n k) 0))
 
-    (define (same-variable? v1 v2)
-        (and (variable? v1) (variable? v2) (eq? v1 v2)))
+    (define (primecheck num)
+        (define (auxprimecheck divisor)
+            (cond 
+                ((= divisor num) #t)
+                ((divides divisor num) #f)
+                (else (auxprimecheck (+ 1 divisor)))))
+        (auxprimecheck 2))
 
-    (define (make-sum a1 a2) (list '+ a1 a2))
-    (define (make-product m1 m2) (list '* m1 m2))
-
-    (define (sum? x) (and (pair? x) (eq? (car x) '+)))
-    (define (addend s) (cadr s))
-    (define (augend s) (caddr s))
-
-    (define (product? x) (and (pair? x) (eq? (car x) '*)))
-    (define (multiplier p) (cadr p))
-    (define (multiplicand p) (caddr p))
-
-    (define (deriv exp var)
-        (cond   
-            ((number? exp) 0)
-            ((variable? exp)
-                (if (same-variable? exp var) 1 0))
-            ((sum? exp)
-                (make-sum 
-                    (deriv (addend exp) var)
-                    (deriv (augend exp) var)))
-            ((product? exp)
-                (make-sum
-                    (make-product (multiplier exp) (deriv (multiplicand exp) var))
-                    (make-product (deriv (multiplier exp) var) (multiplicand exp))))
-            (else
-                (write 'error-deriv))))
-
-    (write
-        (deriv '(+ x (* x y)) 'x))
-                            
+    (write (primecheck 17))
+    (write (primecheck 49))
+    (write (primecheck 51))
+    (write (primecheck 71))
+    (write (primecheck 101))
+    (write (primecheck 102))
 '''
     sio = StringIO.StringIO()
     interpret_code(code_str, sio)

@@ -144,9 +144,12 @@ builtins_map = {
     '+':            make_arith_operator_builtin(operator.add),
     '-':            make_arith_operator_builtin(operator.sub),
     '*':            make_arith_operator_builtin(operator.mul),
+    'quotient':     make_arith_operator_builtin(operator.floordiv),
+    'modulo':       make_arith_operator_builtin(operator.mod),
     '=':            make_comparison_operator_builtin(operator.eq),
     '>=':           make_comparison_operator_builtin(operator.ge),
     '<=':           make_comparison_operator_builtin(operator.le),
     '>':            make_comparison_operator_builtin(operator.gt),
     '<':            make_comparison_operator_builtin(operator.lt),
+
 }                   
