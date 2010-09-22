@@ -7,7 +7,7 @@
 # This code is in the public domain
 #-------------------------------------------------------------------------------
 from __future__ import print_function
-from utils import pack_word
+from utils import pack_word, unpack_word
 from expr import (Pair, Boolean, Symbol, Number, expr_repr)
 
 
@@ -126,6 +126,9 @@ class CodeObject(object):
 # A serialized bytecode consists of a string containing a magic constant
 # followed by the serialized top-level CodeObject in the bytecode. This is 
 # created by Serializer.serialize_bytecode
+# 
+# The Deserializer class can convert a serialized string back into a 
+# CodeObject, in Deserializer.deserialize_bytecode
 #
 # The "magic" constant starting any serialized Bob bytecode consists of a 
 # version in the high two bytes and 0B0B in the low two bytes.
@@ -135,6 +138,7 @@ MAGIC_CONST = 0x00010B0B
 TYPE_NULL       = '0'
 TYPE_BOOLEAN    = 'b'
 TYPE_STRING     = 's'
+TYPE_SYMBOL     = 'S'
 TYPE_NUMBER     = 'n'
 TYPE_PAIR       = 'p'
 TYPE_INSTR      = 'i'
@@ -143,6 +147,9 @@ TYPE_CODEOBJECT = 'c'
 
 
 class Serializer(object):
+    # Each function beginning with _s serializes some type and returns 
+    # a string representing the serialized object.
+    #
     def __init__(self):
         # Allows dispatching serialization of Bob objects according to their
         # types
@@ -193,7 +200,7 @@ class Serializer(object):
         return TYPE_NUMBER + self._s_word(number.value)
 
     def _s_symbol(self, symbol):
-        return self._s_string(symbol.value)
+        return TYPE_SYMBOL + self._s_word(len(symbol.value)) + symbol.value
 
     def _s_pair(self, pair):
         return (    TYPE_PAIR + 
@@ -225,14 +232,107 @@ class Serializer(object):
         return s
 
 
+class Deserializer(object):
+    class DeserializationError(Exception): pass
+
+    # Each function beginning with _d deserializes an object from the given
+    # stream. The stream is represented as an iterator, from which any
+    # deserialization function takes exactly as much as it needs.
+    # These functions are being called *after* the type specifier has been
+    # stripped from the stream.
+    #
+    def __init__(self):
+        self._deserialize_type_dispatch = {
+            TYPE_NULL:          self._d_null,
+            TYPE_BOOLEAN:       self._d_boolean, 
+            TYPE_NUMBER:        self._d_number,
+            TYPE_SYMBOL:        self._d_symbol,
+            TYPE_PAIR:          self._d_pair,
+            TYPE_INSTR:         self._d_instruction,
+            TYPE_CODEOBJECT:    self._d_codeobject,
+            TYPE_SEQUENCE:      self._d_sequence,
+            TYPE_STRING:        self._d_string,
+        }
+        pass
+
+    def deserialize_bytecode(self, str):
+        """ Given a string with a serialized code object, converts it onto
+            a CodeObject.
+        """
+        try:
+            stream = iter(str)
+            magic = self._d_word(stream)
+
+            if magic != MAGIC_CONST:
+                raise self.DeserializationError("Magic constant does't match")
+
+            type = stream.next()
+
+            if type != TYPE_CODEOBJECT:
+                raise self.DeserializationError("Expected TYPE_CODEOBJECT as bytecode")
+
+            return self._d_codeobject(stream)
+        except StopIteration, e:
+            raise self.DeserializationError("Unexpected end of serialized stream")
+        
+    def _d_word(self, stream):
+        bytes = ''.join(stream.next() for i in range(4))
+        print('DB: word from bytes %s' % bytes.encode('hex'))
+        return unpack_word(bytes, big_endian=False)
+
+    def _d_object(self, stream):
+        """ Generic dispatcher for deserializing an arbitrary object.
+        """
+        type = stream.next()
+        print('DB: object dispatch on type "%s"' % type)
+        return self._deserialize_type_dispatch[type](stream)
+
+    def _d_null(self, stream):
+        # NULL has nothing in the stream after the type
+        return None
+
+    def _d_boolean(self, stream):
+        val = stream.next()
+        return Boolean(val == '\x01')
+
+    def _d_string(self, stream):
+        len = self._d_word(stream)
+        return ''.join(stream.next() for i in range(len))
+
+    def _d_number(self, stream):
+        return Number(self._d_word(stream))
+
+    def _d_symbol(self, stream):
+        return Symbol(self._d_string(stream))
+
+    def _d_pair(self, stream):
+        first = self._d_object(stream)
+        second = self._d_object(stream)
+        return Pair(first, second)
+
+    def _d_sequence(self, stream):
+        len = self._d_word(stream)
+        return [self._d_object(stream) for i in range(len)]
+
+    def _d_instruction(self, stream):
+        word = self._d_word(stream)
+        return Instruction(word >> 24, word & 0xFFFFFF)
+    
+    def _d_codeobject(self, stream):
+        co = CodeObject()
+        co.name = self._d_string(stream)
+        print('DB: got name "%s"' % co.name)
+        co.args = self._d_sequence(stream)
+        co.constants = self._d_sequence(stream)
+        co.varnames = self._d_sequence(stream)
+        co.code = self._d_sequence(stream)
+        return co
+
+
 #-----------------------------------------------------------------------------
 if __name__ == '__main__':
     ss = Serializer()
     print(ss._s_boolean(Boolean(False)).encode('hex'))
-
-    print(ss._s_object(Boolean(False)).encode('hex'))
-    print(ss._s_object(Pair(Boolean(False), Symbol('abc'))).encode('hex'))
-    
     print(ss._s_instruction(Instruction(OP_CALL, 34)).encode('hex'))
 
 
