@@ -229,7 +229,7 @@ class BobVM(object):
         return str
 
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 if __name__ == '__main__':
     from compiler import compile_code
     code_str = '''
@@ -244,10 +244,14 @@ if __name__ == '__main__':
 '''
 
     co = compile_code(code_str)    
+
+    from bytecode import Serializer
+    ss = Serializer().serialize_bytecode(co)
+    print(ss.encode('hex'))
     #print co
     
-    vm = BobVM()
-    vm.run(co)
+    #vm = BobVM()
+    #vm.run(co)
     #print vm._show_vm_state()
 
     

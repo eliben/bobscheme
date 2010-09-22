@@ -29,7 +29,7 @@ class CompiledProcedure(object):
         A procedure contains arguments (list of symbol names), code (list
         of compiled instructions) and optionally a name (for debugging).
     """
-    def __init__(self, args, code, name=None):
+    def __init__(self, args, code, name=''):
         self.args = args
         self.code = code
         self.name = name
@@ -84,7 +84,7 @@ class BobCompiler(object):
             with the instructions stored in its .code attribute.
         """
         compiled_exprs = self._comp_exprlist(exprlist)
-        return CompiledProcedure(args=[], name=None, code=compiled_exprs)
+        return CompiledProcedure(args=[], name='', code=compiled_exprs)
 
     def _make_label(self, prefix=None):
         prefix = prefix or 'LABEL'

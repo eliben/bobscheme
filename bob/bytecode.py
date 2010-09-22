@@ -6,7 +6,9 @@
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
 #-------------------------------------------------------------------------------
-from expr import expr_repr
+from __future__ import print_function
+from utils import pack_word
+from expr import (Pair, Boolean, Symbol, Number, expr_repr)
 
 
 OP_CONST    = 0x00
@@ -78,7 +80,7 @@ class CodeObject(object):
             The variables are referenced by their index in this list.
     """
     def __init__(self):
-        self.name = None
+        self.name = ''
         self.args = []
         self.code = []
         self.constants = []
@@ -116,6 +118,121 @@ class CodeObject(object):
         return repr
 
 
+# The serialization scheme is similar to Python's marshalling of code. Each
+# object is serialized by prepending a single "type" byte, followed by 
+# the object's serialized representation. See the code of Serializer for the
+# details of how each type is serialized - it's pretty simple!
+#
+# A serialized bytecode consists of a string containing a magic constant
+# followed by the serialized top-level CodeObject in the bytecode. This is 
+# created by Serializer.serialize_bytecode
+#
+# The "magic" constant starting any serialized Bob bytecode consists of a 
+# version in the high two bytes and 0B0B in the low two bytes.
+#
+MAGIC_CONST = 0x00010B0B
 
+TYPE_NULL       = '0'
+TYPE_BOOLEAN    = 'b'
+TYPE_STRING     = 's'
+TYPE_NUMBER     = 'n'
+TYPE_PAIR       = 'p'
+TYPE_INSTR      = 'i'
+TYPE_SEQUENCE   = '['
+TYPE_CODEOBJECT = 'c'
+
+
+class Serializer(object):
+    def __init__(self):
+        # Allows dispatching serialization of Bob objects according to their
+        # types
+        #
+        self._serialize_type_dispatch = {
+            type(None):     self._s_null,
+            Boolean:        self._s_boolean,
+            Number:         self._s_number,
+            Symbol:         self._s_symbol,
+            Pair:           self._s_pair,
+            Instruction:    self._s_instruction,
+            CodeObject:     self._s_codeobject,
+            type([]):       self._s_sequence,
+            type(''):       self._s_string,
+        }
+
+    def serialize_bytecode(self, codeobject):
+        """ Serialize a top-level CodeObject into a string that can be written
+            into a file.
+        """
+        s = self._s_word(MAGIC_CONST)
+        s += self._s_codeobject(codeobject)
+        return s
+    
+    def _s_word(self, wordvalue):
+        """ word - a 32-bit integer, serialized in 4 bytes as little-endian
+        """
+        return pack_word(wordvalue, big_endian=False)
+
+    def _s_string(self, string):
+        """ string - a Python string, used for representing names in code
+            objects and for Bob Symbol objects.
+        """
+        return TYPE_STRING + self._s_word(len(string)) + string
+           
+    def _s_object(self, obj):
+        """ Generic dispatcher for serializing an arbitrary object
+        """
+        return self._serialize_type_dispatch[type(obj)](obj)
+
+    def _s_null(self, *args):
+        return TYPE_NULL
+
+    def _s_boolean(self, bool):
+        return TYPE_BOOLEAN + ('\x01' if bool.value else '\x00')
+
+    def _s_number(self, number):
+        return TYPE_NUMBER + self._s_word(number.value)
+
+    def _s_symbol(self, symbol):
+        return self._s_string(symbol.value)
+
+    def _s_pair(self, pair):
+        return (    TYPE_PAIR + 
+                    self._s_object(pair.first) + 
+                    self._s_object(pair.second))
+
+    def _s_sequence(self, seq):
+        """ A sequence is just a Python list, used for serializing parts
+            of code objects.
+        """
+        seq = ''.join(self._s_object(obj) for obj in seq)
+        return TYPE_SEQUENCE + self._s_word(len(seq)) + seq
+
+    def _s_instruction(self, instr):
+        """ Instructions are mapped into words, with the opcode taking 
+            the high byte and the argument the low 3 bytes.
+        """
+        arg = instr.arg or 0
+        instr_word = (instr.opcode << 24) | (arg & 0xFFFFFF)
+        return TYPE_INSTR + self._s_word(instr_word)
+        
+    def _s_codeobject(self, codeobject):
+        s = TYPE_CODEOBJECT
+        s += self._s_string(codeobject.name)
+        s += self._s_sequence(codeobject.args)
+        s += self._s_sequence(codeobject.constants)
+        s += self._s_sequence(codeobject.varnames)
+        s += self._s_sequence(codeobject.code)
+        return s
+
+
+#-----------------------------------------------------------------------------
+if __name__ == '__main__':
+    ss = Serializer()
+    print(ss._s_boolean(Boolean(False)).encode('hex'))
+
+    print(ss._s_object(Boolean(False)).encode('hex'))
+    print(ss._s_object(Pair(Boolean(False), Symbol('abc'))).encode('hex'))
+    
+    print(ss._s_instruction(Instruction(OP_CALL, 34)).encode('hex'))
 
 

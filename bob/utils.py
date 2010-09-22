@@ -7,6 +7,7 @@
 # This code is in the public domain
 #-------------------------------------------------------------------------------
 from collections import deque
+import struct
 import time
 
 
@@ -29,6 +30,20 @@ def list_find_or_append(lst, item):
     except ValueError:
         lst.append(item)
         return len(lst) - 1
+
+
+def pack_word(word, big_endian=False):
+    """ Packs a 32-bit word into a binary data string.
+    """
+    endian = ">" if big_endian else "<"
+    return struct.pack("%sL" % endian, word)
+    
+
+def unpack_word(str, big_endian=False):
+    """ Unpacks a 32-bit word from binary data.
+    """
+    endian = ">" if big_endian else "<"
+    return struct.unpack("%sL" % endian, str)[0]
 
 
 class Stack(object):
