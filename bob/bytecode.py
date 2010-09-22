@@ -211,8 +211,8 @@ class Serializer(object):
         """ A sequence is just a Python list, used for serializing parts
             of code objects.
         """
-        seq = ''.join(self._s_object(obj) for obj in seq)
-        return TYPE_SEQUENCE + self._s_word(len(seq)) + seq
+        s_seq = ''.join(self._s_object(obj) for obj in seq)
+        return TYPE_SEQUENCE + self._s_word(len(seq)) + s_seq
 
     def _s_instruction(self, instr):
         """ Instructions are mapped into words, with the opcode taking 
@@ -221,7 +221,7 @@ class Serializer(object):
         arg = instr.arg or 0
         instr_word = (instr.opcode << 24) | (arg & 0xFFFFFF)
         return TYPE_INSTR + self._s_word(instr_word)
-        
+
     def _s_codeobject(self, codeobject):
         s = TYPE_CODEOBJECT
         s += self._s_string(codeobject.name)
@@ -277,14 +277,12 @@ class Deserializer(object):
 
     def _d_word(self, stream):
         bytes = ''.join(stream.next() for i in range(4))
-        print('DB: word from bytes %s' % bytes.encode('hex'))
         return unpack_word(bytes, big_endian=False)
 
     def _d_object(self, stream):
         """ Generic dispatcher for deserializing an arbitrary object.
         """
         type = stream.next()
-        print('DB: object dispatch on type "%s"' % type)
         return self._deserialize_type_dispatch[type](stream)
 
     def _d_null(self, stream):
@@ -322,7 +320,6 @@ class Deserializer(object):
         co = CodeObject()
         self._match_type(stream, TYPE_STRING)
         co.name = self._d_string(stream)
-        print('DB: got name "%s"' % co.name)
 
         seqs = []
         for i in range(4):

@@ -243,27 +243,22 @@ if __name__ == '__main__':
     (func 1 2)
 '''
 
-    code_str = '''
-    1
-'''
 
     co = compile_code(code_str)    
 
     from bytecode import Serializer, Deserializer
     ss = Serializer().serialize_bytecode(co)
     ssp = ''
-
     for c in ss:
         if ord(' ') <= ord(c) <= 'z':
             ssp += '_' + c
         else:
             ssp += c.encode('hex')
 
-    print(ssp)
 
     ds = Deserializer()
     co2 = ds.deserialize_bytecode(ss)
-    #print co
+    print co
     
     #vm = BobVM()
     #vm.run(co)
