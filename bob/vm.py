@@ -6,7 +6,7 @@
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
 #-------------------------------------------------------------------------------
-from bytecode import (  
+from bytecode import (
         OP_CONST, OP_LOADVAR, OP_STOREVAR, OP_DEFVAR, OP_FUNCTION, OP_POP,
         OP_JUMP, OP_FJUMP, OP_RETURN, OP_CALL)
 from expr import expr_repr, Boolean
@@ -251,7 +251,15 @@ if __name__ == '__main__':
 
     from bytecode import Serializer, Deserializer
     ss = Serializer().serialize_bytecode(co)
-    print(ss.encode('hex'))
+    ssp = ''
+
+    for c in ss:
+        if ord(' ') <= ord(c) <= 'z':
+            ssp += '_' + c
+        else:
+            ssp += c.encode('hex')
+
+    print(ssp)
 
     ds = Deserializer()
     co2 = ds.deserialize_bytecode(ss)

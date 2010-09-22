@@ -266,15 +266,15 @@ class Deserializer(object):
             if magic != MAGIC_CONST:
                 raise self.DeserializationError("Magic constant does't match")
 
-            type = stream.next()
-
-            if type != TYPE_CODEOBJECT:
-                raise self.DeserializationError("Expected TYPE_CODEOBJECT as bytecode")
-
+            self._match_type(stream, TYPE_CODEOBJECT)
             return self._d_codeobject(stream)
         except StopIteration, e:
             raise self.DeserializationError("Unexpected end of serialized stream")
         
+    def _match_type(self, stream, type):
+        if stream.next() != type:
+            raise self.DeserializationError("Expected type '%s' not matched" % type)
+
     def _d_word(self, stream):
         bytes = ''.join(stream.next() for i in range(4))
         print('DB: word from bytes %s' % bytes.encode('hex'))
@@ -320,12 +320,16 @@ class Deserializer(object):
     
     def _d_codeobject(self, stream):
         co = CodeObject()
+        self._match_type(stream, TYPE_STRING)
         co.name = self._d_string(stream)
         print('DB: got name "%s"' % co.name)
-        co.args = self._d_sequence(stream)
-        co.constants = self._d_sequence(stream)
-        co.varnames = self._d_sequence(stream)
-        co.code = self._d_sequence(stream)
+
+        seqs = []
+        for i in range(4):
+            self._match_type(stream, TYPE_SEQUENCE)
+            seqs.append(self._d_sequence(stream))
+        co.args, co.constants, co.varnames, co.code = seqs
+
         return co
 
 
