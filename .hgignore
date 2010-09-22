@@ -7,6 +7,5 @@ syntax: glob
 *.swo
 tags
 cscope.*
-
-
+*.bobc
 
