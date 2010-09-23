@@ -1,3 +1,9 @@
+/******************************************************************************
+** bob: Scheme objects for bare VM
+**
+** Eli Bendersky (eliben@gmail.com)
+** This code is in the public domain
+******************************************************************************/
 #include "mem.h"
 #include "object.h"
 

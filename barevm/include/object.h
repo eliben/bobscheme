@@ -1,19 +1,25 @@
+/******************************************************************************
+** bob: Scheme objects for bare VM
+**
+** Eli Bendersky (eliben@gmail.com)
+** This code is in the public domain
+******************************************************************************/
 #ifndef OBJECT_H
 #define OBJECT_H
 
 
-typedef enum _BobObjectType {
+typedef enum BobObjectType {
     TYPE_NULL, TYPE_NUMBER, TYPE_SYMBOL, TYPE_PAIR,
 } BobObjectType;
 
 
-typedef struct _BobObject {
+typedef struct BobObject {
     BobObjectType type;
 
     union {
         int num;
         const char* sym;
-        struct {struct _BobObject *first, *second;} pair;
+        struct {struct BobObject *first, *second;} pair;
     } d;
 } BobObject;
 
