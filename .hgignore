@@ -5,6 +5,7 @@ syntax: glob
 *.o
 *.cover
 *.swp
+*.swn
 *.swo
 tags
 cscope.*

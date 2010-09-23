@@ -2,6 +2,7 @@ NEXT STEPS:
 
 *) Implement set-car! and set-cdr! - these are the only one that can actually modify a variable
 bound elsewhere (??) + write tests
+*) Does equality work correctly? "same object" should be recognized by it (in Python by object id comparison)
 5) VM in C
 
 
@@ -39,18 +40,6 @@ RETURN                          Return from function to last return point
 
 CALL                n           Call function that's in TOS, saving
                                 return point. n - number of arguments passed.
-
-
-
-Bytecode
-========
-
-Each instruction is coded into a 4-byte word. First byte encodes the instruction
-and the other 3 its argument(s).
-
-Bytecode has to be serializable into a binary file that can be loaded by a VM
-written in other languages (and later, by the same VM - to separate the
-compilation stage from VM interpretation)
 
 
 RANDOM THOUGHTS
