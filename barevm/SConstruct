@@ -1,0 +1,19 @@
+# I like scons cuz it's Python ;-)
+#
+CCFLAGS = ['-Wall', '-pedantic', '--std=c99']
+
+if ARGUMENTS.get('debug', 0):
+    CCFLAGS.append('-g')
+
+envc = Environment(
+        CCFLAGS=CCFLAGS,
+        CPPPATH=['./include'],
+        )
+
+# All C files in src/ go in
+#
+cfiles = Glob('src/*.c')
+
+envc.Program(target='barevm', source=cfiles)
+
+

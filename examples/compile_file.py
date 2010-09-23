@@ -17,7 +17,7 @@ def compile_file(filename):
     filename_without_ext = os.path.splitext(filename)[0]
     out_filename = filename_without_ext + '.bobc'
 
-    with open(out_filename, 'w') as out_file:
+    with open(out_filename, 'wb') as out_file:
         out_file.write(serialized)
 
 

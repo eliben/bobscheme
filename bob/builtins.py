@@ -59,6 +59,14 @@ def builtin_list(args):
 def builtin_car(args):
     return args[0].first
 
+def builtin_set_car(args):
+    args[0].first = args[1]
+    return None
+
+def builtin_set_cdr(args):
+    args[0].second = args[1]
+    return None
+
 def builtin_cdr(args):
     return args[0].second
 
@@ -138,6 +146,8 @@ builtins_map = {
     'cdr':          builtin_cdr,
     'cadr':         builtin_cadr,
     'caddr':        builtin_caddr,
+    'set-car!':     builtin_set_car,
+    'set-cdr!':     builtin_set_cdr,
     'not':          builtin_not,
     'and':          builtin_and,
     'or':           builtin_or,

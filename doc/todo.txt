@@ -1,6 +1,7 @@
 NEXT STEPS:
 
-4) Implement serialization and deserialization of CodeObject
+*) Implement set-car! and set-cdr! - these are the only one that can actually modify a variable
+bound elsewhere (??) + write tests
 5) VM in C
 
 

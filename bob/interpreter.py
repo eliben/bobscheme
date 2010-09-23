@@ -223,23 +223,12 @@ if __name__ == '__main__':
     #~ DEBUG = True
     
     code_str = '''
-    (define (divides k n)
-        (= (modulo n k) 0))
-
-    (define (primecheck num)
-        (define (auxprimecheck divisor)
-            (cond 
-                ((= divisor num) #t)
-                ((divides divisor num) #f)
-                (else (auxprimecheck (+ 1 divisor)))))
-        (auxprimecheck 2))
-
-    (write (primecheck 17))
-    (write (primecheck 49))
-    (write (primecheck 51))
-    (write (primecheck 71))
-    (write (primecheck 101))
-    (write (primecheck 102))
+    (define myp (cons 1 2))
+    (write myp)
+    (set-car! myp 5)
+    (write myp)
+    (set-cdr! myp (cons 4 (cons 6 '())))
+    (write myp)
 '''
     sio = StringIO.StringIO()
     interpret_code(code_str, sio)
