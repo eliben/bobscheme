@@ -7,6 +7,9 @@
 #ifndef BYTECODE_H
 #define BYTECODE_H
 
+#include "dstring.h"
+#include "object.h"
+
 
 /* Bob bytecode op-codes.
 */
@@ -30,15 +33,39 @@ typedef struct BobInstruction {
 } BobInstruction;
 
 
+typedef enum {
+    CONSTANT_OBJECT, CONSTANT_CODEOBJECT
+} BobBytecodeConstantType;
+
+
+/* Bytecode constants can be either regular objects or code objects.
+*/
+struct BobCodeObject;
+
+typedef struct BobBytecodeConstant {
+    BobBytecodeConstantType type;
+
+    union {
+        BobObject* obj;
+        struct BobCodeObject* codeobj;
+    } d;
+} BobBytecodeConstant;
+
+
 /* Code object - a Scheme procedure in its compiled and assembled form,
 ** suitable for execution by the VM.
 */
 typedef struct BobCodeObject {
-    char* name;
+    dstring name;
     unsigned num_args;
-    char** args;
+    dstring* args;
+    unsigned num_varnames;
+    dstring* varnames;
     unsigned num_constants;
-    
+    BobBytecodeConstant* constants;
+    unsigned codelen;
+    BobInstruction* code;
 } BobCodeObject;
+
 
 #endif /* BYTECODE_H */

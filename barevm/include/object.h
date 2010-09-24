@@ -7,6 +7,8 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include "dstring.h"
+
 
 typedef enum BobObjectType {
     TYPE_NULL, TYPE_NUMBER, TYPE_SYMBOL, TYPE_PAIR,
@@ -18,7 +20,7 @@ typedef struct BobObject {
 
     union {
         int num;
-        const char* sym;
+        dstring sym;
         struct {struct BobObject *first, *second;} pair;
     } d;
 } BobObject;
@@ -26,7 +28,7 @@ typedef struct BobObject {
 
 BobObject* BobNull_new();
 BobObject* BobNumber_new(int num);
-BobObject* BobSymbol_new(const char* sym);
+BobObject* BobSymbol_new(dstring sym);
 BobObject* BobPair_new(BobObject* first, BobObject* second);
 
 

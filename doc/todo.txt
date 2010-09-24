@@ -1,8 +1,6 @@
 NEXT STEPS:
 
 *) Standard header comment for files in barevm!
-*) Implement set-car! and set-cdr! - these are the only one that can actually modify a variable
-bound elsewhere (??) + write tests
 *) Does equality work correctly? "same object" should be recognized by it (in Python by object id comparison)
 5) VM in C
 

@@ -6,11 +6,13 @@
 ******************************************************************************/
 #include "mem.h"
 #include "object.h"
+#include "objectallocator.h"
+#include "intern.h"
 
 
-static BobObject* BobObject_alloc(BobObjectType type)
+static BobObject* BobObject_new(BobObjectType type)
 {
-    BobObject* obj = mem_alloc(sizeof(*obj));
+    BobObject* obj = BobObject_alloc();
     obj->type = type;
     return obj;
 }
@@ -18,30 +20,30 @@ static BobObject* BobObject_alloc(BobObjectType type)
 
 BobObject* BobNull_new()
 {
-    BobObject* obj = BobObject_alloc(TYPE_NULL);
+    BobObject* obj = BobObject_new(TYPE_NULL);
     return obj;
 }
 
 
 BobObject* BobNumber_new(int num)
 {
-    BobObject* obj = BobObject_alloc(TYPE_NUMBER);
+    BobObject* obj = BobObject_new(TYPE_NUMBER);
     obj->d.num = num;
     return obj;
 }
 
 
-BobObject* BobSymbol_new(const char* sym)
+BobObject* BobSymbol_new(dstring sym)
 {
-    BobObject* obj = BobObject_alloc(TYPE_SYMBOL);
-    obj->d.sym = sym;
+    BobObject* obj = BobObject_new(TYPE_SYMBOL);
+    obj->d.sym = intern_dstring(sym);
     return obj;
 }
 
 
 BobObject* BobPair_new(BobObject* first, BobObject* second)
 {
-    BobObject* obj = BobObject_alloc(TYPE_PAIR);
+    BobObject* obj = BobObject_new(TYPE_PAIR);
     obj->d.pair.first = first;
     obj->d.pair.second = second;
     return obj;
