@@ -20,6 +20,11 @@ dstring dstring_new(const char* cstr);
 */
 dstring dstring_empty(void);
 
+/* Create a dstring from the given c-string and length (strlen(cstr)), taking
+** ownership of the memory allocated in cstr.
+*/
+dstring dstring_from_cstr_and_len(char* cstr, size_t len);
+
 /* Create a dstring from a printf-like format.
 */
 dstring dstring_format(const char* format, ...);

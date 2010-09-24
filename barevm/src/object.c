@@ -25,6 +25,14 @@ BobObject* BobNull_new()
 }
 
 
+BobObject* BobBoolean_new(BOOL boolval)
+{
+    BobObject* obj = BobObject_new(TYPE_BOOLEAN);
+    obj->d.boolval = boolval;
+    return obj;
+}
+
+
 BobObject* BobNumber_new(int num)
 {
     BobObject* obj = BobObject_new(TYPE_NUMBER);

@@ -52,6 +52,17 @@ dstring dstring_empty(void)
 }
 
 
+dstring dstring_from_cstr_and_len(char* cstr, size_t len)
+{
+    dstring dstr = mem_alloc(sizeof(*dstr));
+    
+    dstr->str = cstr;
+    dstr->len = len + 1;
+
+    return dstr;
+}
+
+
 char* dstring_cstr(dstring dstr)
 {
     return dstr->str;
