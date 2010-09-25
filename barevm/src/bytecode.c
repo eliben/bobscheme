@@ -5,6 +5,7 @@
 ** This code is in the public domain
 ******************************************************************************/
 #include <stdio.h>
+#include <string.h>
 #include <assert.h>
 #include "mem.h"
 #include "die.h"
@@ -223,7 +224,80 @@ BobCodeObject* deserialize_bytecode(const char* filename)
 }
 
 
-void free_codeobject(BobCodeObject* codeobj)
+static dstring opcode2str(unsigned opcode)
+{
+#define DEF_OP_STR(op)   case OP_##op: return dstring_new(#op)
+    switch (opcode) {
+        DEF_OP_STR(CONST);
+        DEF_OP_STR(LOADVAR);
+        DEF_OP_STR(STOREVAR);
+        DEF_OP_STR(DEFVAR);
+        DEF_OP_STR(FUNCTION);
+        DEF_OP_STR(POP);
+        DEF_OP_STR(JUMP);
+        DEF_OP_STR(FJUMP);
+        DEF_OP_STR(RETURN);
+        DEF_OP_STR(CALL);
+        default: return dstring_new("UNKNOWN");
+    }
+}
+
+static void BobCodeObject_repr_nested(BobCodeObject* codeobj, dstring repr, size_t nesting)
+{
+    size_t i;
+
+    /* prefix: blank space before each line in the representation to nicely
+    ** show the nesting of code objects.
+    */
+    char* prefix = mem_alloc(nesting + 1);
+    memset(prefix, ' ', nesting);
+    prefix[nesting] = '\0';
+
+    /* Header
+    */
+    dstring_concat_cstr(repr, prefix);
+    dstring_concat_cstr(repr, "----------\n");
+    dstring_concat_cstr(repr, prefix);
+    dstring_concat_cstr(repr, "CodeObject: ");
+    dstring_concat(repr, codeobj->name);
+    dstring_concat_cstr(repr, "\n");
+
+    /* Args
+    */
+    dstring_concat_cstr(repr, prefix);
+    dstring_concat_cstr(repr, "Args: [");
+
+    for (i = 0; i < codeobj->num_args; ++i) {
+        dstring_concat(repr, codeobj->args[i]);
+        dstring_concat_cstr(repr, " ");
+    }
+    dstring_concat_cstr(repr, "]\n");
+
+    /* Code
+    */
+    for (i = 0; i < codeobj->codelen; ++i) {
+        BobInstruction* instr = codeobj->code[i];
+        dstring opcodestr = opcode2str(instr->opcode);
+        dstring op_format = dstring_format("  %4u %-12s ", i, dstring_cstr(opcodestr));
+        dstring_concat_cstr(repr, prefix);
+        dstring_concat(repr, op_format);
+        /* TODO: here
+            XXX: here
+        */
+        dstring_concat_cstr(repr, "\n");
+        dstring_free(opcodestr);
+        dstring_free(op_format);
+    }
+}
+
+
+void BobCodeObject_repr(BobCodeObject* codeobj, dstring repr)
+{
+    BobCodeObject_repr_nested(codeobj, repr, 0);
+}
+
+
+void BobCodeObject_free(BobCodeObject* codeobj)
 {
     /* XXX: how to deallocate the bob objects?!
     ** also don't forget this function has to call itself recursively!!

@@ -62,19 +62,19 @@ class CodeObject(object):
             defined by a 'lambda' and not 'define' and don't have a name).
             The top-level procedure that represents a whole file also doesn't
             have a name.
-        
+
         args:
             A list of argument names (strings) for the procedure.
-        
+
         code:
             A list of Instruction objects.
-        
+
         constants:
             A list of constants. Constants are either Scheme expressions 
             (as defined by the types in the expr module) or CodeObjects (for
             compiled procedures). The instructions in the code reference 
             constants by their index in this list.
-        
+
         varnames:
             A list of strings specifying variable names referenced in the code.
             The variables are referenced by their index in this list.

@@ -234,11 +234,10 @@ if __name__ == '__main__':
     from compiler import compile_code
     code_str = '''
     (write '(1 (6 2)))
-    (define (foo)
-        (debug-vm)
-        50)
     (define (func a b)
-        (+ b (foo)))
+        (if (> a b)
+            #f
+            (+ b (foo))))
 
     (func 1 2)
 '''

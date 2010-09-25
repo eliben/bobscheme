@@ -8,17 +8,17 @@
 
 int main(int argc, const char* argv[])
 {
-    /*BobCodeObject* codeobject;*/
+    BobCodeObject* codeobject;
 
-    /*if (argc != 2)*/
-        /*die("Call: %s <filename>\n", argv[0]);*/
+    if (argc != 2)
+        die("Call: %s <filename>\n", argv[0]);
 
-    /*codeobject = deserialize_bytecode(argv[1]);*/
-    /*{*/
-        /*dstring hoe = dstring_new("armageddon");*/
-        /*dstring_concat_cstr(hoe, " is done");*/
-        /*printf("%s\n", dstring_cstr(hoe));*/
-    /*}*/
+    codeobject = deserialize_bytecode(argv[1]);
+    {
+        dstring repr = dstring_empty();
+        BobCodeObject_repr(codeobject, repr);
+        puts(dstring_cstr(repr));
+    }
     {
         BobObject* ss = BobSymbol_new(dstring_new("kaclso"));
         BobObject* num = BobNumber_new(3382);

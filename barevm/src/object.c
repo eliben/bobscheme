@@ -101,6 +101,6 @@ void BobObject_repr(BobObject* obj, dstring repr)
                 break;
             }
         default:
-            assert(0 && "Unexpected type of BobObject*");
+            assert(0 && "BobObject_repr: Unexpected type of BobObject*");
     }
 }

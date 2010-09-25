@@ -69,7 +69,8 @@ typedef struct BobCodeObject {
 
 
 BobCodeObject* deserialize_bytecode(const char* filename);
-void free_codeobject(BobCodeObject* codeobj);
+void BobCodeObject_repr(BobCodeObject* codeobj, dstring repr);
+void BobCodeObject_free(BobCodeObject* codeobj);
 
 
 #endif /* BYTECODE_H */
