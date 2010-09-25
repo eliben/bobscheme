@@ -34,5 +34,10 @@ BobObject* BobNumber_new(int num);
 BobObject* BobSymbol_new(dstring sym);
 BobObject* BobPair_new(BobObject* first, BobObject* second);
 
+/* Concatenate a textual representation of the given object into the
+** given dstring.
+*/
+void BobObject_repr(BobObject* obj, dstring repr);
+
 
 #endif /* OBJECT_H */

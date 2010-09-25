@@ -233,7 +233,7 @@ class BobVM(object):
 if __name__ == '__main__':
     from compiler import compile_code
     code_str = '''
-    (write 2)
+    (write '(1 (6 2)))
     (define (foo)
         (debug-vm)
         50)

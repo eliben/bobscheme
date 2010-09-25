@@ -61,6 +61,10 @@ dstring dstring_concat_len(dstring dest, dstring src, size_t n);
 */
 dstring dstring_concat(dstring dest, dstring src);
 
+/* Concatenate the whole C string in 'cstr' to the end of 'dest'
+*/
+dstring dstring_concat_cstr(dstring dest, const char* cstr);
+
 /* Return the character at position 'pos' of the string. If 'pos'
 ** is out of bounds, '\0' is returned.
 */

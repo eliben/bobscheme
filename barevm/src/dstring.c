@@ -183,6 +183,17 @@ dstring dstring_concat(dstring dest, dstring src)
 }
 
 
+dstring dstring_concat_cstr(dstring dest, const char* cstr)
+{
+    size_t added_len = strlen(cstr);
+    size_t new_len = dest->len + added_len;
+    dest->str = mem_realloc(dest->str, new_len);
+    memcpy(dest->str + dest->len - 1, cstr, added_len);
+    dest->str[new_len - 1] = '\0';
+    dest->len = new_len;
+    return dest;
+}
+
 int dstring_compare(dstring d1, dstring d2)
 {
     return strcmp(d1->str, d2->str);

@@ -4,6 +4,7 @@
 ** Eli Bendersky (eliben@gmail.com)
 ** This code is in the public domain
 ******************************************************************************/
+#include <assert.h>
 #include "mem.h"
 #include "object.h"
 #include "objectallocator.h"
@@ -57,3 +58,49 @@ BobObject* BobPair_new(BobObject* first, BobObject* second)
     return obj;
 }
 
+
+void BobObject_repr(BobObject* obj, dstring repr)
+{
+    switch (obj->type) {
+        case TYPE_NULL:
+            dstring_concat_cstr(repr, "()");
+            break;
+        case TYPE_BOOLEAN:
+            if (obj->d.boolval == TRUE)
+                dstring_concat_cstr(repr, "#t");
+            else
+                dstring_concat_cstr(repr, "#f");
+            break;
+        case TYPE_NUMBER:
+            {
+                dstring numstr = dstring_format("%d", obj->d.num);
+                dstring_concat(repr, numstr);
+                dstring_free(numstr);
+                break;
+            }
+        case TYPE_SYMBOL:
+            dstring_concat(repr, obj->d.sym);
+            break;
+        case TYPE_PAIR:
+            {
+                dstring_concat_cstr(repr, "(");
+                BobObject_repr(obj->d.pair.first, repr);
+                while (obj->d.pair.second->type == TYPE_PAIR)  {
+                    dstring_concat_cstr(repr, " ");
+                    BobObject_repr(obj->d.pair.second->d.pair.first, repr);
+                    obj = obj->d.pair.second;
+                }
+                if (obj->d.pair.second->type == TYPE_NULL) {
+                    dstring_concat_cstr(repr, ")");
+                }
+                else {
+                    dstring_concat_cstr(repr, " . ");
+                    BobObject_repr(obj->d.pair.second, repr);
+                    dstring_concat_cstr(repr, ")");
+                }
+                break;
+            }
+        default:
+            assert(0 && "Unexpected type of BobObject*");
+    }
+}
