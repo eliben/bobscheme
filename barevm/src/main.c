@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "object.h"
+#include "bytecode.h"
 
 
 int main(int argc, const char* argv[])

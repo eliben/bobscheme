@@ -1,5 +1,6 @@
 NEXT STEPS:
 
+*) In Python (de)serialization, negative numbers shouldn't work because _d_word is unsigned!!!! fixit
 *) Standard header comment for files in barevm!
 *) Does equality work correctly? "same object" should be recognized by it (in Python by object id comparison)
 5) VM in C

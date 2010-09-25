@@ -13,16 +13,16 @@
 
 /* Bob bytecode op-codes.
 */
-const unsigned OP_CONST    = 0x00;
-const unsigned OP_LOADVAR  = 0x10;
-const unsigned OP_STOREVAR = 0x11;
-const unsigned OP_DEFVAR   = 0x12;
-const unsigned OP_FUNCTION = 0x20;
-const unsigned OP_POP      = 0x30;
-const unsigned OP_JUMP     = 0x40;
-const unsigned OP_FJUMP    = 0x41;
-const unsigned OP_RETURN   = 0x50;
-const unsigned OP_CALL     = 0x51;
+#define OP_CONST    0x00
+#define OP_LOADVAR  0x10
+#define OP_STOREVAR 0x11
+#define OP_DEFVAR   0x12
+#define OP_FUNCTION 0x20
+#define OP_POP      0x30
+#define OP_JUMP     0x40
+#define OP_FJUMP    0x41
+#define OP_RETURN   0x50
+#define OP_CALL     0x51
 
 
 /* Bytecode instruction executable by the VM.
@@ -62,10 +62,14 @@ typedef struct BobCodeObject {
     unsigned num_varnames;
     dstring* varnames;
     unsigned num_constants;
-    BobBytecodeConstant* constants;
+    BobBytecodeConstant** constants;
     unsigned codelen;
-    BobInstruction* code;
+    BobInstruction** code;
 } BobCodeObject;
+
+
+BobCodeObject* deserialize_bytecode(const char* filename);
+void free_codeobject(BobCodeObject* codeobj);
 
 
 #endif /* BYTECODE_H */
