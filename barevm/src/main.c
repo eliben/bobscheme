@@ -1,11 +1,17 @@
 #include <stdio.h>
 #include "object.h"
 #include "bytecode.h"
+#include "die.h"
 
 
 int main(int argc, const char* argv[])
 {
-    BobObject* bo = BobNumber_new(1553);
-    printf("%d\n", bo->d.num);
+    BobCodeObject* codeobject;
+
+    if (argc != 2)
+        die("Call: %s <filename>\n", argv[0]);
+
+    codeobject = deserialize_bytecode(argv[1]);
+
     return 0;
 }

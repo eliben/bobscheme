@@ -82,14 +82,19 @@ static dstring d_string(FILE* stream)
 {
     size_t len = d_word(stream);
     char* str = mem_alloc(len + 1);
-    size_t i;
-
-    for (i = 0; i < len; ++i) {
-        str[i] = (char) fgetc(stream);
-    }
-    str[len] = 0;
+    size_t nread = fread(str, 1, len, stream);
+    if (nread != len)
+        die("Deserialization error: string ended earlier than expected (%u bytes read instead of %u)\n", nread, len);
+    str[len] = '\0';
 
     return dstring_from_cstr_and_len(str, len);
+}
+
+
+static dstring d_expect_string(FILE* stream)
+{
+    d_match_type(stream, SER_TYPE_STRING);
+    return d_string(stream);
 }
 
 
@@ -187,14 +192,13 @@ static BobCodeObject* d_codeobject(FILE* stream)
     BobCodeObject* codeobject = mem_alloc(sizeof(*codeobject));
     unsigned len, i;
 
-    d_match_type(stream, SER_TYPE_STRING);
-    codeobject->name = d_string(stream);
+    codeobject->name = d_expect_string(stream);
 
-    D_SEQUENCE(codeobject->args, d_string);
+    D_SEQUENCE(codeobject->args, d_expect_string);
     codeobject->num_args = len;
     D_SEQUENCE(codeobject->constants, d_expect_bytecodeconstant);
     codeobject->num_constants = len;
-    D_SEQUENCE(codeobject->varnames, d_string);
+    D_SEQUENCE(codeobject->varnames, d_expect_string);
     codeobject->num_varnames = len;
     D_SEQUENCE(codeobject->code, d_expect_instruction);
     codeobject->codelen = len;
