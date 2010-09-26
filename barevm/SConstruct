@@ -7,12 +7,13 @@ if ARGUMENTS.get('debug', 0):
 
 envc = Environment(
         CCFLAGS=CCFLAGS,
-        CPPPATH=['./include'],
+        CPPPATH=['./include', './utils'],
         )
 
-# All C files in src/ go in
+# All C files 
 #
-cfiles = Glob('src/*.c')
+cfiles = Glob('utils/*.c')
+cfiles += Glob('src/*.c')
 
 envc.Program(target='barevm', source=cfiles)
 
