@@ -294,7 +294,7 @@ void* hashtable_find_or_insert(hashtable ht, void* key, void* val)
     if (ht->numentries > ht->numbuckets)
         ht_resize_table(ht, ht->numbuckets * 2);
     
-    return val;
+    return he->val;
 }
 
 

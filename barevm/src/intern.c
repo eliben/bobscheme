@@ -16,7 +16,7 @@ static hashtable table;
 
 static void create_new_table()
 {
-   table = hashtable_new(HTableType_copy_dstring_key, 100); 
+   table = hashtable_new(HTableType_copy_dstring_key_val, 100); 
 }
 
 

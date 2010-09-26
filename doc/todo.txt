@@ -2,6 +2,7 @@ NEXT STEPS:
 
 *) In Python (de)serialization, negative numbers shouldn't work because _d_word is unsigned!!!! fixit - are negative numbers 
 (constants) supported at all?
+*) put generic utility code in utils/ ?
 
 
 *) Standard header comment for files in barevm!

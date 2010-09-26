@@ -279,15 +279,53 @@ static void BobCodeObject_repr_nested(BobCodeObject* codeobj, dstring repr, size
         BobInstruction* instr = codeobj->code[i];
         dstring opcodestr = opcode2str(instr->opcode);
         dstring op_format = dstring_format("  %4u %-12s ", i, dstring_cstr(opcodestr));
+        dstring arg_format = 0;
+
         dstring_concat_cstr(repr, prefix);
         dstring_concat(repr, op_format);
-        /* TODO: here
-            XXX: here
-        */
+
+        switch (instr->opcode) {
+            case OP_CONST:
+                arg_format = dstring_format("%4d {= ", instr->arg);
+                assert(codeobj->constants[instr->arg]->type == CONSTANT_OBJECT);
+                BobObject_repr(codeobj->constants[instr->arg]->d.obj, arg_format);
+                dstring_concat_cstr(arg_format, "}");
+                break;
+            case OP_LOADVAR:
+            case OP_STOREVAR:
+            case OP_DEFVAR:
+                arg_format = dstring_format("%4d {= ", instr->arg);
+                dstring_concat(arg_format, codeobj->varnames[instr->arg]);
+                dstring_concat_cstr(arg_format, "}");
+                break;
+            case OP_FJUMP:
+            case OP_JUMP:
+            case OP_CALL:
+                arg_format = dstring_format("%4d", instr->arg);
+                break;
+            case OP_FUNCTION:
+                arg_format = dstring_format("%4d {=\n", instr->arg);
+                assert(codeobj->constants[instr->arg]->type == CONSTANT_CODEOBJECT);
+                BobCodeObject_repr_nested(codeobj->constants[instr->arg]->d.codeobj, arg_format, nesting + 8);
+                break;
+            case OP_POP:
+            case OP_RETURN:
+                arg_format = dstring_empty();
+                break;
+            default:
+                assert(0 && "unknown instruction opcode");
+        }
+        dstring_concat(repr, arg_format);
         dstring_concat_cstr(repr, "\n");
+
         dstring_free(opcodestr);
+        dstring_free(arg_format);
         dstring_free(op_format);
     }
+
+    dstring_concat_cstr(repr, prefix);
+    dstring_concat_cstr(repr, "----------\n");
+    mem_free(prefix);
 }
 
 

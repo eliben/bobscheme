@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import os, sys
 
 sys.path.insert(0, '..')
@@ -11,6 +12,7 @@ def run_compiled(filename):
     """
     bytecode = open(filename, 'rb').read()
     codeobject = Deserializer().deserialize_bytecode(bytecode)
+    print(codeobject)
     vm = BobVM(output_stream=sys.stdout)
     vm.run(codeobject)
 

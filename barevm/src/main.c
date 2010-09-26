@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "object.h"
 #include "bytecode.h"
 #include "dstring.h"
@@ -9,6 +10,9 @@
 int main(int argc, const char* argv[])
 {
     BobCodeObject* codeobject;
+    /*dstring ds = dstring_new("blahamuha");*/
+    /*BobObject* bs = BobSymbol_new(ds);*/
+    /*exit(1);*/
 
     if (argc != 2)
         die("Call: %s <filename>\n", argv[0]);
