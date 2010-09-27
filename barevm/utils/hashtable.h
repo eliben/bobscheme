@@ -1,6 +1,8 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
+#include <stdlib.h>
+
 
 /* Return codes used by the hashtable API.
 */
@@ -100,8 +102,9 @@ HT_RETVAL hashtable_insert(hashtable ht, void* key, void* val, int replace);
 
 /* If the key is in the table, its value is returned. Otherwise,
 ** the key/value pair is added to the table and the value is 
-** returned.
-**
+** returned. Note: when a value-copy function is specified in the
+** HTableType, the value returned here will be the new value created
+** by that function.
 */
 void* hashtable_find_or_insert(hashtable ht, void* key, void* val);
 

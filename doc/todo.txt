@@ -1,10 +1,5 @@
 NEXT STEPS:
 
-*) In Python (de)serialization, negative numbers shouldn't work because _d_word is unsigned!!!! fixit - are negative numbers 
-(constants) supported at all?
-*) put generic utility code in utils/ ?
-
-
 *) Standard header comment for files in barevm!
 *) Does equality work correctly? "same object" should be recognized by it (in Python by object id comparison)
 5) VM in C
@@ -15,9 +10,6 @@ VM instructions
 
 The following are instructions in their original form, before being assembled
 to actual bytecode.
-
-SP - stack pointer
-TOS - value at top of stack
 
 
 Opcode              Args        Description
@@ -54,3 +46,5 @@ RANDOM THOUGHTS
     to letrec will just convolute the resulting bytecode with another layer of 
     'lambda'. This is tangential to my goals with Bob.
  
+(*) Negative numbers: currently no way to create them, except (- 0 2). Should I bother?
+

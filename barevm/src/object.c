@@ -59,6 +59,24 @@ BobObject* BobPair_new(BobObject* first, BobObject* second)
 }
 
 
+BobObject* BobBuiltin_new(builtin_proc_type proc, dstring name)
+{
+    BobObject* obj = BobObject_new(TYPE_BUILTIN_PROC);
+    obj->d.builtin.proc = proc;
+    obj->d.builtin.name = name;
+    return obj;
+}
+
+
+BobObject* BobClosure_new(struct BobCodeObject* codeobj, struct BobEnv* env)
+{
+    BobObject* obj = BobObject_new(TYPE_CLOSURE);
+    obj->d.closure.codeobj = codeobj;
+    obj->d.closure.env = env;
+    return obj;
+}
+
+
 void BobObject_repr(BobObject* obj, dstring repr)
 {
     switch (obj->type) {

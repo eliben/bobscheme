@@ -14,9 +14,9 @@ from expr import *
 class BuiltinProcedure(object):
     """ A lightweight representation of builtin procedures, parallel to the
         approach taken in SICP.
-        
+
         The calling convention for builtin procedures is as follows:
-        
+
         Arguments are passed in as a Python list. Each argument is a Scheme
         expression (from the expr module). The procedure should always return
         a single value which is also a Scheme expression.
@@ -24,7 +24,7 @@ class BuiltinProcedure(object):
     def __init__(self, name, proc):
         self.name = name
         self.proc = proc
-    
+
     def apply(self, args):
         return self.proc(args)
 
@@ -81,12 +81,12 @@ def builtin_eqv(args):
     # practical purposes
     #
     left, right = args[0], args[1]
-    
+
     if isinstance(left, Pair) and isinstance(right, Pair):
         return Boolean(id(left) == id(right))
     else:
         return Boolean(left == right)
-    
+
 def builtin_not(args):
     if isinstance(args[0], Boolean) and args[0].value == False:
         return Boolean(True)
@@ -161,5 +161,4 @@ builtins_map = {
     '<=':           make_comparison_operator_builtin(operator.le),
     '>':            make_comparison_operator_builtin(operator.gt),
     '<':            make_comparison_operator_builtin(operator.lt),
-
-}                   
+}

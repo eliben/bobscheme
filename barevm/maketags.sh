@@ -1,4 +1,4 @@
 #!/bin/bash
-ctags -R src/ include/
+ctags -R src/ include/ utils/
 cscope -R -b
 
