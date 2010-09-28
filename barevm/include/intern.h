@@ -15,12 +15,15 @@
 ** about allocation and deallocation. The table keeps each string only once.
 */
 
-/* Intern the given string.
+/* Intern the given string - return a unique dstring representing it.
 ** Note: the function doesn't assume ownership of the passed 'str', but
 ** makes its own copy.
 */
 dstring intern_dstring(dstring str);
 
+/* Return an interned dstring representing the given c-string.
+*/
+dstring intern_cstring(const char* cstr);
 
 /* Cleanup of interning data structures.
 */

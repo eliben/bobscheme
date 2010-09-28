@@ -32,6 +32,14 @@ dstring intern_dstring(dstring str)
 }
 
 
+dstring intern_cstring(const char* cstr)
+{
+    dstring dstr = dstring_new(cstr);
+    dstring interned = intern_dstring(dstr);
+    dstring_free(dstr);
+    return interned;
+}
+
 void intern_cleanup()
 {
     hashtable_free(table);

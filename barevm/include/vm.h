@@ -8,5 +8,10 @@
 #define VM_H
 
 
+typedef struct BobVMState BobVMState;
+
+
+BobVMState* create_vm(FILE* output_stream);
+
 
 #endif /* VM_H */
