@@ -1,10 +1,12 @@
 /******************************************************************************
-** bob: builtins - implementation of some built-in Scheme procedures.
+** bob: The main VM implementation
 **
 ** Eli Bendersky (eliben@gmail.com)
 ** This code is in the public domain
 ******************************************************************************/
-#include "builtins.h"
-#include "object.h"
+#ifndef VM_H
+#define VM_H
 
 
+
+#endif /* VM_H */

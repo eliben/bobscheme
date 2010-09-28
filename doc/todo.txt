@@ -1,6 +1,12 @@
 NEXT STEPS:
 
-*) Standard header comment for files in barevm!
+**) Implement a couple of builtins to see how it goes...
+    -> need some way to iterate over all builtins (for adding them to global env?)
+**) Cautiously start implementing the VM?
+
+**) MEMORY MANAGEMENT!!!! GC!!!!!
+    hard problem... probably just leave it for later (when my tests pass...)
+
 *) Does equality work correctly? "same object" should be recognized by it (in Python by object id comparison)
 5) VM in C
 

@@ -48,7 +48,7 @@ BobObject* BobBoolean_new(BOOL boolval);
 BobObject* BobNumber_new(int num);
 BobObject* BobSymbol_new(dstring sym);
 BobObject* BobPair_new(BobObject* first, BobObject* second);
-BobObject* BobBuiltin_new(builtin_proc_type proc, dstring name);
+BobObject* BobBuiltin_new(dstring name, builtin_proc_type proc);
 BobObject* BobClosure_new(struct BobCodeObject* codeobj, struct BobEnv* env);
 
 /* Concatenate a textual representation of the given object into the

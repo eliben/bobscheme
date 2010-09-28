@@ -1,7 +1,7 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
-#include <stdlib.h>
+#include <stddef.h>
 
 
 /* Return codes used by the hashtable API.

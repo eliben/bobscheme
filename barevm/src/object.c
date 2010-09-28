@@ -59,7 +59,7 @@ BobObject* BobPair_new(BobObject* first, BobObject* second)
 }
 
 
-BobObject* BobBuiltin_new(builtin_proc_type proc, dstring name)
+BobObject* BobBuiltin_new(dstring name, builtin_proc_type proc)
 {
     BobObject* obj = BobObject_new(TYPE_BUILTIN_PROC);
     obj->d.builtin.proc = proc;
