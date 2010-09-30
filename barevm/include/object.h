@@ -7,6 +7,7 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include <stdio.h>
 #include "dstring.h"
 #include "cutils.h"
 #include "builtins.h"
@@ -14,12 +15,13 @@
 
 typedef enum BobObjectType {
     TYPE_NULL, TYPE_BOOLEAN, TYPE_NUMBER, TYPE_SYMBOL, TYPE_PAIR,
-    TYPE_BUILTIN_PROC, TYPE_CLOSURE,
+    TYPE_BUILTIN_PROC, TYPE_CLOSURE, TYPE_PORT,
 } BobObjectType;
 
 
 struct BobCodeObject;
 struct BobEnv;
+
 
 typedef struct BobObject {
     BobObjectType type;
@@ -31,6 +33,9 @@ typedef struct BobObject {
         struct {
             struct BobObject *first, *second;
         } pair;
+        struct {
+            FILE* file;
+        } port;
         struct {
             builtin_proc_type proc;
             dstring name;
@@ -47,6 +52,7 @@ BobObject* BobNull_new();
 BobObject* BobBoolean_new(BOOL boolval);
 BobObject* BobNumber_new(int num);
 BobObject* BobSymbol_new(dstring sym);
+BobObject* BobPort_new(FILE* file);
 BobObject* BobPair_new(BobObject* first, BobObject* second);
 BobObject* BobBuiltin_new(dstring name, builtin_proc_type proc);
 BobObject* BobClosure_new(struct BobCodeObject* codeobj, struct BobEnv* env);

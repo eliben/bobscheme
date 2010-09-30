@@ -9,7 +9,9 @@
 
 
 /* This is a hash table storing for each interned dstring itself as 
-** the value.
+** the value. Since it copies keys and values, these will be different
+** objects in memory, but equal to each other. The _value_ dstring is
+** the unique pointer used by interning.
 */
 static hashtable table;
 

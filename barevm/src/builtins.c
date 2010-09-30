@@ -38,3 +38,22 @@ struct BobObject* builtin_add(size_t nargs, struct BobObject** args)
 
     return BobNumber_new(sum);
 }
+
+
+/* Always assumes the first argument is the object to display and
+** the second is an output port.
+*/
+struct BobObject* builtin_write(size_t nargs, struct BobObject** args)
+{
+    size_t i;
+    dstring repr = dstring_empty();
+    assert(nargs == 2 && args[1]->type == TYPE_PORT);    
+
+    BobObject_repr(args[0], repr);
+    dstring_concat_cstr(repr, "\n");
+    fputs(dstring_cstr(repr), args[1]->d.port.file);
+
+    dstring_free(repr);
+    return BobNull_new();
+}
+

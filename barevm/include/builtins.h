@@ -22,6 +22,7 @@ typedef struct BobObject* (*builtin_proc_type)(size_t nargs, struct BobObject** 
 struct BobObject* builtin_car(size_t nargs, struct BobObject** args);
 struct BobObject* builtin_cdr(size_t nargs, struct BobObject** args);
 struct BobObject* builtin_add(size_t nargs, struct BobObject** args);
+struct BobObject* builtin_write(size_t nargs, struct BobObject** args);
 
 
 #endif /* BUILTINS_H */

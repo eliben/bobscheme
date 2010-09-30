@@ -8,10 +8,12 @@
 #define VM_H
 
 
-typedef struct BobVMState BobVMState;
+struct BobCodeObject;
+
+void init_vm(FILE* output_stream);
+void vm_run_code(struct BobCodeObject* codeobj);
 
 
-BobVMState* create_vm(FILE* output_stream);
 
 
 #endif /* VM_H */

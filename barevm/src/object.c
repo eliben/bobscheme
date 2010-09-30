@@ -50,6 +50,14 @@ BobObject* BobSymbol_new(dstring sym)
 }
 
 
+BobObject* BobPort_new(FILE* file)
+{
+    BobObject* obj = BobObject_new(TYPE_PORT);
+    obj->d.port.file = file;
+    return obj;
+}
+
+
 BobObject* BobPair_new(BobObject* first, BobObject* second)
 {
     BobObject* obj = BobObject_new(TYPE_PAIR);
