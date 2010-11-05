@@ -1,0 +1,147 @@
+==========================
+ Getting started with Bob
+==========================
+
+:Author: Eli Bendersky
+:Contact: eliben@gmail.com
+:Date: 06-Nov-2010
+
+.. contents:: Table of Contents
+.. sectnum::
+
+
+Introduction
+************
+
+This document will help you get started using / hacking on Bob. 
+
+What is Bob?
+------------
+
+Bob is a suite of implementations of the Scheme language in Python. It currently includes:
+
+* A Scheme interpreter
+* An implementation of a stack-based virtual machine called the "Bob VM"
+* A compiler from Scheme to Bob VM bytecode
+* A serializer and deserializer for Bob VM bytecode
+
+License
+-------
+
+Bob is in the public domain. You can see it defined in more formal terms in the ``doc/UNLICENSE`` file, or visit `unlicense.org <http://unlicense.org/>`_.
+
+What is Bob useful for?
+-----------------------
+
+Bob is a self-educational project. I find that the best way to understand complex concepts and mechanisms is implementing them from scratch. Working on Bob helped me understand the following concepts much better:
+
+* How to write an interpreter for a complete programming-language. This was the easy part, because I've written a few interepreters before. However, it's important in order to provide a base-line implementation with which the other implementations can be compared.
+* How to implement a stack-based virtual machine with its own bytecode. The Bob VM is not much different in its core from "real" VMs, like the one Python itself (to be more exact, the official CPython implementation) runs on. It's just much simpler.
+* How to compile a high-level programming language into much lower-level VM bytecode.
+
+I learned a lot by working on Bob, and I release its code with the hope that it can help educate other people. Bob is written in Python, which is the closest to executable pseudo-code one can get. The code is relatively compact, clean and well documented. Many such hobby projects exist, but I believe Bob is particularly clean, self-contained and easy to understand. 
+
+What Scheme does Bob implement?
+-------------------------------
+
+Bob implements a representative subset of the standard R5RS Scheme. For an example of what Bob supports, here is the Y combinator, and an invocation of the factorial function defined by using it::
+
+    (define Y
+     (lambda (X)
+      ((lambda (procedure)
+         (X (lambda (arg) ((procedure procedure) arg))))
+       (lambda (procedure)
+         (X (lambda (arg) ((procedure procedure) arg)))))))
+    
+    (define F*
+     (lambda (func-arg)
+      (lambda (n)
+        (if (zero? n)
+            1
+            (* n (func-arg (- n 1)))))))
+    
+    (define fact (Y F*))
+    (write (fact 8))
+
+
+References
+----------
+
+Bob doesn't contain too many original ideas - it's mostly based on earlier work. I've done a lot of reading on this subject, both in books and online, but the two foremost resources that stand out are the following two books:
+
+* [SICP] *Structure and Implementation of Computer Programs, 2nd edition*, by Hal Abelson and Gerald Jay Sussman
+* [PAIP] *Paradigms of Artificial Intelligence Programming*, by Peter Norvig
+
+Getting started with Bob
+************************
+
+Documentation
+-------------
+
+The Bob documentation is collected in the ``doc`` directory. It's written in plain text files, in reStructuredText format, and is converted to HTML with the ``doc/src/__gen_html.py`` script.
+
+**ZZZ**
+
+Dependencies
+------------
+
+Bob is implemented in pure Python and is currently completely self-contained. To run it, you just need to have Python installed (version 2.6 or newer, including 3.1)
+
+Structure of the source tree
+----------------------------
+
+* ``doc``: Documentation
+
+* ``bob``: The Python source code implementing Bob
+
+* ``examples``: Some examples of using Bob in a script
+
+* ``tests_full``: Tests exercising Bob's code by running complete Scheme programs and making sure they produce the expected output.
+
+Running examples
+----------------
+
+Bob is implemented as a set of Python modules that can be imported and used from any Python script. The ``examples`` directory contains a few very simple scripts that show how to use Bob. 
+
+Running the interpreter in interactive mode
+===========================================
+
+Bob contains an implementation of a Scheme interpreter. This interpreter has a very rudimentary interactive mode, mimicking a standard Scheme REPL (Read-Eval-Print loop). You can see how to invoke it by running the ``interactive.py`` example. Here's a sample interaction::
+
+  .../examples> interactive.py
+  Interactive Bob interpreter. Type a Scheme expression or 'quit'
+  [bob] >> 1
+  : 1
+  [bob] >> (+ 2 1)
+  : 3
+  [bob] >> (define (foo a b) (+ a b 10))
+  [bob] >> (foo 6 7)
+  : 23
+  [bob] >>
+
+Compiling Scheme into Bob VM bytecode and executing the bytecode
+================================================================
+
+The ``examples`` directory contains a simple Scheme program in ``simple_func.scm``::
+
+  (define (func a b)
+    (lambda (x)
+      (+ a b x)))
+
+  (write ((func 4 5) 10))
+
+The script ``compile_file.py`` invokes the Bob compiler to compile Scheme into Bob VM bytecode and serialize this bytecode into a file with extension ``.bobc``. The script ``run_compiled.py`` loads Bob VM bytecode from ``.bobc`` files and runs it on the Bob VM. Here's a simple interaction with these scripts::
+
+  .../examples> compile_file.py simple_func.scm
+  Output file created: simple_func.bobc
+
+  .../examples> run_compiled.py simple_func.bobc
+  19
+
+Running tests
+-------------
+
+The ``tests_full`` directory contains a test suite for running complete Scheme programs with Bob. To make sure Bob runs correctly, execute both ``test_interpreter.py`` and ``test_vm_compiler.py``, and see that no errors are reported. 
+
+The file ``testcases_utils.py`` contains the simple testing infrastructure code used to implement the actual tests, and the ``testcases`` directory contains complete Scheme programs with expected output files. New test cases added to this directory will be automatically "discovered" and run by the testing scripts.
+

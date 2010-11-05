@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# The following import is for compatibility with both Python 2.6 and 3.x
+from __future__ import print_function
 import os, sys
 
 sys.path.insert(0, '..')
@@ -20,6 +22,7 @@ def compile_file(filename):
 
     with open(out_filename, 'wb') as out_file:
         out_file.write(serialized)
+        print("Output file created: %s" % out_filename)
 
 
 if __name__ == '__main__':

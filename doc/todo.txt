@@ -1,3 +1,9 @@
+Documenting:
+
+* diagram for "getting started"
+* document explaining the VM and its instruction set
+
+
 NEXT STEPS:
 
 **) Implement a couple of builtins to see how it goes...

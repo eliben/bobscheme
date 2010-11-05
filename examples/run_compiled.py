@@ -12,7 +12,6 @@ def run_compiled(filename):
     """
     bytecode = open(filename, 'rb').read()
     codeobject = Deserializer().deserialize_bytecode(bytecode)
-    print(codeobject)
     vm = BobVM(output_stream=sys.stdout)
     vm.run(codeobject)
 
