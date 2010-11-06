@@ -7,8 +7,8 @@
 # This code is in the public domain
 #-------------------------------------------------------------------------------
 from __future__ import print_function
-from utils import pack_word, unpack_word
-from expr import (Pair, Boolean, Symbol, Number, expr_repr)
+from .utils import pack_word, unpack_word, byte_literal, get_bytes_from_iterator
+from .expr import (Pair, Boolean, Symbol, Number, expr_repr)
 
 
 OP_CONST    = 0x00
@@ -133,17 +133,20 @@ class CodeObject(object):
 # The "magic" constant starting any serialized Bob bytecode consists of a 
 # version in the high two bytes and 0B0B in the low two bytes.
 #
+# IMPORTANT: For compatibility with Python 2.6 and 3.x, bytecode is serialized
+# into 'bytes' objects.
+#
 MAGIC_CONST = 0x00010B0B
 
-TYPE_NULL       = '0'
-TYPE_BOOLEAN    = 'b'
-TYPE_STRING     = 's'
-TYPE_SYMBOL     = 'S'
-TYPE_NUMBER     = 'n'
-TYPE_PAIR       = 'p'
-TYPE_INSTR      = 'i'
-TYPE_SEQUENCE   = '['
-TYPE_CODEOBJECT = 'c'
+TYPE_NULL       = b'0'
+TYPE_BOOLEAN    = b'b'
+TYPE_STRING     = b's'
+TYPE_SYMBOL     = b'S'
+TYPE_NUMBER     = b'n'
+TYPE_PAIR       = b'p'
+TYPE_INSTR      = b'i'
+TYPE_SEQUENCE   = b'['
+TYPE_CODEOBJECT = b'c'
 
 
 class Serializer(object):
@@ -185,7 +188,7 @@ class Serializer(object):
         """ string - a Python string, used for representing names in code
             objects and for Bob Symbol objects.
         """
-        return TYPE_STRING + self._s_word(len(string)) + string
+        return TYPE_STRING + self._s_word(len(string)) + string.encode('ascii')
            
     def _s_object(self, obj):
         """ Generic dispatcher for serializing an arbitrary object
@@ -196,13 +199,13 @@ class Serializer(object):
         return TYPE_NULL
 
     def _s_boolean(self, bool):
-        return TYPE_BOOLEAN + ('\x01' if bool.value else '\x00')
+        return TYPE_BOOLEAN + (b'\x01' if bool.value else b'\x00')
 
     def _s_number(self, number):
         return TYPE_NUMBER + self._s_word(number.value)
 
     def _s_symbol(self, symbol):
-        return TYPE_SYMBOL + self._s_word(len(symbol.value)) + symbol.value
+        return TYPE_SYMBOL + self._s_word(len(symbol.value)) + symbol.value.encode('ascii')
 
     def _s_pair(self, pair):
         return (    TYPE_PAIR + 
@@ -213,7 +216,7 @@ class Serializer(object):
         """ A sequence is just a Python list, used for serializing parts
             of code objects.
         """
-        s_seq = ''.join(self._s_object(obj) for obj in seq)
+        s_seq = b''.join(self._s_object(obj) for obj in seq)
         return TYPE_SEQUENCE + self._s_word(len(seq)) + s_seq
 
     def _s_instruction(self, instr):
@@ -273,21 +276,22 @@ class Deserializer(object):
 
             self._match_type(stream, TYPE_CODEOBJECT)
             return self._d_codeobject(stream)
-        except StopIteration, e:
+        except StopIteration as e:
             raise self.DeserializationError("Unexpected end of serialized stream")
         
     def _match_type(self, stream, type):
-        if stream.next() != type:
+        b = next(stream)
+        if byte_literal(b) != type:
             raise self.DeserializationError("Expected type '%s' not matched" % type)
 
     def _d_word(self, stream):
-        bytes = ''.join(stream.next() for i in range(4))
+        bytes = get_bytes_from_iterator(stream, 4)
         return unpack_word(bytes, big_endian=False)
 
     def _d_object(self, stream):
         """ Generic dispatcher for deserializing an arbitrary object.
         """
-        type = stream.next()
+        type = get_bytes_from_iterator(stream, 1)
         return self._deserialize_type_dispatch[type](stream)
 
     def _d_null(self, stream):
@@ -295,12 +299,11 @@ class Deserializer(object):
         return None
 
     def _d_boolean(self, stream):
-        val = stream.next()
-        return Boolean(val == '\x01')
+        return Boolean(get_bytes_from_iterator(stream, 1) == b'\x01')
 
     def _d_string(self, stream):
         len = self._d_word(stream)
-        return ''.join(stream.next() for i in range(len))
+        return get_bytes_from_iterator(stream, len).decode('ascii')
 
     def _d_number(self, stream):
         return Number(self._d_word(stream))

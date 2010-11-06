@@ -6,13 +6,14 @@
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
 #-------------------------------------------------------------------------------
-from bytecode import (
+from __future__ import print_function
+from .bytecode import (
         OP_CONST, OP_LOADVAR, OP_STOREVAR, OP_DEFVAR, OP_FUNCTION, OP_POP,
         OP_JUMP, OP_FJUMP, OP_RETURN, OP_CALL)
-from expr import expr_repr, Boolean
-from builtins import BuiltinProcedure, builtins_map
-from environment import Environment
-from utils import Stack
+from .expr import expr_repr, Boolean
+from .builtins import BuiltinProcedure, builtins_map
+from .environment import Environment
+from .utils import Stack
 
 
 DEBUG = False
@@ -86,7 +87,7 @@ class BobVM(object):
                 else:
                     raise self.VMError('Code object ended prematurely: %s' % self.codeobject)
             
-            if DEBUG: print opcode2str(instr.opcode), instr.arg
+            if DEBUG: print(opcode2str(instr.opcode), instr.arg)
             
             if instr.opcode == OP_CONST:
                 self.valuestack.push(self.frame.codeobject.constants[instr.arg])
@@ -192,7 +193,7 @@ class BobVM(object):
         self.output_stream.write(expr_repr(args[0]) + '\n')
 
     def _hook_debug_vm(self, args):
-        print self._show_vm_state()
+        print(self._show_vm_state())
 
     def _show_vm_state(self):
         def value_printer(item):

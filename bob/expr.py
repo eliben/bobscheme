@@ -379,6 +379,5 @@ def convert_let_to_application(exp):
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
-    print expand_nested_pairs(Pair(1, Pair(Pair(2, Pair(22, None)), Pair(3, None))))
     pass
     

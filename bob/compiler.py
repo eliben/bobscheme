@@ -6,10 +6,11 @@
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
 #-------------------------------------------------------------------------------
-from utils import flatten, list_find_or_append
-from expr import *
-from bytecode import *
-from bobparser import BobParser
+from __future__ import print_function
+from .utils import flatten, list_find_or_append
+from .expr import *
+from .bytecode import *
+from .bobparser import BobParser
 
 
 DEBUG = False
@@ -107,7 +108,7 @@ class BobCompiler(object):
         
             Always returns a (Python) list of instructions.
         """
-        if DEBUG: print '~~~~ Comp called on %s [%s]' % (expr_repr(expr), type(expr))
+        if DEBUG: print('~~~~ Comp called on %s [%s]' % (expr_repr(expr), type(expr)))
 
         if is_self_evaluating(expr):
             return self._instr(OP_CONST, expr)
