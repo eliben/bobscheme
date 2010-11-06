@@ -149,6 +149,13 @@ void vm_run_code(struct BobCodeObject* codeobj)
             else
                 die("VM Error: Code object ended prematurely\n");
         }
+
+        switch (instr->opcode) {
+            case OP_CONST:
+
+        }
+
+        printf("PC: %u, instr 0x%0X, arg 0x%0X\n", vm_state->frame->pc, instr->opcode, instr->arg);
     }
 }
 
