@@ -6,12 +6,13 @@
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
 #-------------------------------------------------------------------------------
+from __future__ import print_function
 import pprint
 
-from bobparser import BobParser
-from builtins import BuiltinProcedure, builtins_map
-from expr import *
-from environment import Environment
+from .bobparser import BobParser
+from .builtins import BuiltinProcedure, builtins_map
+from .expr import *
+from .environment import Environment
 
 
 DEBUG = False
@@ -54,8 +55,8 @@ class BobInterpreter(object):
         return self._eval(expr, self.global_env)
     
     def _eval(self, expr, env):
-        if DEBUG: print '~~~~ Eval called on %s [%s]' % (expr_repr(expr), type(expr))
-        if DEBUG: print 'Env:'
+        if DEBUG: print('~~~~ Eval called on %s [%s]' % (expr_repr(expr), type(expr)))
+        if DEBUG: print('Env:')
         if DEBUG: pprint.pprint(env.binding)
 
         # Standard Scheme eval (SICP 4.1.1)
@@ -124,18 +125,18 @@ class BobInterpreter(object):
     def _apply(self, proc, args):
         # Standard Scheme apply (SICP 4.1.1)
         #
-        if DEBUG: print "~~~~ Applying procedure %s" % proc
-        if DEBUG: print "     with args %s" % expr_repr(args)
+        if DEBUG: print("~~~~ Applying procedure %s" % proc)
+        if DEBUG: print("     with args %s" % expr_repr(args))
         if isinstance(proc, BuiltinProcedure):
-            if DEBUG: print "~~~~ Applying builtin procedure %s" % proc.name
+            if DEBUG: print("~~~~ Applying builtin procedure %s" % proc.name)
             # The '' builtin gets the current output stream as a custom
             # argument
             #
             return proc.apply(expand_nested_pairs(args))
             
         elif isinstance(proc, Procedure):
-            if DEBUG: print "~~~~ Applying procedure with args: %s" % proc.params
-            if DEBUG: print "     and body:\n%s" % expr_repr(proc.body)
+            if DEBUG: print("~~~~ Applying procedure with args: %s" % proc.params)
+            if DEBUG: print("     and body:\n%s" % expr_repr(proc.body))
             return self._eval_sequence(
                     exprs=proc.body,
                     env=self._extend_env_for_procedure(
@@ -196,7 +197,7 @@ def interactive_interpreter():
     """
     interp = BobInterpreter() # by default output_stream is sys.stdout
     parser = BobParser()
-    print "Interactive Bob interpreter. Type a Scheme expression or 'quit'"
+    print("Interactive Bob interpreter. Type a Scheme expression or 'quit'")
 
     while True:
         inp = raw_input("[bob] >> ")
@@ -207,32 +208,12 @@ def interactive_interpreter():
         if val is None:
             pass
         elif isinstance(val, Procedure):
-            print ": <procedure object>"
+            print(": <procedure object>")
         else:
-            print ":", expr_repr(val)
+            print(":", expr_repr(val))
 
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
-    import sys
-    import StringIO
-    
-    #interactive_interpreter()
-    #sys.exit(1)
-
-    #~ DEBUG = True
-    
-    code_str = '''
-    (define myp (cons 1 2))
-    (write myp)
-    (set-car! myp 5)
-    (write myp)
-    (set-cdr! myp (cons 4 (cons 6 '())))
-    (write myp)
-'''
-    sio = StringIO.StringIO()
-    interpret_code(code_str, sio)
-    
-    print 'VALUE:'
-    print sio.getvalue(),
+    pass
 

@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 import operator
 import functools
-from expr import *
+from .expr import *
 
 
 class BuiltinProcedure(object):

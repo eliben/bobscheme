@@ -6,6 +6,7 @@
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
 #-------------------------------------------------------------------------------
+from __future__ import print_function
 from collections import deque
 import struct
 import time
@@ -45,6 +46,24 @@ def unpack_word(str, big_endian=False):
     endian = ">" if big_endian else "<"
     return struct.unpack("%sL" % endian, str)[0]
 
+def byte_literal(b):
+    """ If b is already a byte literal, return it. Otherwise, b is 
+        an integer which should be converted to a byte literal.
+
+        This function is for compatibility with Python 2.6 and 3.x
+    """
+    if isinstance(b, int):
+        return bytes([b])
+    else:
+        return b
+
+def get_bytes_from_iterator(it, nbytes):
+    """ Takes a few bytes from an iterator and returns them as a single
+        bytes object.
+    """
+    lst = [next(it) for n in range(nbytes)]
+    return b''.join(byte_literal(b) for b in lst)
+
 
 class Stack(object):
     """ A simple stack abstraction.
@@ -83,6 +102,6 @@ class Timer(object):
         
     def __exit__(self, type, value, traceback):
         if self.name:
-            print '[%s]' % self.name,
-        print 'Elapsed: %s' % (time.time() - self.tstart)
+            print('[%s]' % self.name)
+        print('Elapsed: %s' % (time.time() - self.tstart))
 

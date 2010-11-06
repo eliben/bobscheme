@@ -7,8 +7,8 @@
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
 #-------------------------------------------------------------------------------
-from lexer import Lexer, Token, LexerError
-from expr import Pair, Number, Symbol, Boolean
+from .lexer import Lexer, Token, LexerError
+from .expr import Pair, Number, Symbol, Boolean
 
 class ParseError(Exception): pass
 

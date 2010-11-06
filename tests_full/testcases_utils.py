@@ -7,8 +7,9 @@
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
 #-------------------------------------------------------------------------------
-import os, time
-from cStringIO import StringIO
+from __future__ import print_function
+import os, time, sys
+from io import StringIO
 
 
 class TestCase(object):
@@ -31,6 +32,16 @@ def all_testcases(dir='testcases/'):
             yield TestCase(testname, code, expected)
 
 
+class StringIOUnicode(StringIO):
+    """ For compatibility with both Python 2.6 and 3.x
+    """
+    def write(self, s):
+        if sys.hexversion > 0x03000000:
+            StringIO.write(self, s)
+        else:
+            StringIO.write(self, unicode(s))
+        
+
 def run_all_tests(runner, dir='testcases/'):
     """ Runs all tests from the directory with the given runner. A runner
         is a function accepting Scheme code as a string and an output stream
@@ -43,25 +54,26 @@ def run_all_tests(runner, dir='testcases/'):
     for testcase in all_testcases():
         numdots = 25 - len(testcase.name)
         dots = '.' * numdots
-        print '~~ Running test #%-3s [%s]%s.....' % (testcount, testcase.name, dots),
+        print('~~ Running test #%-3s [%s]%s.....' % (testcount, testcase.name, dots), end='')
         
         expected = testcase.expected.lstrip()
-        ostream = StringIO()
+        ostream = StringIOUnicode()
         runner(testcase.code, ostream)
         
         if ostream.getvalue() == expected:
-            print 'OK'
+            print('OK')
         else:
             errorcount += 1
-            print 'ERROR'
-            print '-------- Expected:\n%s' % expected
-            print '-------- Got:\n%s' % ostream.getvalue()
-            print '-------- For code:\n%s' % testcase.code
+            print('ERROR')
+            print('-------- Expected:\n%s' % expected)
+            print('-------- Got:\n%s' % ostream.getvalue())
+            print('-------- For code:\n%s' % testcase.code)
 
         testcount += 1
 
     if errorcount == 0:
-        print '---- All tests ran OK ----'
+        print('---- All tests ran OK ----')
     else:
-        print '---- Tests had %s errors ----' % errorcount
-    print 'Elapsed: %.4s sec' % (time.time() - starttime,)
+        print('---- Tests had %s errors ----' % errorcount)
+    print('Elapsed: %.4s sec' % (time.time() - starttime,))
+
