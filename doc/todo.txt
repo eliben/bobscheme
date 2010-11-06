@@ -1,10 +1,11 @@
-Documenting:
-
-* diagram for "getting started"
-* document explaining the VM and its instruction set
-
-
 NEXT STEPS:
+
+For release:
+
+* Write documentation (for now "getting started" + bytecode reference)
+
+* 
+
 
 **) Implement a couple of builtins to see how it goes...
     -> need some way to iterate over all builtins (for adding them to global env?)

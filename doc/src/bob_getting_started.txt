@@ -7,6 +7,8 @@
 :Date: 06-Nov-2010
 
 .. contents:: Table of Contents
+    :backlinks: none
+
 .. sectnum::
 
 
@@ -24,6 +26,12 @@ Bob is a suite of implementations of the Scheme language in Python. It currently
 * An implementation of a stack-based virtual machine called the "Bob VM"
 * A compiler from Scheme to Bob VM bytecode
 * A serializer and deserializer for Bob VM bytecode
+
+Here's a schematic description of these parts:
+
+.. image:: diagrams/bob_toplevel.png
+  :align: center
+
 
 License
 -------
@@ -44,7 +52,7 @@ I learned a lot by working on Bob, and I release its code with the hope that it 
 What Scheme does Bob implement?
 -------------------------------
 
-Bob implements a representative subset of the standard R5RS Scheme. For an example of what Bob supports, here is the Y combinator, and an invocation of the factorial function defined by using it::
+Bob implements a representative subset of the standard R5RS Scheme. The initial aim was to allow implementing all the code from `SICP <http://mitpress.mit.edu/sicp/full-text/book/book.html>`_. For an example of what Bob supports, here is the Y combinator, and an invocation of the factorial function defined by using it::
 
     (define Y
      (lambda (X)
@@ -63,14 +71,15 @@ Bob implements a representative subset of the standard R5RS Scheme. For an examp
     (define fact (Y F*))
     (write (fact 8))
 
+In any case, extending Bob to support more functionality from R5RS is very easy. I'm adding features on a per-need basis from time to time.
 
 References
 ----------
 
 Bob doesn't contain too many original ideas - it's mostly based on earlier work. I've done a lot of reading on this subject, both in books and online, but the two foremost resources that stand out are the following two books:
 
-* [SICP] *Structure and Implementation of Computer Programs, 2nd edition*, by Hal Abelson and Gerald Jay Sussman
-* [PAIP] *Paradigms of Artificial Intelligence Programming*, by Peter Norvig
+* [`SICP <http://mitpress.mit.edu/sicp/full-text/book/book.html>`_] *Structure and Implementation of Computer Programs, 2nd edition*, by Hal Abelson and Gerald Jay Sussman
+* [`PAIP <http://norvig.com/paip.html>`_] *Paradigms of Artificial Intelligence Programming*, by Peter Norvig
 
 Getting started with Bob
 ************************

@@ -323,33 +323,33 @@ ul.auto-toc {
 <div class="contents topic" id="table-of-contents">
 <p class="topic-title first">Table of Contents</p>
 <ul class="auto-toc simple">
-<li><a class="reference internal" href="#introduction" id="id2">1&nbsp;&nbsp;&nbsp;Introduction</a><ul class="auto-toc">
-<li><a class="reference internal" href="#what-is-bob" id="id3">1.1&nbsp;&nbsp;&nbsp;What is Bob?</a></li>
-<li><a class="reference internal" href="#license" id="id4">1.2&nbsp;&nbsp;&nbsp;License</a></li>
-<li><a class="reference internal" href="#what-is-bob-useful-for" id="id5">1.3&nbsp;&nbsp;&nbsp;What is Bob useful for?</a></li>
-<li><a class="reference internal" href="#what-scheme-does-bob-implement" id="id6">1.4&nbsp;&nbsp;&nbsp;What Scheme does Bob implement?</a></li>
-<li><a class="reference internal" href="#references" id="id7">1.5&nbsp;&nbsp;&nbsp;References</a></li>
+<li><a class="reference internal" href="#introduction" id="id3">1&nbsp;&nbsp;&nbsp;Introduction</a><ul class="auto-toc">
+<li><a class="reference internal" href="#what-is-bob" id="id4">1.1&nbsp;&nbsp;&nbsp;What is Bob?</a></li>
+<li><a class="reference internal" href="#license" id="id5">1.2&nbsp;&nbsp;&nbsp;License</a></li>
+<li><a class="reference internal" href="#what-is-bob-useful-for" id="id6">1.3&nbsp;&nbsp;&nbsp;What is Bob useful for?</a></li>
+<li><a class="reference internal" href="#what-scheme-does-bob-implement" id="id7">1.4&nbsp;&nbsp;&nbsp;What Scheme does Bob implement?</a></li>
+<li><a class="reference internal" href="#references" id="id8">1.5&nbsp;&nbsp;&nbsp;References</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id1" id="id8">2&nbsp;&nbsp;&nbsp;Getting started with Bob</a><ul class="auto-toc">
-<li><a class="reference internal" href="#documentation" id="id9">2.1&nbsp;&nbsp;&nbsp;Documentation</a></li>
-<li><a class="reference internal" href="#dependencies" id="id10">2.2&nbsp;&nbsp;&nbsp;Dependencies</a></li>
-<li><a class="reference internal" href="#structure-of-the-source-tree" id="id11">2.3&nbsp;&nbsp;&nbsp;Structure of the source tree</a></li>
-<li><a class="reference internal" href="#running-examples" id="id12">2.4&nbsp;&nbsp;&nbsp;Running examples</a><ul class="auto-toc">
-<li><a class="reference internal" href="#running-the-interpreter-in-interactive-mode" id="id13">2.4.1&nbsp;&nbsp;&nbsp;Running the interpreter in interactive mode</a></li>
-<li><a class="reference internal" href="#compiling-scheme-into-bob-vm-bytecode-and-executing-the-bytecode" id="id14">2.4.2&nbsp;&nbsp;&nbsp;Compiling Scheme into Bob VM bytecode and executing the bytecode</a></li>
+<li><a class="reference internal" href="#id2" id="id9">2&nbsp;&nbsp;&nbsp;Getting started with Bob</a><ul class="auto-toc">
+<li><a class="reference internal" href="#documentation" id="id10">2.1&nbsp;&nbsp;&nbsp;Documentation</a></li>
+<li><a class="reference internal" href="#dependencies" id="id11">2.2&nbsp;&nbsp;&nbsp;Dependencies</a></li>
+<li><a class="reference internal" href="#structure-of-the-source-tree" id="id12">2.3&nbsp;&nbsp;&nbsp;Structure of the source tree</a></li>
+<li><a class="reference internal" href="#running-examples" id="id13">2.4&nbsp;&nbsp;&nbsp;Running examples</a><ul class="auto-toc">
+<li><a class="reference internal" href="#running-the-interpreter-in-interactive-mode" id="id14">2.4.1&nbsp;&nbsp;&nbsp;Running the interpreter in interactive mode</a></li>
+<li><a class="reference internal" href="#compiling-scheme-into-bob-vm-bytecode-and-executing-the-bytecode" id="id15">2.4.2&nbsp;&nbsp;&nbsp;Compiling Scheme into Bob VM bytecode and executing the bytecode</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#running-tests" id="id15">2.5&nbsp;&nbsp;&nbsp;Running tests</a></li>
+<li><a class="reference internal" href="#running-tests" id="id16">2.5&nbsp;&nbsp;&nbsp;Running tests</a></li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="section" id="introduction">
-<h1><a class="toc-backref" href="#id2">1&nbsp;&nbsp;&nbsp;Introduction</a></h1>
+<h1>1&nbsp;&nbsp;&nbsp;Introduction</h1>
 <p>This document will help you get started using / hacking on Bob.</p>
 <div class="section" id="what-is-bob">
-<h2><a class="toc-backref" href="#id3">1.1&nbsp;&nbsp;&nbsp;What is Bob?</a></h2>
+<h2>1.1&nbsp;&nbsp;&nbsp;What is Bob?</h2>
 <p>Bob is a suite of implementations of the Scheme language in Python. It currently includes:</p>
 <ul class="simple">
 <li>A Scheme interpreter</li>
@@ -357,13 +357,15 @@ ul.auto-toc {
 <li>A compiler from Scheme to Bob VM bytecode</li>
 <li>A serializer and deserializer for Bob VM bytecode</li>
 </ul>
+<p>Here's a schematic description of these parts:</p>
+<div align="center" class="align-center"><img alt="diagrams/bob_toplevel.png" class="align-center" src="diagrams/bob_toplevel.png" /></div>
 </div>
 <div class="section" id="license">
-<h2><a class="toc-backref" href="#id4">1.2&nbsp;&nbsp;&nbsp;License</a></h2>
+<h2>1.2&nbsp;&nbsp;&nbsp;License</h2>
 <p>Bob is in the public domain. You can see it defined in more formal terms in the <tt class="docutils literal"><span class="pre">doc/UNLICENSE</span></tt> file, or visit <a class="reference external" href="http://unlicense.org/">unlicense.org</a>.</p>
 </div>
 <div class="section" id="what-is-bob-useful-for">
-<h2><a class="toc-backref" href="#id5">1.3&nbsp;&nbsp;&nbsp;What is Bob useful for?</a></h2>
+<h2>1.3&nbsp;&nbsp;&nbsp;What is Bob useful for?</h2>
 <p>Bob is a self-educational project. I find that the best way to understand complex concepts and mechanisms is implementing them from scratch. Working on Bob helped me understand the following concepts much better:</p>
 <ul class="simple">
 <li>How to write an interpreter for a complete programming-language. This was the easy part, because I've written a few interepreters before. However, it's important in order to provide a base-line implementation with which the other implementations can be compared.</li>
@@ -373,8 +375,8 @@ ul.auto-toc {
 <p>I learned a lot by working on Bob, and I release its code with the hope that it can help educate other people. Bob is written in Python, which is the closest to executable pseudo-code one can get. The code is relatively compact, clean and well documented. Many such hobby projects exist, but I believe Bob is particularly clean, self-contained and easy to understand.</p>
 </div>
 <div class="section" id="what-scheme-does-bob-implement">
-<h2><a class="toc-backref" href="#id6">1.4&nbsp;&nbsp;&nbsp;What Scheme does Bob implement?</a></h2>
-<p>Bob implements a representative subset of the standard R5RS Scheme. For an example of what Bob supports, here is the Y combinator, and an invocation of the factorial function defined by using it:</p>
+<h2>1.4&nbsp;&nbsp;&nbsp;What Scheme does Bob implement?</h2>
+<p>Bob implements a representative subset of the standard R5RS Scheme. The initial aim was to allow implementing all the code from <a class="reference external" href="http://mitpress.mit.edu/sicp/full-text/book/book.html">SICP</a>. For an example of what Bob supports, here is the Y combinator, and an invocation of the factorial function defined by using it:</p>
 <pre class="literal-block">
 (define Y
  (lambda (X)
@@ -393,29 +395,30 @@ ul.auto-toc {
 (define fact (Y F*))
 (write (fact 8))
 </pre>
+<p>In any case, extending Bob to support more functionality from R5RS is very easy. I'm adding features on a per-need basis from time to time.</p>
 </div>
 <div class="section" id="references">
-<h2><a class="toc-backref" href="#id7">1.5&nbsp;&nbsp;&nbsp;References</a></h2>
+<h2>1.5&nbsp;&nbsp;&nbsp;References</h2>
 <p>Bob doesn't contain too many original ideas - it's mostly based on earlier work. I've done a lot of reading on this subject, both in books and online, but the two foremost resources that stand out are the following two books:</p>
 <ul class="simple">
-<li>[SICP] <em>Structure and Implementation of Computer Programs, 2nd edition</em>, by Hal Abelson and Gerald Jay Sussman</li>
-<li>[PAIP] <em>Paradigms of Artificial Intelligence Programming</em>, by Peter Norvig</li>
+<li>[<a class="reference external" href="http://mitpress.mit.edu/sicp/full-text/book/book.html">SICP</a>] <em>Structure and Implementation of Computer Programs, 2nd edition</em>, by Hal Abelson and Gerald Jay Sussman</li>
+<li>[<a class="reference external" href="http://norvig.com/paip.html">PAIP</a>] <em>Paradigms of Artificial Intelligence Programming</em>, by Peter Norvig</li>
 </ul>
 </div>
 </div>
-<div class="section" id="id1">
-<h1><a class="toc-backref" href="#id8">2&nbsp;&nbsp;&nbsp;Getting started with Bob</a></h1>
+<div class="section" id="id2">
+<h1>2&nbsp;&nbsp;&nbsp;Getting started with Bob</h1>
 <div class="section" id="documentation">
-<h2><a class="toc-backref" href="#id9">2.1&nbsp;&nbsp;&nbsp;Documentation</a></h2>
+<h2>2.1&nbsp;&nbsp;&nbsp;Documentation</h2>
 <p>The Bob documentation is collected in the <tt class="docutils literal"><span class="pre">doc</span></tt> directory. It's written in plain text files, in reStructuredText format, and is converted to HTML with the <tt class="docutils literal"><span class="pre">doc/src/__gen_html.py</span></tt> script.</p>
 <p><strong>ZZZ</strong></p>
 </div>
 <div class="section" id="dependencies">
-<h2><a class="toc-backref" href="#id10">2.2&nbsp;&nbsp;&nbsp;Dependencies</a></h2>
+<h2>2.2&nbsp;&nbsp;&nbsp;Dependencies</h2>
 <p>Bob is implemented in pure Python and is currently completely self-contained. To run it, you just need to have Python installed (version 2.6 or newer, including 3.1)</p>
 </div>
 <div class="section" id="structure-of-the-source-tree">
-<h2><a class="toc-backref" href="#id11">2.3&nbsp;&nbsp;&nbsp;Structure of the source tree</a></h2>
+<h2>2.3&nbsp;&nbsp;&nbsp;Structure of the source tree</h2>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">doc</span></tt>: Documentation</li>
 <li><tt class="docutils literal"><span class="pre">bob</span></tt>: The Python source code implementing Bob</li>
@@ -424,10 +427,10 @@ ul.auto-toc {
 </ul>
 </div>
 <div class="section" id="running-examples">
-<h2><a class="toc-backref" href="#id12">2.4&nbsp;&nbsp;&nbsp;Running examples</a></h2>
+<h2>2.4&nbsp;&nbsp;&nbsp;Running examples</h2>
 <p>Bob is implemented as a set of Python modules that can be imported and used from any Python script. The <tt class="docutils literal"><span class="pre">examples</span></tt> directory contains a few very simple scripts that show how to use Bob.</p>
 <div class="section" id="running-the-interpreter-in-interactive-mode">
-<h3><a class="toc-backref" href="#id13">2.4.1&nbsp;&nbsp;&nbsp;Running the interpreter in interactive mode</a></h3>
+<h3>2.4.1&nbsp;&nbsp;&nbsp;Running the interpreter in interactive mode</h3>
 <p>Bob contains an implementation of a Scheme interpreter. This interpreter has a very rudimentary interactive mode, mimicking a standard Scheme REPL (Read-Eval-Print loop). You can see how to invoke it by running the <tt class="docutils literal"><span class="pre">interactive.py</span></tt> example. Here's a sample interaction:</p>
 <pre class="literal-block">
 .../examples&gt; interactive.py
@@ -443,7 +446,7 @@ Interactive Bob interpreter. Type a Scheme expression or 'quit'
 </pre>
 </div>
 <div class="section" id="compiling-scheme-into-bob-vm-bytecode-and-executing-the-bytecode">
-<h3><a class="toc-backref" href="#id14">2.4.2&nbsp;&nbsp;&nbsp;Compiling Scheme into Bob VM bytecode and executing the bytecode</a></h3>
+<h3>2.4.2&nbsp;&nbsp;&nbsp;Compiling Scheme into Bob VM bytecode and executing the bytecode</h3>
 <p>The <tt class="docutils literal"><span class="pre">examples</span></tt> directory contains a simple Scheme program in <tt class="docutils literal"><span class="pre">simple_func.scm</span></tt>:</p>
 <pre class="literal-block">
 (define (func a b)
@@ -463,7 +466,7 @@ Output file created: simple_func.bobc
 </div>
 </div>
 <div class="section" id="running-tests">
-<h2><a class="toc-backref" href="#id15">2.5&nbsp;&nbsp;&nbsp;Running tests</a></h2>
+<h2>2.5&nbsp;&nbsp;&nbsp;Running tests</h2>
 <p>The <tt class="docutils literal"><span class="pre">tests_full</span></tt> directory contains a test suite for running complete Scheme programs with Bob. To make sure Bob runs correctly, execute both <tt class="docutils literal"><span class="pre">test_interpreter.py</span></tt> and <tt class="docutils literal"><span class="pre">test_vm_compiler.py</span></tt>, and see that no errors are reported.</p>
 <p>The file <tt class="docutils literal"><span class="pre">testcases_utils.py</span></tt> contains the simple testing infrastructure code used to implement the actual tests, and the <tt class="docutils literal"><span class="pre">testcases</span></tt> directory contains complete Scheme programs with expected output files. New test cases added to this directory will be automatically &quot;discovered&quot; and run by the testing scripts.</p>
 </div>
