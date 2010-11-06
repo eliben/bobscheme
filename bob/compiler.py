@@ -286,15 +286,4 @@ def compile_code(code_str):
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
-    
-    from bobparser import BobParser
-    parsecode = '''
-(write (eqv? #f #t))
-(write (eqv? 5 (+ 1 4)))
-'''
-    co = compile_code(parsecode)
-    
-    print repr(co)
-    
-    
-    
+    pass

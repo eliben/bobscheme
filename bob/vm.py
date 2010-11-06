@@ -44,7 +44,8 @@ class ExecutionFrame(object):
 
 
 class BobVM(object):
-    """ 
+    """ Implementation of the Bob VM. Initialize and then .run() with a 
+        CodeObject.
     """
     class VMError(Exception): pass
         
@@ -64,6 +65,9 @@ class BobVM(object):
             self.output_stream = output_stream
     
     def run(self, codeobject):
+        """ The main execution function of the VM. Accepts a CodeObject, and
+            runs it until there are no more instructions to execute.
+        """
         self.frame.codeobject = codeobject
         self.frame.pc = 0
         
@@ -231,38 +235,5 @@ class BobVM(object):
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
-    from compiler import compile_code
-    code_str = '''
-    (write '(1 (6 2)))
-    (define (func a b)
-        (if (> a b)
-            #f
-            (+ b (foo))))
-
-    (func 1 2)
-'''
-
-
-    co = compile_code(code_str)    
-
-    from bytecode import Serializer, Deserializer
-    ss = Serializer().serialize_bytecode(co)
-    ssp = ''
-    for c in ss:
-        if ord(' ') <= ord(c) <= 'z':
-            ssp += '_' + c
-        else:
-            ssp += c.encode('hex')
-
-
-    ds = Deserializer()
-    co2 = ds.deserialize_bytecode(ss)
-    print co
-    
-    #vm = BobVM()
-    #vm.run(co)
-    #print vm._show_vm_state()
-
-    
-
+    pass
 

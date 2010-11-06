@@ -147,6 +147,8 @@ TYPE_CODEOBJECT = 'c'
 
 
 class Serializer(object):
+    """ Serializes a CodeObject to a string.
+    """
     # Each function beginning with _s serializes some type and returns 
     # a string representing the serialized object.
     #
@@ -233,6 +235,9 @@ class Serializer(object):
 
 
 class Deserializer(object):
+    """ Deserializes a CodeObjct from a string
+    """
+    
     class DeserializationError(Exception): pass
 
     # Each function beginning with _d deserializes an object from the given

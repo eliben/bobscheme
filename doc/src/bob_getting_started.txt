@@ -78,8 +78,17 @@ References
 
 Bob doesn't contain too many original ideas - it's mostly based on earlier work. I've done a lot of reading on this subject, both in books and online, but the two foremost resources that stand out are the following two books:
 
-* [`SICP <http://mitpress.mit.edu/sicp/full-text/book/book.html>`_] *Structure and Implementation of Computer Programs, 2nd edition*, by Hal Abelson and Gerald Jay Sussman
-* [`PAIP <http://norvig.com/paip.html>`_] *Paradigms of Artificial Intelligence Programming*, by Peter Norvig
+* [`SICP <http://mitpress.mit.edu/sicp/full-text/book/book.html>`_] *Structure and Implementation of Computer Programs, 2nd edition*, by Hal Abelson and Gerald Jay Sussman. The Bob interpreter is based on the *meta-circular interpreter* presented in this book.
+* [`PAIP <http://norvig.com/paip.html>`_] *Paradigms of Artificial Intelligence Programming*, by Peter Norvig. The Bob VM is inspired by the *hyperbolical stack machine* presented by Norvig in chapter 23.
+
+In addition, the mainline implementation of Python (CPython) has served as an inspiration for a few parts of Bob. The compilation + VM flow described by the diagram in section `What is Bob?`_ is very similar to how CPython works under the hood.
+
+Design philosophy
+-----------------
+
+The single guiding design philosophy of Bob is *clarity and simplicity*. There's a huge amount of optimizations I can envision applying to Bob to make it more compact and faster. I avoided these optimizations on purpose. A sad inherent conflict in software is that optimziation and clarity are almost always at odds - you can gain one, but usually sacrifice the other in the process. 
+
+The mechanisms Bob implements are complex enough even without optimizations. Therefore, I aimed to create a design that's as simple as possible, and implement it with code that's as simple and clean as possible. 
 
 Getting started with Bob
 ************************
@@ -87,9 +96,12 @@ Getting started with Bob
 Documentation
 -------------
 
-The Bob documentation is collected in the ``doc`` directory. It's written in plain text files, in reStructuredText format, and is converted to HTML with the ``doc/src/__gen_html.py`` script.
+The Bob documentation is collected in the ``doc`` directory. It's written in plain text files, in reStructuredText format and is converted to HTML with the ``doc/src/__gen_html.py`` script. At the moment, the following documents are available:
 
-**ZZZ**
+* ``doc/bob_getting_started.html``: this document
+* ``doc/bob_bytecode_reference.html``: reference of the Bob bytecode 
+
+However, the best documentation of Bob is its source code. Bob is written in executable pseudo-code (Python) and the internal documentation strings and comments are relatively comprehensive. If you feel something is missing or some part of Bob's code isn't documented well enough, don't hesitate to drop me an email - I will gladly improve it.
 
 Dependencies
 ------------
@@ -106,6 +118,8 @@ Structure of the source tree
 * ``examples``: Some examples of using Bob in a script
 
 * ``tests_full``: Tests exercising Bob's code by running complete Scheme programs and making sure they produce the expected output.
+
+* ``experimental``: Here be dragons! Experimental code not currently suitable for use.
 
 Running examples
 ----------------

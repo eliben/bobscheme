@@ -329,18 +329,19 @@ ul.auto-toc {
 <li><a class="reference internal" href="#what-is-bob-useful-for" id="id6">1.3&nbsp;&nbsp;&nbsp;What is Bob useful for?</a></li>
 <li><a class="reference internal" href="#what-scheme-does-bob-implement" id="id7">1.4&nbsp;&nbsp;&nbsp;What Scheme does Bob implement?</a></li>
 <li><a class="reference internal" href="#references" id="id8">1.5&nbsp;&nbsp;&nbsp;References</a></li>
+<li><a class="reference internal" href="#design-philosophy" id="id9">1.6&nbsp;&nbsp;&nbsp;Design philosophy</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id2" id="id9">2&nbsp;&nbsp;&nbsp;Getting started with Bob</a><ul class="auto-toc">
-<li><a class="reference internal" href="#documentation" id="id10">2.1&nbsp;&nbsp;&nbsp;Documentation</a></li>
-<li><a class="reference internal" href="#dependencies" id="id11">2.2&nbsp;&nbsp;&nbsp;Dependencies</a></li>
-<li><a class="reference internal" href="#structure-of-the-source-tree" id="id12">2.3&nbsp;&nbsp;&nbsp;Structure of the source tree</a></li>
-<li><a class="reference internal" href="#running-examples" id="id13">2.4&nbsp;&nbsp;&nbsp;Running examples</a><ul class="auto-toc">
-<li><a class="reference internal" href="#running-the-interpreter-in-interactive-mode" id="id14">2.4.1&nbsp;&nbsp;&nbsp;Running the interpreter in interactive mode</a></li>
-<li><a class="reference internal" href="#compiling-scheme-into-bob-vm-bytecode-and-executing-the-bytecode" id="id15">2.4.2&nbsp;&nbsp;&nbsp;Compiling Scheme into Bob VM bytecode and executing the bytecode</a></li>
+<li><a class="reference internal" href="#id2" id="id10">2&nbsp;&nbsp;&nbsp;Getting started with Bob</a><ul class="auto-toc">
+<li><a class="reference internal" href="#documentation" id="id11">2.1&nbsp;&nbsp;&nbsp;Documentation</a></li>
+<li><a class="reference internal" href="#dependencies" id="id12">2.2&nbsp;&nbsp;&nbsp;Dependencies</a></li>
+<li><a class="reference internal" href="#structure-of-the-source-tree" id="id13">2.3&nbsp;&nbsp;&nbsp;Structure of the source tree</a></li>
+<li><a class="reference internal" href="#running-examples" id="id14">2.4&nbsp;&nbsp;&nbsp;Running examples</a><ul class="auto-toc">
+<li><a class="reference internal" href="#running-the-interpreter-in-interactive-mode" id="id15">2.4.1&nbsp;&nbsp;&nbsp;Running the interpreter in interactive mode</a></li>
+<li><a class="reference internal" href="#compiling-scheme-into-bob-vm-bytecode-and-executing-the-bytecode" id="id16">2.4.2&nbsp;&nbsp;&nbsp;Compiling Scheme into Bob VM bytecode and executing the bytecode</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#running-tests" id="id16">2.5&nbsp;&nbsp;&nbsp;Running tests</a></li>
+<li><a class="reference internal" href="#running-tests" id="id17">2.5&nbsp;&nbsp;&nbsp;Running tests</a></li>
 </ul>
 </li>
 </ul>
@@ -401,17 +402,27 @@ ul.auto-toc {
 <h2>1.5&nbsp;&nbsp;&nbsp;References</h2>
 <p>Bob doesn't contain too many original ideas - it's mostly based on earlier work. I've done a lot of reading on this subject, both in books and online, but the two foremost resources that stand out are the following two books:</p>
 <ul class="simple">
-<li>[<a class="reference external" href="http://mitpress.mit.edu/sicp/full-text/book/book.html">SICP</a>] <em>Structure and Implementation of Computer Programs, 2nd edition</em>, by Hal Abelson and Gerald Jay Sussman</li>
-<li>[<a class="reference external" href="http://norvig.com/paip.html">PAIP</a>] <em>Paradigms of Artificial Intelligence Programming</em>, by Peter Norvig</li>
+<li>[<a class="reference external" href="http://mitpress.mit.edu/sicp/full-text/book/book.html">SICP</a>] <em>Structure and Implementation of Computer Programs, 2nd edition</em>, by Hal Abelson and Gerald Jay Sussman. The Bob interpreter is based on the <em>meta-circular interpreter</em> presented in this book.</li>
+<li>[<a class="reference external" href="http://norvig.com/paip.html">PAIP</a>] <em>Paradigms of Artificial Intelligence Programming</em>, by Peter Norvig. The Bob VM is inspired by the <em>hyperbolical stack machine</em> presented by Norvig in chapter 23.</li>
 </ul>
+<p>In addition, the mainline implementation of Python (CPython) has served as an inspiration for a few parts of Bob. The compilation + VM flow described by the diagram in section <a class="reference internal" href="#what-is-bob">What is Bob?</a> is very similar to how CPython works under the hood.</p>
+</div>
+<div class="section" id="design-philosophy">
+<h2>1.6&nbsp;&nbsp;&nbsp;Design philosophy</h2>
+<p>The single guiding design philosophy of Bob is <em>clarity and simplicity</em>. There's a huge amount of optimizations I can envision applying to Bob to make it more compact and faster. I avoided these optimizations on purpose. A sad inherent conflict in software is that optimziation and clarity are almost always at odds - you can gain one, but usually sacrifice the other in the process.</p>
+<p>The mechanisms Bob implements are complex enough even without optimizations. Therefore, I aimed to create a design that's as simple as possible, and implement it with code that's as simple and clean as possible.</p>
 </div>
 </div>
 <div class="section" id="id2">
 <h1>2&nbsp;&nbsp;&nbsp;Getting started with Bob</h1>
 <div class="section" id="documentation">
 <h2>2.1&nbsp;&nbsp;&nbsp;Documentation</h2>
-<p>The Bob documentation is collected in the <tt class="docutils literal"><span class="pre">doc</span></tt> directory. It's written in plain text files, in reStructuredText format, and is converted to HTML with the <tt class="docutils literal"><span class="pre">doc/src/__gen_html.py</span></tt> script.</p>
-<p><strong>ZZZ</strong></p>
+<p>The Bob documentation is collected in the <tt class="docutils literal"><span class="pre">doc</span></tt> directory. It's written in plain text files, in reStructuredText format and is converted to HTML with the <tt class="docutils literal"><span class="pre">doc/src/__gen_html.py</span></tt> script. At the moment, the following documents are available:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">doc/bob_getting_started.html</span></tt>: this document</li>
+<li><tt class="docutils literal"><span class="pre">doc/bob_bytecode_reference.html</span></tt>: reference of the Bob bytecode</li>
+</ul>
+<p>However, the best documentation of Bob is its source code. Bob is written in executable pseudo-code (Python) and the internal documentation strings and comments are relatively comprehensive. If you feel something is missing or some part of Bob's code isn't documented well enough, don't hesitate to drop me an email - I will gladly improve it.</p>
 </div>
 <div class="section" id="dependencies">
 <h2>2.2&nbsp;&nbsp;&nbsp;Dependencies</h2>
@@ -424,6 +435,7 @@ ul.auto-toc {
 <li><tt class="docutils literal"><span class="pre">bob</span></tt>: The Python source code implementing Bob</li>
 <li><tt class="docutils literal"><span class="pre">examples</span></tt>: Some examples of using Bob in a script</li>
 <li><tt class="docutils literal"><span class="pre">tests_full</span></tt>: Tests exercising Bob's code by running complete Scheme programs and making sure they produce the expected output.</li>
+<li><tt class="docutils literal"><span class="pre">experimental</span></tt>: Here be dragons! Experimental code not currently suitable for use.</li>
 </ul>
 </div>
 <div class="section" id="running-examples">

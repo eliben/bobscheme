@@ -2,6 +2,7 @@ import os, sys
 
 FILES = [
     'bob_getting_started.txt',
+    'bob_bytecode_reference.txt',
 ]
 
 RST_EXE = 'rst2html' if sys.platform == 'win32' else 'rst2html.py'
