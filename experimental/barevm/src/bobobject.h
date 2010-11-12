@@ -13,13 +13,24 @@
 class BobObject 
 {
 public:
-    BobObject();
-    virtual ~BobObject();
+    BobObject()
+    {}
 
-private:
-    /* data */  
+    virtual ~BobObject()
+    {}
+
+    friend bool objects_equal(const BobObject*, const BobObject*);
+protected:
+    // Derived objects must override this comparison function. An object can
+    // assume that 'other' is of the same type as it is.
+    //
+    virtual bool equals_to(const BobObject& other) const = 0;
 };
 
+
+// Compare two objects of any type derived from BobObject
+//
+bool objects_equal(const BobObject*, const BobObject*);
 
 
 #endif /* BOBOBJECT_H */

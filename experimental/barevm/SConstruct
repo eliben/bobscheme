@@ -5,14 +5,13 @@ CCFLAGS = ['-Wall', '-pedantic']
 if ARGUMENTS.get('debug', 0):
     CCFLAGS.append('-g')
 
-envc = Environment(
-        CCFLAGS=CCFLAGS,
-        CPPPATH=['.'],
+envcpp = Environment(
+            CCFLAGS=CCFLAGS,
+            CPPPATH=['.'],
         )
 
 # All C++ files 
 #
-envcpp = Environment()
 cppfiles = Glob('src/*.cpp')
 
 envcpp.Program(target='barevm', source=cppfiles)
