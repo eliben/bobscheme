@@ -11,6 +11,8 @@
 #include "bobobject.h"
 
 
+// A Scheme "null" - empty list
+//
 class BobNull : public BobObject
 {
 public:
@@ -25,6 +27,8 @@ public:
 };
 
 
+// A Scheme boolean - true or false
+//
 class BobBoolean : public BobObject
 {
 public:
@@ -43,6 +47,8 @@ private:
 };
 
 
+// A Scheme number - integer
+//
 class BobNumber : public BobObject
 {
 public:
@@ -60,6 +66,8 @@ private:
 };
 
 
+// A Scheme symbol - a constant string
+//
 class BobSymbol : public BobObject
 {
 public:
@@ -77,6 +85,8 @@ private:
 };
 
 
+// A Scheme pair - holds sub-objects 'first' and 'second'
+//
 class BobPair : public BobObject
 {
 public:

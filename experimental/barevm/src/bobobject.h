@@ -22,8 +22,10 @@ public:
         return "<object>";
     }
 
-    // Derived objects must override this comparison function. An object can
-    // assume that 'other' is of the same type as it is.
+    // Derived classes that want to be comparable should override this
+    // method. 
+    // It shall be invoked only with 'other' of the same class as the
+    // object it's invoked on.
     //
     virtual bool equals_to(const BobObject& other) const
     {
