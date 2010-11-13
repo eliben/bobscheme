@@ -7,6 +7,8 @@
 #ifndef BOBOBJECT_H
 #define BOBOBJECT_H
 
+#include <string>
+
 
 // Abstract base class for all objects managed by the Bob VM
 //
@@ -19,6 +21,7 @@ public:
     virtual ~BobObject()
     {}
 
+    virtual std::string repr() const = 0;
     friend bool objects_equal(const BobObject*, const BobObject*);
 protected:
     // Derived objects must override this comparison function. An object can
