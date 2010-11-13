@@ -80,7 +80,7 @@ class BobParser(object):
             * Reads in the next token
         """
         if self.cur_token.type == type:
-            val = self.cur_token.value
+            val = self.cur_token.val
             self._next_token()
             return val
         else:
@@ -110,10 +110,10 @@ class BobParser(object):
     
     def _simple_datum(self):
         if self.cur_token.type == 'BOOLEAN':
-            retval = Boolean(self.cur_token.value == '#t')
+            retval = Boolean(self.cur_token.val == '#t')
         elif self.cur_token.type == 'NUMBER':
             base = 10
-            num_str = self.cur_token.value
+            num_str = self.cur_token.val
             if num_str.startswith('#'):
                 if num_str[1] == 'x': base = 16
                 elif num_str[1] == 'o': base = 8
@@ -125,9 +125,9 @@ class BobParser(object):
             except ValueError as err:
                 self._parse_error('Invalid number')
         elif self.cur_token.type == 'ID':
-            retval = Symbol(self.cur_token.value)
+            retval = Symbol(self.cur_token.val)
         else:
-            self._parse_error('Unexpected token "%s"' % self.cur_token.value)
+            self._parse_error('Unexpected token "%s"' % self.cur_token.val)
         
         self._next_token()
         return retval
@@ -150,7 +150,7 @@ class BobParser(object):
                 self._parse_error('Unmatched parentheses at end of input')
             elif self.cur_token.type == 'RPAREN':
                 break
-            elif self.cur_token.type == 'ID' and self.cur_token.value == '.':
+            elif self.cur_token.type == 'ID' and self.cur_token.val == '.':
                 if dot_idx > 0:
                     self._parse_error('Invalid usage of "."')
                 dot_idx = len(lst)
