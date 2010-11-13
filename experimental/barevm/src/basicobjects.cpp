@@ -6,22 +6,10 @@
 //*****************************************************************************
 
 #include "basicobjects.h"
-#include <sstream>
+#include "utils.h"
 #include <typeinfo>
 #include <cassert>
 using namespace std;
-
-
-// Convert some value to a string. This value must be of a class that supports
-// operator<< to a stream. Otherwise, a compile error will be generated.
-//
-template <class T>
-static string value_to_string(const T& value)
-{
-    stringstream out;
-    out << value;
-    return out.str();
-}
 
 
 // ----------- BobNull ------------

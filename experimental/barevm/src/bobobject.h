@@ -15,19 +15,20 @@
 class BobObject 
 {
 public:
-    BobObject()
-    {}
+    virtual ~BobObject() = 0;
 
-    virtual ~BobObject()
-    {}
+    virtual std::string repr() const
+    {
+        return "<object>";
+    }
 
-    virtual std::string repr() const = 0;
-    friend bool objects_equal(const BobObject*, const BobObject*);
-protected:
     // Derived objects must override this comparison function. An object can
     // assume that 'other' is of the same type as it is.
     //
-    virtual bool equals_to(const BobObject& other) const = 0;
+    virtual bool equals_to(const BobObject& other) const
+    {
+        return false;
+    }
 };
 
 

@@ -17,8 +17,10 @@ public:
     BobNull()
     {}
 
+    ~BobNull()
+    {}
+
     std::string repr() const;
-protected:
     bool equals_to(const BobObject& other) const;
 };
 
@@ -30,10 +32,13 @@ public:
         : m_value(value)
     {}
 
+    ~BobBoolean()
+    {}
+
     std::string repr() const;
-protected:
     bool equals_to(const BobObject& other) const;
 
+private:
     bool m_value;
 };
 
@@ -45,10 +50,12 @@ public:
         : m_value(value)
     {}
 
-    std::string repr() const;
-protected:
-    bool equals_to(const BobObject& other) const;
+    ~BobNumber()
+    {}
 
+    std::string repr() const;
+    bool equals_to(const BobObject& other) const;
+private:
     int m_value;
 };
 
@@ -60,10 +67,12 @@ public:
         : m_value(value)
     {}
 
-    std::string repr() const;
-protected:
-    bool equals_to(const BobObject& other) const;
+    ~BobSymbol()
+    {}
 
+    std::string repr() const;
+    bool equals_to(const BobObject& other) const;
+private:
     std::string m_value;
 };
 
@@ -75,11 +84,14 @@ public:
         : m_first(first), m_second(second)
     {}
 
+    ~BobPair()
+    {}
+
     inline const BobObject* get_first() const;
     inline const BobObject* get_second() const;
     std::string repr() const;
-protected:
     bool equals_to(const BobObject& other) const;
+private:
     std::string repr_internal() const;
 
     const BobObject* m_first;

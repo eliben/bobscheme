@@ -8,6 +8,11 @@
 #include <typeinfo>
 
 
+BobObject::~BobObject()
+{
+}
+
+
 bool objects_equal(const BobObject* lhs, const BobObject* rhs)
 {
     if (lhs == rhs)
