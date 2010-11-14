@@ -7,8 +7,8 @@
 #ifndef BASICOBJECTS_H
 #define BASICOBJECTS_H
 
-#include <string>
 #include "bobobject.h"
+#include <string>
 
 
 // A Scheme "null" - empty list
