@@ -10,8 +10,11 @@
 #include "bobobject.h"
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 
+// VM instruction opcodes
+//
 const unsigned OP_CONST      = 0x00;
 const unsigned OP_LOADVAR    = 0x10;
 const unsigned OP_STOREVAR   = 0x11;
@@ -52,6 +55,15 @@ public:
     std::vector<Instruction> code;
 };
 
+
+// The exception type thrown by the deserializer
+//
+struct DeserializationError : public std::runtime_error
+{
+    DeserializationError(const std::string& reason) 
+        : std::runtime_error(reason)
+    {}
+};
 
 // Given a bytecode file, deserializes it into a new BobCodeObject
 //

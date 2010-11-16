@@ -20,3 +20,8 @@ std::string value_to_string(const T& value)
     return out.str();
 }
 
+
+// Create a string from a printf-like format and arguments
+//
+std::string format_string(const char* format, ...);
+

@@ -6,6 +6,7 @@
 //*****************************************************************************
 #include <iostream>
 #include "basicobjects.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -43,6 +44,8 @@ int main(int argc, const char* argv[])
     cerr << pp5->repr() << endl;
     cerr << pp6->repr() << endl;
     cerr << pp7->repr() << endl;
+
+    cerr << format_string("%20d %-20d\n", 1544, 933382) << endl;
     
     return 0;
 }
