@@ -4,11 +4,11 @@
 // Eli Bendersky (eliben@gmail.com)
 // This code is in the public domain
 //*****************************************************************************
-
 #include "basicobjects.h"
 #include "utils.h"
 #include <typeinfo>
 #include <cassert>
+
 using namespace std;
 
 

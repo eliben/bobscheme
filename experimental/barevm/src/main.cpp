@@ -7,12 +7,17 @@
 #include <iostream>
 #include "basicobjects.h"
 #include "utils.h"
+#include "bytecode.h"
+#include "serialization.h"
 
 using namespace std;
 
 
 int main(int argc, const char* argv[])
 {
+    string filename = argv[1];
+    BobCodeObject* bco = deserialize_bytecode(filename);
+
     BobObject* nl = new BobNull();
     BobObject* n8 = new BobNumber(8);
     BobObject* nn8 = new BobNumber(8);

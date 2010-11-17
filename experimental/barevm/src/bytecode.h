@@ -1,5 +1,5 @@
 //*****************************************************************************
-// bob: Bytecode objects and deserialization
+// bob: Instructions and bytecode
 //
 // Eli Bendersky (eliben@gmail.com)
 // This code is in the public domain
@@ -10,7 +10,6 @@
 #include "bobobject.h"
 #include <string>
 #include <vector>
-#include <stdexcept>
 
 
 // VM instruction opcodes
@@ -27,11 +26,15 @@ const unsigned OP_RETURN     = 0x50;
 const unsigned OP_CALL       = 0x51;
 
 
-// An Instruction is a POD type containing the opcode and a single
+// An instruction is a POD type containing the opcode and a single
 // numeric argument (for instructions that need it)
 //
-struct Instruction 
+struct BobInstruction 
 {
+    BobInstruction(unsigned opcode_, unsigned arg_)
+        : opcode(opcode_), arg(arg_)
+    {}
+
     unsigned opcode;
     unsigned arg;
 };
@@ -52,22 +55,8 @@ public:
     std::vector<std::string> args;
     std::vector<std::string> varnames;
     std::vector<const BobObject*> constants;
-    std::vector<Instruction> code;
+    std::vector<BobInstruction> code;
 };
-
-
-// The exception type thrown by the deserializer
-//
-struct DeserializationError : public std::runtime_error
-{
-    DeserializationError(const std::string& reason) 
-        : std::runtime_error(reason)
-    {}
-};
-
-// Given a bytecode file, deserializes it into a new BobCodeObject
-//
-BobCodeObject* deserialize_bytecode(std::string filename); 
 
 #endif /* BYTECODE_H */
 
