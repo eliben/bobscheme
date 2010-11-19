@@ -209,7 +209,7 @@ static BobObject* d_match_object(BytecodeStream& stream)
 }
 
 
-BobCodeObject* deserialize_bytecode(string filename)
+BobCodeObject* deserialize_bytecode(const string& filename)
 {
     BytecodeStream stream(filename.c_str());
 

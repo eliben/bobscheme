@@ -26,6 +26,6 @@ class BobCodeObject;
 
 // Given a bytecode file, deserializes it into a new BobCodeObject
 //
-BobCodeObject* deserialize_bytecode(std::string filename); 
+BobCodeObject* deserialize_bytecode(const std::string& filename); 
 
 #endif /* SERIALIZATION_H */

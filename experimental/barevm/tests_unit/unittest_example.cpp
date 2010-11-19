@@ -1,3 +1,6 @@
+// Sanity check - make sure gtest linked correctly and the include
+// paths are set up
+//
 #include <gtest/gtest.h>
 #include "bytecode.h"
 

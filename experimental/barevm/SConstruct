@@ -1,7 +1,8 @@
-import glob
-
 # I like scons cuz it's Python ;-)
+# Import Python's glob instead of scons's since Python's returns a simple
+# list of filenames that can be easily manipulated.
 #
+import glob
 DEBUG_FLAG = []
 
 if ARGUMENTS.get('debug', 0):
