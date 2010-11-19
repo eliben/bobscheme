@@ -31,7 +31,7 @@ unittests = Glob('tests_unit/*.cpp')
 # gtest doesn't like -pedantic... whatever!
 envcpptest = Environment(
                 CCFLAGS=['-Wall', '-Wextra'] + DEBUG_FLAG,
-                CPPPATH=['.', './tests_unit/'],
+                CPPPATH=['src/', './tests_unit/'],
             )
 
 envcpptest.Program(target="tests_unit/bob_test_main", 

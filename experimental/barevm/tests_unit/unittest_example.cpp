@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
+#include "bytecode.h"
 
-TEST(FactorialTest, Negative) {
-  int j = 5 - 4;
-  EXPECT_EQ(1, j);
-  EXPECT_EQ(43, j);
+
+TEST(SanityTest, Trivial) {
+  EXPECT_EQ(1, 1);
 }
 
