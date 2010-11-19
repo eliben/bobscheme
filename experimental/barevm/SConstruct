@@ -21,7 +21,7 @@ bobmainfile = "src/main.cpp"
 bobsourcefiles.remove(bobmainfile)
 
 envcpp.Library('boblib', source=bobsourcefiles)
-envcpp.Program(target='barevm', source=[bobmainfile], 
+envcpp.Program(target='barevm.exe', source=[bobmainfile], 
     LIBS=['boblib'], LIBPATH=['.'])
 
 # Unit-testing with gtest
@@ -35,6 +35,6 @@ envcpptest = Environment(
                 CPPPATH=['src/', './tests_unit/'],
             )
 
-envcpptest.Program(target="tests_unit/bob_test_main", 
+envcpptest.Program(target="tests_unit/bob_test_main.exe", 
     source=unittests + gtestfiles, LIBS=['boblib', 'pthread'], LIBPATH=['.'])
 

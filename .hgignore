@@ -11,4 +11,6 @@ syntax: glob
 tags
 cscope.*
 *.bobc
+*.exe
+
 
