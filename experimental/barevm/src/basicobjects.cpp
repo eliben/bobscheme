@@ -16,6 +16,7 @@ using namespace std;
 //
 bool BobNull::equals_to(const BobObject& other) const 
 { 
+    (void)other;
     // This will be called only for another BobNull, and two nulls are
     // always equal
     //

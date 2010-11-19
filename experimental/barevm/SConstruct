@@ -1,19 +1,39 @@
+import glob
+
 # I like scons cuz it's Python ;-)
 #
-CCFLAGS = ['-Wall', '-pedantic']
+DEBUG_FLAG = []
 
 if ARGUMENTS.get('debug', 0):
-    CCFLAGS.append('-g')
+    DEBUG_FLAG.append('-g')
 
 envcpp = Environment(
-            CCFLAGS=CCFLAGS,
+            CCFLAGS=['-Wall', '-Wextra', '-pedantic'] + DEBUG_FLAG,
             CPPPATH=['.'],
         )
 
-# All C++ files 
+# Build the 'boblib' library with all Bob source except the main driver,
+# and the main driver executable named 'barevm'
 #
-cppfiles = Glob('src/*.cpp')
+bobsourcefiles = glob.glob("src/*.cpp")
+bobmainfile = "src/main.cpp"
+bobsourcefiles.remove(bobmainfile)
 
-envcpp.Program(target='barevm', source=cppfiles)
+envcpp.Library('boblib', source=bobsourcefiles)
+envcpp.Program(target='barevm', source=[bobmainfile], 
+    LIBS=['boblib'], LIBPATH=['.'])
 
+# Unit-testing with gtest
+#
+gtestfiles = Glob('tests_unit/gtest/*.cc')
+unittests = Glob('tests_unit/*.cpp')
+
+# gtest doesn't like -pedantic... whatever!
+envcpptest = Environment(
+                CCFLAGS=['-Wall', '-Wextra'] + DEBUG_FLAG,
+                CPPPATH=['.', './tests_unit/'],
+            )
+
+envcpptest.Program(target="tests_unit/bob_test_main", 
+    source=unittests + gtestfiles, LIBS=['boblib', 'pthread'], LIBPATH=['.'])
 

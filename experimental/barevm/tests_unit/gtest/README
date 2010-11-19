@@ -1,0 +1,3 @@
+This is the "fused" version of the sources for gtest 1.5.0
+To use gtest just compile and link to gtest-all.cc
+If you want to use gtest's own main function, link with gtest_main.cc as well

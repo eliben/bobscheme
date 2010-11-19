@@ -87,6 +87,8 @@ static void match_type(BytecodeStream& stream, unsigned char type)
 
 static BobObject* d_null(BytecodeStream& stream)
 {
+    (void)stream;
+
     // Doesn't have to read anything...
     // 
     return new BobNull();

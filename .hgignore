@@ -3,6 +3,7 @@ syntax: glob
 .sconsign.*
 *.pyc
 *.o
+*.a
 *.cover
 *.swp
 *.swn

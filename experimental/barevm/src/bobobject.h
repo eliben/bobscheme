@@ -29,6 +29,7 @@ public:
     //
     virtual bool equals_to(const BobObject& other) const
     {
+        (void)other;
         return false;
     }
 };
