@@ -68,7 +68,11 @@ private:
 //
 namespace bob_builtin {
 
-BobObject* car(BuiltinArgs args);
+#define DECLARE_BUILTIN(name) BobObject* name(BuiltinArgs args);
+
+DECLARE_BUILTIN(car)
+DECLARE_BUILTIN(set_car)
+DECLARE_BUILTIN(logical_not)
 
 } // namespace bob_builtin
 

@@ -39,6 +39,7 @@ public:
     ~BobBoolean()
     {}
 
+    bool value() const {return m_value;}
     std::string repr() const;
     bool equals_to(const BobObject& other) const;
 
