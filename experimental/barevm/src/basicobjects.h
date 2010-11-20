@@ -90,22 +90,25 @@ private:
 class BobPair : public BobObject
 {
 public:
-    BobPair(const BobObject* first, const BobObject* second)
+    BobPair(BobObject* first, BobObject* second)
         : m_first(first), m_second(second)
     {}
 
     ~BobPair()
     {}
 
-    inline const BobObject* get_first() const;
-    inline const BobObject* get_second() const;
+    BobObject* first() {return m_first;}
+    BobObject* second() {return m_second;}
+    void set_first(BobObject* first) {m_first = first;}
+    void set_second(BobObject* second) {m_second = second;}
+
     std::string repr() const;
     bool equals_to(const BobObject& other) const;
 private:
     std::string repr_internal() const;
 
-    const BobObject* m_first;
-    const BobObject* m_second;
+    BobObject* m_first;
+    BobObject* m_second;
 };
 
 #endif /* BASICOBJECTS_H */

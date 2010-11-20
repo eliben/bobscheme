@@ -27,8 +27,8 @@ class BobEnvironment : public BobObject
 public:
     // Create a new, empty environment with the given parent link
     //
-    BobEnvironment(BobEnvironment* parent_=0)
-        : parent(parent_)
+    BobEnvironment(BobEnvironment* parent=0)
+        : m_parent(parent)
     {}
 
     // Lookup the variable in this environment or its parents. Return the 
@@ -50,9 +50,9 @@ public:
     virtual ~BobEnvironment()
     {}
 private:
-    BobEnvironment* parent;
+    BobEnvironment* m_parent;
     typedef std::map<std::string, BobObject*> Binding;
-    Binding binding;
+    Binding m_binding;
 };
 
 

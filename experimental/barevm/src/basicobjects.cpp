@@ -85,18 +85,6 @@ bool BobPair::equals_to(const BobObject& other) const
 }
 
 
-const BobObject* BobPair::get_first() const
-{
-    return m_first;
-}
-
-
-const BobObject* BobPair::get_second() const
-{
-    return m_second;
-}
-
-
 string BobPair::repr() const
 {
     string rep = "(" + repr_internal() + ")";

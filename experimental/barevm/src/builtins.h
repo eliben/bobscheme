@@ -10,6 +10,7 @@
 #include "bobobject.h"
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 
 // Builtin procedures are implemented as normal C++ functions with the 
@@ -17,8 +18,21 @@
 // a vector and return a single value. All values (args and return value)
 // are BobObjects.
 //
-typedef BobObject* (*BuiltinProc)(const std::vector<BobObject*>& args);
+typedef const std::vector<BobObject*>& BuiltinArgs;
+typedef BobObject* (*BuiltinProc)(BuiltinArgs args);
 
+
+// The exception type thrown by builtins when they're used incorrectly by
+// the user. Note: this is reserved for errors that *the user can make*,
+// like calling (car 2) [car must have a pair as its argument].
+//
+struct BuiltinError : public std::runtime_error
+{
+    BuiltinError(const std::string& reason)
+        : std::runtime_error(reason)
+    {}
+};
+            
 
 // A simple wrapper for a builtin procedure. Derived from BobObject for 
 // convenience (this way it can be kept in an environment bound to a name of 
@@ -27,26 +41,37 @@ typedef BobObject* (*BuiltinProc)(const std::vector<BobObject*>& args);
 class BobBuiltinProcedure : public BobObject
 {
 public:
-    BobBuiltinProcedure(const std::string& name_, BuiltinProc proc_)
-        : name(name_), proc(proc_)
+    BobBuiltinProcedure(const std::string& name, BuiltinProc proc)
+        : m_name(name), m_proc(proc)
     {}
 
     virtual ~BobBuiltinProcedure()
     {}
 
-    const std::string& get_name() const
+    const std::string& name() const
     {
-        return name;
+        return m_name;
     }
 
-    BuiltinProc get_proc() const
+    BuiltinProc proc() const
     {
-        return proc;
+        return m_proc;
     }
 private:
-    std::string name;
-    BuiltinProc proc;
+    std::string m_name;
+    BuiltinProc m_proc;
 };
+
+
+// Declarations of builtins. They live in a namespace since I want to use
+// simple Scheme-like names, and yet not pollute the global namespace.
+//
+namespace bob_builtin {
+
+BobObject* car(BuiltinArgs args);
+
+} // namespace bob_builtin
+
 
 #endif /* BUILTINS_H */
 

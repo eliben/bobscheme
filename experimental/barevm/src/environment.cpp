@@ -11,9 +11,9 @@ using namespace std;
 
 BobObject* BobEnvironment::lookup_var(const string& name)
 {
-    Binding::const_iterator it = binding.find(name);
-    if (it == binding.end())
-        return parent ? parent->lookup_var(name) : 0;
+    Binding::const_iterator it = m_binding.find(name);
+    if (it == m_binding.end())
+        return m_parent ? m_parent->lookup_var(name) : 0;
     else
         return it->second;
 }
@@ -21,17 +21,17 @@ BobObject* BobEnvironment::lookup_var(const string& name)
 
 void BobEnvironment::define_var(const string& name, BobObject* value)
 {
-    binding[name] = value;
+    m_binding[name] = value;
 }
 
 
 BobObject* BobEnvironment::set_var_value(const string& name, BobObject* value)
 {
-    Binding::const_iterator it = binding.find(name);
-    if (it == binding.end())
-        return parent ? parent->set_var_value(name, value) : 0;
+    Binding::const_iterator it = m_binding.find(name);
+    if (it == m_binding.end())
+        return m_parent ? m_parent->set_var_value(name, value) : 0;
     else {
-        binding[name] = value;
+        m_binding[name] = value;
         return value;
     }
 }
