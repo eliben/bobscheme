@@ -20,7 +20,7 @@ struct VMError : public std::runtime_error
 };
 
 
-struct VMData;
+struct VMImpl;
 
 class BobVM 
 {
@@ -29,7 +29,7 @@ public:
     virtual ~BobVM();
 
 private:
-    VMData* d;
+    VMImpl* d;
 };
 
 

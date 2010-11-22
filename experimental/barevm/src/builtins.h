@@ -9,6 +9,7 @@
 
 #include "bobobject.h"
 #include <string>
+#include <map>
 #include <vector>
 #include <stdexcept>
 
@@ -62,6 +63,13 @@ private:
     BuiltinProc m_proc;
 };
 
+
+// BuiltinsMap is a mapping of names to procedures. 
+// Call init_builtins_map to fill in a BuiltinsMap with all the available
+// builtins.
+//
+typedef std::map<std::string, BobBuiltinProcedure*> BuiltinsMap;
+void init_builtins_map(BuiltinsMap& map);
 
 // Declarations of builtins. They live in a namespace since I want to use
 // simple Scheme-like names, and yet not pollute the global namespace.
