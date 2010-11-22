@@ -12,8 +12,6 @@
 using namespace std;
 
 
-namespace bob_builtin {
-
 static inline void builtin_verify(bool condition, const string& message)
 {
     if (!condition)
@@ -27,7 +25,7 @@ static inline void verify_numargs(BuiltinArgs args, size_t num, const string& na
 }
 
 
-BobObject* car(BuiltinArgs args)
+static BobObject* car(BuiltinArgs args)
 {
     verify_numargs(args, 1, "car");
     BobPair* pair = dynamic_cast<BobPair*>(args[0]);
@@ -36,7 +34,7 @@ BobObject* car(BuiltinArgs args)
 }
 
 
-BobObject* set_car(BuiltinArgs args)
+static BobObject* set_car(BuiltinArgs args)
 {
     verify_numargs(args, 2, "set-car");
     BobPair* pair = dynamic_cast<BobPair*>(args[0]);
@@ -46,7 +44,10 @@ BobObject* set_car(BuiltinArgs args)
 }
 
 
-BobObject* logical_not(BuiltinArgs args)
+// This one gets a longer name to avoid clash with a STL functor named
+// logical_not
+//
+static BobObject* builtin_logical_not(BuiltinArgs args)
 {
     verify_numargs(args, 1, "not");
     BobBoolean* val = dynamic_cast<BobBoolean*>(args[0]);
@@ -55,4 +56,14 @@ BobObject* logical_not(BuiltinArgs args)
 }
 
 
-} // namespace bob_builtin
+BuiltinsMap make_builtins_map()
+{
+    BuiltinsMap builtins_map;
+
+    builtins_map["car"] = car;
+    builtins_map["set-car"] = set_car;
+    builtins_map["not"] = builtin_logical_not;
+
+    return builtins_map;
+}
+

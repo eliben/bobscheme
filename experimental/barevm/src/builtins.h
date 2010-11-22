@@ -37,7 +37,7 @@ struct BuiltinError : public std::runtime_error
 
 // A simple wrapper for a builtin procedure. Derived from BobObject for 
 // convenience (this way it can be kept in an environment bound to a name of 
-// a builtin.
+// a builtin).
 //
 class BobBuiltinProcedure : public BobObject
 {
@@ -49,14 +49,14 @@ public:
     virtual ~BobBuiltinProcedure()
     {}
 
-    const std::string& name() const
+    virtual const std::string& name() const
     {
         return m_name;
     }
 
-    BuiltinProc proc() const
+    virtual BobObject* exec(BuiltinArgs args) const
     {
-        return m_proc;
+        return m_proc(args);
     }
 private:
     std::string m_name;
@@ -64,25 +64,11 @@ private:
 };
 
 
-// BuiltinsMap is a mapping of names to procedures. 
 // Call init_builtins_map to fill in a BuiltinsMap with all the available
 // builtins.
 //
-typedef std::map<std::string, BobBuiltinProcedure*> BuiltinsMap;
-void init_builtins_map(BuiltinsMap& map);
-
-// Declarations of builtins. They live in a namespace since I want to use
-// simple Scheme-like names, and yet not pollute the global namespace.
-//
-namespace bob_builtin {
-
-#define DECLARE_BUILTIN(name) BobObject* name(BuiltinArgs args);
-
-DECLARE_BUILTIN(car)
-DECLARE_BUILTIN(set_car)
-DECLARE_BUILTIN(logical_not)
-
-} // namespace bob_builtin
+typedef std::map<std::string, BuiltinProc> BuiltinsMap;
+BuiltinsMap make_builtins_map();
 
 
 #endif /* BUILTINS_H */
