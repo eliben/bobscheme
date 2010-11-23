@@ -19,8 +19,10 @@
 // a vector and return a single value. All values (args and return value)
 // are BobObjects.
 //
-typedef const std::vector<BobObject*>& BuiltinArgs;
-typedef BobObject* (*BuiltinProc)(BuiltinArgs args);
+typedef std::vector<BobObject*> BuiltinArgs;
+typedef std::vector<BobObject*>::iterator BuiltinArgsIterator;
+typedef std::vector<BobObject*>::const_iterator BuiltinArgsIteratorConst;
+typedef BobObject* (*BuiltinProc)(BuiltinArgs& args);
 
 
 // The exception type thrown by builtins when they're used incorrectly by
@@ -54,7 +56,7 @@ public:
         return m_name;
     }
 
-    virtual BobObject* exec(BuiltinArgs args) const
+    virtual BobObject* exec(BuiltinArgs& args) const
     {
         return m_proc(args);
     }

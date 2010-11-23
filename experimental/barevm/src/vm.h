@@ -29,6 +29,7 @@ public:
     BobVM(const std::string& output_file="");
     virtual ~BobVM();
 
+    void run(BobCodeObject* codeobj);
 private:
     BobVM(const BobVM&);
     BobVM& operator=(const BobVM&);

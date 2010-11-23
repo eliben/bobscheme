@@ -50,8 +50,8 @@ struct VMImpl
 
     BobEnvironment* create_global_env();
 
-    BobObject* builtin_write(BuiltinArgs args);
-    BobObject* builtin_debug_vm(BuiltinArgs args);
+    BobObject* builtin_write(BuiltinArgs& args);
+    BobObject* builtin_debug_vm(BuiltinArgs& args);
 };
 
 
@@ -66,6 +66,10 @@ BobVM::BobVM(const string& output_file)
         if (!d->m_output_stream)
             throw VMError("Unable to open for output: " + output_file);
     }
+
+    d->m_frame.codeobject = 0;
+    d->m_frame.pc = 0;
+    d->m_frame.env = d->create_global_env();
 }
 
 
@@ -73,6 +77,24 @@ BobVM::~BobVM()
 {
     if (d->m_output_stream != stdout)
         fclose(d->m_output_stream);
+}
+
+
+void BobVM::run(BobCodeObject* codeobj)
+{
+    if (!codeobj)
+        return;
+
+    d->m_frame.codeobject = codeobj;
+    d->m_frame.pc = 0;
+
+    // The big VM loop!
+    //
+    while (true) {
+        BobInstruction instr;
+        if (d->m_frame.pc >= d->m_frame.codeobject->code.size())
+
+        }
 }
 
 
@@ -89,7 +111,7 @@ BobVM::~BobVM()
 // and member function pointer to call a builtin function that's actually
 // defined inside BobVM and thus has access to its state.
 //
-typedef BobObject* (VMImpl::*VMBuiltinProc)(BuiltinArgs args);
+typedef BobObject* (VMImpl::*VMBuiltinProc)(BuiltinArgs& args);
 
 class BobVMBuiltinProcedure : public BobBuiltinProcedure
 {
@@ -100,7 +122,7 @@ public:
 
     virtual ~BobVMBuiltinProcedure();
 
-    virtual BobObject* exec(BuiltinArgs args) const
+    virtual BobObject* exec(BuiltinArgs& args) const
     {
         // Invoke the member function via a pointer on the object
         //
@@ -138,11 +160,11 @@ BobEnvironment* VMImpl::create_global_env()
 }
 
 
-BobObject* VMImpl::builtin_write(BuiltinArgs args)
+BobObject* VMImpl::builtin_write(BuiltinArgs& args)
 {
     string output_str;
 
-    for (vector<BobObject*>::const_iterator i = args.begin(); i != args.end(); ++i) {
+    for (BuiltinArgsIteratorConst i = args.begin(); i != args.end(); ++i) {
         output_str += (*i)->repr() + " ";
     }
     output_str += "\n";
@@ -152,7 +174,7 @@ BobObject* VMImpl::builtin_write(BuiltinArgs args)
 }
 
 
-BobObject* VMImpl::builtin_debug_vm(BuiltinArgs args)
+BobObject* VMImpl::builtin_debug_vm(BuiltinArgs& args)
 {
     (void)args;
     fputs("** debug called\n", m_output_stream);

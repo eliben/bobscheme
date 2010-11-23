@@ -60,6 +60,7 @@ public:
     ~BobNumber()
     {}
 
+    int value() const {return m_value;}
     std::string repr() const;
     bool equals_to(const BobObject& other) const;
 private:
