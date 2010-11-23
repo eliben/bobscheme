@@ -56,9 +56,8 @@ struct VMImpl
 
 
 BobVM::BobVM(const string& output_file)
+    : d(new VMImpl)
 {
-    d = new VMImpl;
-
     if (output_file == "") 
         d->m_output_stream = stdout;
     else {
@@ -74,8 +73,6 @@ BobVM::~BobVM()
 {
     if (d->m_output_stream != stdout)
         fclose(d->m_output_stream);
-
-    delete d;
 }
 
 
@@ -157,6 +154,7 @@ BobObject* VMImpl::builtin_write(BuiltinArgs args)
 
 BobObject* VMImpl::builtin_debug_vm(BuiltinArgs args)
 {
+    (void)args;
     fputs("** debug called\n", m_output_stream);
     return 0;
 }

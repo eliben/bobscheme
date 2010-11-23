@@ -10,6 +10,7 @@
 #include "bytecode.h"
 #include <string>
 #include <stdexcept>
+#include <memory>
 
 
 struct VMError : public std::runtime_error
@@ -29,7 +30,10 @@ public:
     virtual ~BobVM();
 
 private:
-    VMImpl* d;
+    BobVM(const BobVM&);
+    BobVM& operator=(const BobVM&);
+
+    std::auto_ptr<VMImpl> d;
 };
 
 
