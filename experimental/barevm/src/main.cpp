@@ -9,6 +9,7 @@
 #include "utils.h"
 #include "bytecode.h"
 #include "serialization.h"
+#include "vm.h"
 
 using namespace std;
 
@@ -20,6 +21,10 @@ int main(int argc, const char* argv[])
     BobCodeObject* bco = deserialize_bytecode(filename);
 
     cerr << bco->repr() << endl;
+
+    BobVM vm;
+    vm.run(bco);
+
     
     return 0;
 }

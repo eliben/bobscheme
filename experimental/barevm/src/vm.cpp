@@ -9,10 +9,14 @@
 #include "bytecode.h"
 #include "environment.h"
 #include "builtins.h"
+#include "basicobjects.h"
 #include <stack>
+#include <algorithm>
 #include <cstdio>
 #include <stack>
 #include <cassert>
+#include <iostream>
+#include <typeinfo>
 
 using namespace std;
 
@@ -30,13 +34,31 @@ struct ExecutionFrame
 };
 
 
+// A closure is a code object (procedure) with an associated environment
+// in which the closure was created.
+//
+class BobClosure : public BobObject
+{
+public:
+    BobClosure(BobCodeObject* codeobject_, BobEnvironment* env_)
+        : codeobject(codeobject_), env(env_)
+    {}
+
+    virtual ~BobClosure()
+    {}
+
+    BobCodeObject* codeobject;
+    BobEnvironment* env;
+};
+
+
 struct VMImpl
 {
     // The output stream for (write)
     //
     FILE* m_output_stream;
 
-    // Stack for execution frames to implement procedure calls
+    // Explicit stack for execution frames to implement procedure calls.
     //
     stack<ExecutionFrame> m_framestack;
 
@@ -121,7 +143,7 @@ void BobVM::run(BobCodeObject* codeobj)
             }
             case OP_LOADVAR:
             {
-                assert(instr.arg < cur_codeobj->varnames[instr.arg].size() && "Varnames offset in bounds");
+                assert(instr.arg < cur_codeobj->varnames.size() && "Varnames offset in bounds");
                 string varname = cur_codeobj->varnames[instr.arg];
                 BobObject* val = d->m_frame.env->lookup_var(varname);
                 d->m_valuestack.push(val);
@@ -129,7 +151,7 @@ void BobVM::run(BobCodeObject* codeobj)
             }
             case OP_STOREVAR:
             {
-                assert(instr.arg < cur_codeobj->varnames[instr.arg].size() && "Varnames offset in bounds");
+                assert(instr.arg < cur_codeobj->varnames.size() && "Varnames offset in bounds");
                 assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
                 BobObject* val = d->m_valuestack.top();
                 d->m_valuestack.pop();
@@ -138,7 +160,7 @@ void BobVM::run(BobCodeObject* codeobj)
             }
             case OP_DEFVAR:
             {
-                assert(instr.arg < cur_codeobj->varnames[instr.arg].size() && "Varnames offset in bounds");
+                assert(instr.arg < cur_codeobj->varnames.size() && "Varnames offset in bounds");
                 assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
                 BobObject* val = d->m_valuestack.top();
                 d->m_valuestack.pop();
@@ -152,6 +174,103 @@ void BobVM::run(BobCodeObject* codeobj)
                 //
                 if (!d->m_valuestack.empty())
                     d->m_valuestack.pop();
+                break;
+            }
+            case OP_JUMP:
+            {
+                d->m_frame.pc = instr.arg;
+                break;
+            }
+            case OP_FJUMP:
+            {
+                assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
+                BobBoolean* bool_predicate = dynamic_cast<BobBoolean*>(d->m_valuestack.top());
+                d->m_valuestack.pop();
+                if (bool_predicate && !bool_predicate->value())
+                    d->m_frame.pc = instr.arg;
+                break;
+            }
+            case OP_FUNCTION:
+            {
+                assert(instr.arg < cur_codeobj->constants.size() && "Constants offset in bounds");
+                BobObject* val = cur_codeobj->constants[instr.arg];
+                BobCodeObject* func_codeobj = dynamic_cast<BobCodeObject*>(val);
+                assert(val && "Expected code object as the argument to OP_FUNCTION");
+                d->m_valuestack.push(new BobClosure(func_codeobj, d->m_frame.env));
+                break;
+            }
+            case OP_RETURN:
+            {
+                assert(!d->m_framestack.empty() && "OP_RETURN needs non-empty frame stack");
+                d->m_frame = d->m_framestack.top();
+                d->m_framestack.pop();
+                break;
+            }
+            case OP_CALL:
+            {
+                // For OP_CALL we have the function on top of the value stack,
+                // followed by its arguments (in reverse order). The amount of
+                // arguments is in the argument of the instruction.
+                // The function is either a builtin procedure or a closure.
+                //
+                assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
+                BobObject* func_val = d->m_valuestack.top();
+                vector<BobObject*> argvalues;
+
+                // Take the function's arguments from the stack. The last
+                // (right-most) argument is on top of the stack (first).
+                //
+                for (unsigned i = 0; i < instr.arg; ++i) {
+                    assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
+                    argvalues.push_back(d->m_valuestack.top());
+                    d->m_valuestack.pop();
+                }
+                reverse(argvalues.begin(), argvalues.end());
+
+                cerr << "***" << typeid(func_val).name() << endl;
+
+                if (BobBuiltinProcedure* proc = dynamic_cast<BobBuiltinProcedure*>(func_val)) {
+                    BobObject* retval = proc->exec(argvalues);
+                    d->m_valuestack.push(retval);
+                }
+                else if (BobClosure* closure = dynamic_cast<BobClosure*>(func_val)) {
+                    // Extend the closure's environment with one where its code 
+                    // object's arguments are bound to the values passed to it
+                    // in the call.
+                    //
+                    if (argvalues.size() != closure->codeobject->args.size())
+                        throw VMError(format_string("Calling procedure %s with %d args, expected %d",
+                                        closure->codeobject->name.c_str(),
+                                        argvalues.size(),
+                                        closure->codeobject->args.size()));
+
+                    BobEnvironment* call_env = new BobEnvironment(closure->env);
+                    for (size_t i = 0; i < argvalues.size(); ++i) {
+                        string argname = closure->codeobject->args[i];
+                        BobObject* argvalue = argvalues[i];
+                        call_env->define_var(argname, argvalue);
+                    }
+
+                    // To execute the procedure:
+                    // 1. Save the current execution frame on the frame stack
+                    // 2. Create a new frame from the closure's code object
+                    //    and the extendend environment.
+                    // 3. Start executing the frame by making it the current
+                    //    frame with pc=0. The procedure's first instruction
+                    //    will then execute in the next iteration of this 
+                    //    loop.
+                    //
+                    d->m_framestack.push(d->m_frame);
+                    ExecutionFrame new_frame;
+                    new_frame.codeobject = closure->codeobject;
+                    new_frame.pc = 0;
+                    new_frame.env = call_env;
+                    d->m_frame = new_frame;
+                }
+                else 
+                    assert(0 && "Expected callable object on TOS for OP_CALL");
+
+                break;
             }
             default:
                 throw VMError(format_string("Invalid instruction opcode 0x%02X", instr.opcode));
@@ -182,7 +301,8 @@ public:
         : BobBuiltinProcedure(name, 0), m_vmobj(vmobj), m_builtin(builtin)
     {}
 
-    virtual ~BobVMBuiltinProcedure();
+    virtual ~BobVMBuiltinProcedure()
+    {}
 
     virtual BobObject* exec(BuiltinArgs& args) const
     {
