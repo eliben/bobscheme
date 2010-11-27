@@ -5,12 +5,14 @@
 // This code is in the public domain
 //*****************************************************************************
 #include "vm.h"
+#include "utils.h"
 #include "bytecode.h"
 #include "environment.h"
 #include "builtins.h"
 #include <stack>
 #include <cstdio>
 #include <stack>
+#include <cassert>
 
 using namespace std;
 
@@ -91,10 +93,70 @@ void BobVM::run(BobCodeObject* codeobj)
     // The big VM loop!
     //
     while (true) {
-        BobInstruction instr;
-        if (d->m_frame.pc >= d->m_frame.codeobject->code.size())
+        BobCodeObject* cur_codeobj = d->m_frame.codeobject;
 
+        // Get the next instruction from the current code object. If there's
+        // no more instructions, this must be a top-level codeobject, in
+        // which case the program is done.
+        //
+        BobInstruction instr;
+        if (d->m_frame.pc >= cur_codeobj->code.size()) {
+            if (d->m_framestack.size() == 0) 
+                return;
+            else
+                throw VMError("Code object ended prematurely");
         }
+        else {
+            instr = cur_codeobj->code[d->m_frame.pc];
+            d->m_frame.pc++;
+        }
+
+        switch (instr.opcode) {
+            case OP_CONST:
+            {
+                assert(instr.arg < cur_codeobj->constants.size() && "Constants offset in bounds");
+                BobObject* val = cur_codeobj->constants[instr.arg];
+                d->m_valuestack.push(val);
+                break;
+            }
+            case OP_LOADVAR:
+            {
+                assert(instr.arg < cur_codeobj->varnames[instr.arg].size() && "Varnames offset in bounds");
+                string varname = cur_codeobj->varnames[instr.arg];
+                BobObject* val = d->m_frame.env->lookup_var(varname);
+                d->m_valuestack.push(val);
+                break;
+            }
+            case OP_STOREVAR:
+            {
+                assert(instr.arg < cur_codeobj->varnames[instr.arg].size() && "Varnames offset in bounds");
+                assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
+                BobObject* val = d->m_valuestack.top();
+                d->m_valuestack.pop();
+                d->m_frame.env->set_var_value(cur_codeobj->varnames[instr.arg], val);
+                break;
+            }
+            case OP_DEFVAR:
+            {
+                assert(instr.arg < cur_codeobj->varnames[instr.arg].size() && "Varnames offset in bounds");
+                assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
+                BobObject* val = d->m_valuestack.top();
+                d->m_valuestack.pop();
+                d->m_frame.env->define_var(cur_codeobj->varnames[instr.arg], val);
+                break;
+            }
+            case OP_POP:
+            {
+                // It's not a bug to generate instructions to pop the stack
+                // when there's nothing to pop.
+                //
+                if (!d->m_valuestack.empty())
+                    d->m_valuestack.pop();
+            }
+            default:
+                throw VMError(format_string("Invalid instruction opcode 0x%02X", instr.opcode));
+        }
+    }
 }
 
 

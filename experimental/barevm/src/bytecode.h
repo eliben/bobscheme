@@ -24,6 +24,7 @@ const unsigned OP_JUMP       = 0x40;
 const unsigned OP_FJUMP      = 0x41;
 const unsigned OP_RETURN     = 0x50;
 const unsigned OP_CALL       = 0x51;
+const unsigned OP_INVALID    = 0xFF;
 
 
 // An instruction is a POD type containing the opcode and a single
@@ -31,7 +32,7 @@ const unsigned OP_CALL       = 0x51;
 //
 struct BobInstruction 
 {
-    BobInstruction(unsigned opcode_, unsigned arg_)
+    BobInstruction(unsigned opcode_ = OP_INVALID, unsigned arg_ = 0)
         : opcode(opcode_), arg(arg_)
     {}
 
@@ -54,7 +55,7 @@ public:
     std::string name;
     std::vector<std::string> args;
     std::vector<std::string> varnames;
-    std::vector<const BobObject*> constants;
+    std::vector<BobObject*> constants;
     std::vector<BobInstruction> code;
 };
 
