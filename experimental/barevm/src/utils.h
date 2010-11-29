@@ -4,6 +4,8 @@
 // Eli Bendersky (eliben@gmail.com)
 // This code is in the public domain
 //*****************************************************************************
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <string>
 #include <sstream>
@@ -25,3 +27,4 @@ std::string value_to_string(const T& value)
 //
 std::string format_string(const char* format, ...);
 
+#endif /* UTILS_H */

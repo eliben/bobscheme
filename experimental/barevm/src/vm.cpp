@@ -47,6 +47,11 @@ public:
     virtual ~BobClosure()
     {}
 
+    virtual string repr() const
+    {
+        return format_string("<closure '%s'>", codeobject->name.c_str());
+    }
+
     BobCodeObject* codeobject;
     BobEnvironment* env;
 };
@@ -138,6 +143,7 @@ void BobVM::run(BobCodeObject* codeobj)
             {
                 assert(instr.arg < cur_codeobj->constants.size() && "Constants offset in bounds");
                 BobObject* val = cur_codeobj->constants[instr.arg];
+                cerr << "OP_CONST The repr of val on stack is " << val->repr() << endl;
                 d->m_valuestack.push(val);
                 break;
             }
@@ -215,6 +221,7 @@ void BobVM::run(BobCodeObject* codeobj)
                 //
                 assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
                 BobObject* func_val = d->m_valuestack.top();
+                d->m_valuestack.pop();
                 vector<BobObject*> argvalues;
 
                 // Take the function's arguments from the stack. The last
@@ -226,8 +233,6 @@ void BobVM::run(BobCodeObject* codeobj)
                     d->m_valuestack.pop();
                 }
                 reverse(argvalues.begin(), argvalues.end());
-
-                cerr << "***" << typeid(func_val).name() << endl;
 
                 if (BobBuiltinProcedure* proc = dynamic_cast<BobBuiltinProcedure*>(func_val)) {
                     BobObject* retval = proc->exec(argvalues);
@@ -345,6 +350,8 @@ BobEnvironment* VMImpl::create_global_env()
 BobObject* VMImpl::builtin_write(BuiltinArgs& args)
 {
     string output_str;
+
+    cerr << "write called with n args: " << args.size() << endl;
 
     for (BuiltinArgsIteratorConst i = args.begin(); i != args.end(); ++i) {
         output_str += (*i)->repr() + " ";

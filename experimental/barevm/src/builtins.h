@@ -8,6 +8,7 @@
 #define BUILTINS_H
 
 #include "bobobject.h"
+#include "utils.h"
 #include <string>
 #include <map>
 #include <vector>
@@ -59,6 +60,11 @@ public:
     virtual BobObject* exec(BuiltinArgs& args) const
     {
         return m_proc(args);
+    }
+
+    virtual std::string repr() const
+    {
+        return format_string("<builtin '%s'>", m_name.c_str());
     }
 private:
     std::string m_name;
