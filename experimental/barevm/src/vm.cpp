@@ -31,6 +31,11 @@ struct ExecutionFrame
     BobCodeObject* codeobject;
     unsigned pc;
     BobEnvironment* env;
+
+    string repr()
+    {
+        return format_string("Code: <%s> [PC=%d]", codeobject->name.c_str(), pc);
+    }
 };
 
 
@@ -77,10 +82,15 @@ struct VMImpl
 
     //---------------------------------------------------------------
 
-    BobEnvironment* create_global_env();
-
+    // Builtins with access to VM state
+    //
     BobObject* builtin_write(BuiltinArgs& args);
     BobObject* builtin_debug_vm(BuiltinArgs& args);
+
+    // Internal 
+    //
+    BobEnvironment* create_global_env();
+    string repr_vm_state();
 };
 
 
@@ -368,5 +378,30 @@ BobObject* VMImpl::builtin_debug_vm(BuiltinArgs& args)
     (void)args;
     fputs("** debug called\n", m_output_stream);
     return 0;
+}
+
+
+static string frame_printer(ExecutionFrame frame)
+{
+    return frame.repr();
+}
+
+
+static string value_printer(BobObject* value)
+{
+    return "| " + value->repr();
+}
+
+
+template <class T>
+static string repr_stack(stack<T> thestack, string name, string (*printer)(T))
+{
+    return "";
+}
+
+
+string VMImpl::repr_vm_state()
+{
+
 }
 

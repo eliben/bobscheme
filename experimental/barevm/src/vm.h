@@ -13,6 +13,8 @@
 #include <memory>
 
 
+// The exception raised by BobVM for execution errors.
+//
 struct VMError : public std::runtime_error
 {
     VMError(const std::string& reason)
@@ -23,6 +25,11 @@ struct VMError : public std::runtime_error
 
 struct VMImpl;
 
+// Implementation of the Bob VM.
+// Usage: create, then .run() with a code object.
+// The only side effect it produces currently is to print output to the given 
+// file. If output_file is "", prints to stdout. 
+// 
 class BobVM 
 {
 public:
