@@ -396,12 +396,36 @@ static string value_printer(BobObject* value)
 template <class T>
 static string repr_stack(stack<T> thestack, string name, string (*printer)(T))
 {
+    string head = string(8 + name.size(), '-');
+    string str = format_string("+%s+\n| %s stack |\n+%s+\n\n",
+                    head.c_str(), name.c_str(), head.c_str());
+
+    // Since we can't iterate a stack, it's copied into a vector and then 
+    // restored. Slow, bug performance doesn't really matter in this function.
+    //
+    vector<T> stackcontents;
+    bool tos = true;
+    while (!thestack.empty()) {
+        T item = thestack.top();
+
+        str += "     |--------\n";
+        str += tos ? "TOS:  " : "      ";
+        str += printer(item);
+
+        stackcontents.push_back(item);
+        thestack.pop();
+        tos = false;
+    }
+
+
     return "";
 }
 
 
 string VMImpl::repr_vm_state()
 {
+    string str = repr_stack(m_valuestack, "Value", value_printer);
+    return "";
 
 }
 
