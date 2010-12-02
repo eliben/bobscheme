@@ -160,9 +160,6 @@ static BobObject* zero_p(BuiltinArgs& args)
 }
 
 
-// This one gets a longer name to avoid clash with a STL functor named
-// logical_not
-//
 static BobObject* builtin_logical_not(BuiltinArgs& args)
 {
     verify_numargs(args, 1, "not");
@@ -172,25 +169,90 @@ static BobObject* builtin_logical_not(BuiltinArgs& args)
 }
 
 
+// The 'and' and 'or' builtins are conforming to the definition in R5RS,
+// section 4.2
+//
+static BobObject* builtin_logical_or(BuiltinArgs& args)
+{
+    if (args.size() < 1)
+        return new BobBoolean(false);
+    
+    for (BuiltinArgs::iterator arg = args.begin(); arg != args.end(); ++arg) {
+        BobBoolean* boolval = dynamic_cast<BobBoolean*>(*arg);
+        if (boolval && boolval->value())
+            return boolval;
+    }
+
+    return args[args.size() - 1];
+}
+
+
+static BobObject* builtin_logical_and(BuiltinArgs& args)
+{
+    if (args.size() < 1)
+        return new BobBoolean(true);
+    
+    for (BuiltinArgs::iterator arg = args.begin(); arg != args.end(); ++arg) {
+        BobBoolean* boolval = dynamic_cast<BobBoolean*>(*arg);
+        if (boolval && !boolval->value())
+            return boolval;
+    }
+
+    return args[args.size() - 1];
+}
+
+
+// A rough approximation of Scheme's eqv? that's good enough for most purposes.
+//
+static BobObject* eqv_p(BuiltinArgs& args)
+{
+    verify_numargs(args, 2, "eqv?");
+    BobObject* lhs = args[0];
+    BobObject* rhs = args[1];
+
+    if (dynamic_cast<BobPair*>(lhs) && dynamic_cast<BobPair*>(rhs))
+        return new BobBoolean(lhs == rhs); // pointer comparison
+    else
+        return new BobBoolean(objects_equal(args[0], args[1]));
+}
+
+
+static BobObject* builtin_add(BuiltinArgs& args)
+{
+    int result = 0;
+    for (BuiltinArgs::iterator arg = args.begin(); arg != args.end(); ++arg) {
+        BobNumber* argnum = dynamic_cast<BobNumber*>(*arg);
+        builtin_verify(argnum, "+ expects a numeric argument");
+        result = result + argnum->value();
+    }
+    return new BobNumber(result);
+}
+
+
 BuiltinsMap make_builtins_map()
 {
     BuiltinsMap builtins_map;
 
+    builtins_map["eq?"] = eqv_p;
+    builtins_map["eqv?"] = eqv_p;
     builtins_map["car"] = car;
-    builtins_map["set-car"] = set_car;
     builtins_map["cdr"] = cdr;
+    builtins_map["cadr"] = cadr;
+    builtins_map["caddr"] = caddr;
+    builtins_map["set-car"] = set_car;
     builtins_map["set-cdr"] = set_cdr;
+    builtins_map["cons"] = cons;
     builtins_map["not"] = builtin_logical_not;
+    builtins_map["or"] = builtin_logical_or;
+    builtins_map["and"] = builtin_logical_and;
     builtins_map["pair?"] = pair_p;
     builtins_map["number?"] = number_p;
     builtins_map["null?"] = null_p;
     builtins_map["boolean?"] = boolean_p;
     builtins_map["symbol?"] = symbol_p;
     builtins_map["zero?"] = zero_p;
-    builtins_map["cadr"] = cadr;
-    builtins_map["caddr"] = caddr;
-    builtins_map["cons"] = cons;
     builtins_map["list"] = builtin_list;
+    builtins_map["+"] = builtin_add;
 
     return builtins_map;
 }

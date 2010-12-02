@@ -153,7 +153,7 @@ void BobVM::run(BobCodeObject* codeobj)
             {
                 assert(instr.arg < cur_codeobj->constants.size() && "Constants offset in bounds");
                 BobObject* val = cur_codeobj->constants[instr.arg];
-                cerr << "OP_CONST The repr of val on stack is " << val->repr() << endl;
+                //cerr << "OP_CONST The repr of val on stack is " << val->repr() << endl;
                 d->m_valuestack.push(val);
                 break;
             }
@@ -371,7 +371,7 @@ BobObject* VMImpl::builtin_write(BuiltinArgs& args)
 {
     string output_str;
 
-    cerr << "write called with n args: " << args.size() << endl;
+    //cerr << "write called with n args: " << args.size() << endl;
 
     for (BuiltinArgsIteratorConst i = args.begin(); i != args.end(); ++i) {
         output_str += (*i)->repr() + " ";
