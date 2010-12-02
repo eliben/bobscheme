@@ -18,12 +18,20 @@ int main(int argc, const char* argv[])
 {
     (void)argc;
     string filename = argv[1];
-    BobCodeObject* bco = deserialize_bytecode(filename);
 
-    cerr << bco->repr() << endl;
+    try {
+        BobCodeObject* bco = deserialize_bytecode(filename);
+        cerr << bco->repr() << endl;
 
-    BobVM vm;
-    vm.run(bco);
+        BobVM vm;
+        vm.run(bco);
+    }
+    catch (const DeserializationError& err) {
+        cerr << "Deserialization ERROR: " << err.what() << endl;
+    }
+    catch (const VMError& err) {
+        cerr << "VM ERROR: " << err.what() << endl;
+    }
 
     
     return 0;

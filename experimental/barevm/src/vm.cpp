@@ -162,6 +162,8 @@ void BobVM::run(BobCodeObject* codeobj)
                 assert(instr.arg < cur_codeobj->varnames.size() && "Varnames offset in bounds");
                 string varname = cur_codeobj->varnames[instr.arg];
                 BobObject* val = d->m_frame.env->lookup_var(varname);
+                if (!val)
+                    throw VMError(format_string("Unknown variable '%s' referenced", varname.c_str()));
                 d->m_valuestack.push(val);
                 break;
             }
@@ -171,7 +173,10 @@ void BobVM::run(BobCodeObject* codeobj)
                 assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
                 BobObject* val = d->m_valuestack.top();
                 d->m_valuestack.pop();
-                d->m_frame.env->set_var_value(cur_codeobj->varnames[instr.arg], val);
+                string varname = cur_codeobj->varnames[instr.arg];
+                BobObject* retval = d->m_frame.env->set_var_value(varname, val);
+                if (!retval)
+                    throw VMError(format_string("Unknown variable '%s' referenced", varname.c_str()));
                 break;
             }
             case OP_DEFVAR:
@@ -245,8 +250,13 @@ void BobVM::run(BobCodeObject* codeobj)
                 reverse(argvalues.begin(), argvalues.end());
 
                 if (BobBuiltinProcedure* proc = dynamic_cast<BobBuiltinProcedure*>(func_val)) {
-                    BobObject* retval = proc->exec(argvalues);
-                    d->m_valuestack.push(retval);
+                    try {
+                        BobObject* retval = proc->exec(argvalues);
+                        d->m_valuestack.push(retval);
+                    }
+                    catch (const BuiltinError& err) {
+                        throw VMError(err.what());
+                    }
                 }
                 else if (BobClosure* closure = dynamic_cast<BobClosure*>(func_val)) {
                     // Extend the closure's environment with one where its code 
@@ -376,14 +386,15 @@ BobObject* VMImpl::builtin_write(BuiltinArgs& args)
 BobObject* VMImpl::builtin_debug_vm(BuiltinArgs& args)
 {
     (void)args;
-    fputs("** debug called\n", m_output_stream);
+    string str = repr_vm_state();
+    fputs(str.c_str(), m_output_stream);
     return 0;
 }
 
 
 static string frame_printer(ExecutionFrame frame)
 {
-    return frame.repr();
+    return "| " + frame.repr();
 }
 
 
@@ -400,32 +411,27 @@ static string repr_stack(stack<T> thestack, string name, string (*printer)(T))
     string str = format_string("+%s+\n| %s stack |\n+%s+\n\n",
                     head.c_str(), name.c_str(), head.c_str());
 
-    // Since we can't iterate a stack, it's copied into a vector and then 
-    // restored. Slow, bug performance doesn't really matter in this function.
+    // The stack is passed by value here (copied), so we're free to modify it.
     //
-    vector<T> stackcontents;
     bool tos = true;
     while (!thestack.empty()) {
-        T item = thestack.top();
-
         str += "     |--------\n";
-        str += tos ? "TOS:  " : "      ";
-        str += printer(item);
+        str += tos ? "TOS: " : "     ";
+        str += printer(thestack.top()) + "\n";
 
-        stackcontents.push_back(item);
         thestack.pop();
         tos = false;
     }
+    str += "     |--------\n";
 
-
-    return "";
+    return str;
 }
 
 
 string VMImpl::repr_vm_state()
 {
     string str = repr_stack(m_valuestack, "Value", value_printer);
-    return "";
-
+    str += "\n" + repr_stack(m_framestack, "Frame", frame_printer);
+    return str;
 }
 
