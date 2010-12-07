@@ -8,6 +8,8 @@
 #include "basicobjects.h"
 #include "utils.h"
 #include <cassert>
+#include <functional>
+#include <numeric>
 #include <iterator>
 
 using namespace std;
@@ -23,6 +25,16 @@ static inline void builtin_verify(bool condition, const string& message)
 static inline void verify_numargs(BuiltinArgs& args, size_t num, const string& name)
 {
     builtin_verify(args.size() == num, format_string("%s expects %u arguments", name.c_str(), num));
+}
+
+
+template <class T>
+static inline T* verify_argtype(BobObject* arg, string message)
+{
+    T* arg_t = dynamic_cast<T*>(arg);
+    if (!arg_t)
+        throw BuiltinError(message);
+    return arg_t;
 }
 
 
@@ -217,17 +229,60 @@ static BobObject* eqv_p(BuiltinArgs& args)
 }
 
 
-static BobObject* builtin_add(BuiltinArgs& args)
+// A generic arithmetic builtin that's parametrized by a binary operation
+// that must support being called as func(int, int) returning int, and
+// an initial value.
+//
+template <class ArithmeticFunction>
+static BobObject* builtin_arithmetic_generic(
+                        string name,
+                        BuiltinArgs& args, 
+                        ArithmeticFunction func)
 {
-    int result = 0;
-    for (BuiltinArgs::iterator arg = args.begin(); arg != args.end(); ++arg) {
+    builtin_verify(args.size() > 0, name + " expects arguments");
+    BobNumber* firstarg = dynamic_cast<BobNumber*>(*args.begin());
+    builtin_verify(firstarg, name + " expectes a numeric argument");
+    int result = firstarg->value();
+    for (BuiltinArgs::iterator arg = args.begin() + 1; arg != args.end(); ++arg) {
         BobNumber* argnum = dynamic_cast<BobNumber*>(*arg);
-        builtin_verify(argnum, "+ expects a numeric argument");
-        result = result + argnum->value();
+        builtin_verify(argnum, name + " expects a numeric argument");
+        result = func(result, argnum->value());
     }
     return new BobNumber(result);
 }
 
+
+static BobObject* builtin_add(BuiltinArgs& args)
+{
+    return builtin_arithmetic_generic("+", args, plus<int>());
+}
+
+
+static BobObject* builtin_sub(BuiltinArgs& args)
+{
+    return builtin_arithmetic_generic("-", args, minus<int>());
+}
+
+
+static BobObject* builtin_mul(BuiltinArgs& args)
+{
+    return builtin_arithmetic_generic("*", args, multiplies<int>());
+}
+
+
+static BobObject* builtin_quotient(BuiltinArgs& args)
+{
+    return builtin_arithmetic_generic("quotient", args, divides<int>());
+}
+
+
+static BobObject* builtin_modulo(BuiltinArgs& args)
+{
+    return builtin_arithmetic_generic("modulo", args, modulus<int>());
+}
+
+
+static BobObject* builtin_comparison_generic(
 
 BuiltinsMap make_builtins_map()
 {
@@ -242,9 +297,6 @@ BuiltinsMap make_builtins_map()
     builtins_map["set-car"] = set_car;
     builtins_map["set-cdr"] = set_cdr;
     builtins_map["cons"] = cons;
-    builtins_map["not"] = builtin_logical_not;
-    builtins_map["or"] = builtin_logical_or;
-    builtins_map["and"] = builtin_logical_and;
     builtins_map["pair?"] = pair_p;
     builtins_map["number?"] = number_p;
     builtins_map["null?"] = null_p;
@@ -253,6 +305,13 @@ BuiltinsMap make_builtins_map()
     builtins_map["zero?"] = zero_p;
     builtins_map["list"] = builtin_list;
     builtins_map["+"] = builtin_add;
+    builtins_map["-"] = builtin_sub;
+    builtins_map["*"] = builtin_mul;
+    builtins_map["quotient"] = builtin_quotient;
+    builtins_map["modulo"] = builtin_modulo;
+    builtins_map["not"] = builtin_logical_not;
+    builtins_map["or"] = builtin_logical_or;
+    builtins_map["and"] = builtin_logical_and;
 
     return builtins_map;
 }
