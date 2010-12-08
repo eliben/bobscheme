@@ -28,6 +28,9 @@ static inline void verify_numargs(BuiltinArgs& args, size_t num, const string& n
 }
 
 
+// Try to dynamically case arg to T* and return the cast pointer. On failure, 
+// throw BuiltinError with message as the error.
+//
 template <class T>
 static inline T* verify_argtype(BobObject* arg, string message)
 {
@@ -41,8 +44,7 @@ static inline T* verify_argtype(BobObject* arg, string message)
 static BobObject* car(BuiltinArgs& args)
 {
     verify_numargs(args, 1, "car");
-    BobPair* pair = dynamic_cast<BobPair*>(args[0]);
-    builtin_verify(pair, "car expects a pair");
+    BobPair* pair = verify_argtype<BobPair>(args[0], "car expects a pair");
     return pair->first();
 }
 
@@ -50,8 +52,7 @@ static BobObject* car(BuiltinArgs& args)
 static BobObject* cdr(BuiltinArgs& args)
 {
     verify_numargs(args, 1, "cdr");
-    BobPair* pair = dynamic_cast<BobPair*>(args[0]);
-    builtin_verify(pair, "cdr expects a pair");
+    BobPair* pair = verify_argtype<BobPair>(args[0], "cdr expects a pair");
     return pair->second();
 }
 
@@ -59,10 +60,8 @@ static BobObject* cdr(BuiltinArgs& args)
 static BobObject* cadr(BuiltinArgs& args)
 {
     verify_numargs(args, 1, "cadr");
-    BobPair* pair = dynamic_cast<BobPair*>(args[0]);
-    builtin_verify(pair, "cadr expects a pair");
-    BobPair* cdr_pair = dynamic_cast<BobPair*>(pair->second());
-    builtin_verify(cdr_pair, "cadr expects arg's cdr to be a pair");
+    BobPair* pair = verify_argtype<BobPair>(args[0], "cadr expects a pair");
+    BobPair* cdr_pair = verify_argtype<BobPair>(pair->second(), "cadr expects arg's cdr to be a pair");
     return cdr_pair->first();
 }
 
@@ -70,12 +69,9 @@ static BobObject* cadr(BuiltinArgs& args)
 static BobObject* caddr(BuiltinArgs& args)
 {
     verify_numargs(args, 1, "caddr");
-    BobPair* pair = dynamic_cast<BobPair*>(args[0]);
-    builtin_verify(pair, "caddr expects a pair");
-    BobPair* cdr_pair = dynamic_cast<BobPair*>(pair->second());
-    builtin_verify(cdr_pair, "caddr expects arg's cdr to be a pair");
-    BobPair* cddr_pair = dynamic_cast<BobPair*>(pair->second());
-    builtin_verify(cddr_pair, "caddr expects arg's cddr to be a pair");
+    BobPair* pair = verify_argtype<BobPair>(args[0], "caddr expects a pair");
+    BobPair* cdr_pair = verify_argtype<BobPair>(pair->second(), "caddr expects arg's cdr to be a pair");
+    BobPair* cddr_pair = verify_argtype<BobPair>(cdr_pair->second(), "caddr expects arg's cddr to be a pair");
     return cddr_pair->first();
 }
 
@@ -83,8 +79,7 @@ static BobObject* caddr(BuiltinArgs& args)
 static BobObject* set_car(BuiltinArgs& args)
 {
     verify_numargs(args, 2, "set-car");
-    BobPair* pair = dynamic_cast<BobPair*>(args[0]);
-    builtin_verify(pair, "set-car expects a pair as its first argument");
+    BobPair* pair = verify_argtype<BobPair>(args[0], "set-car expects a pair");
     pair->set_first(args[1]);
     return new BobNull();
 }
@@ -93,8 +88,7 @@ static BobObject* set_car(BuiltinArgs& args)
 static BobObject* set_cdr(BuiltinArgs& args)
 {
     verify_numargs(args, 2, "set-cdr");
-    BobPair* pair = dynamic_cast<BobPair*>(args[0]);
-    builtin_verify(pair, "set-cdr expects a pair as its first argument");
+    BobPair* pair = verify_argtype<BobPair>(args[0], "set-cdr expects a pair");
     pair->set_second(args[1]);
     return new BobNull();
 }
@@ -175,8 +169,7 @@ static BobObject* zero_p(BuiltinArgs& args)
 static BobObject* builtin_logical_not(BuiltinArgs& args)
 {
     verify_numargs(args, 1, "not");
-    BobBoolean* val = dynamic_cast<BobBoolean*>(args[0]);
-    builtin_verify(val, "not expects a boolean");
+    BobBoolean* val = verify_argtype<BobBoolean>(args[0], "not expects a boolean");
     return new BobBoolean(!val->value());
 }
 
@@ -239,13 +232,12 @@ static BobObject* builtin_arithmetic_generic(
                         BuiltinArgs& args, 
                         ArithmeticFunction func)
 {
+    string typeerrmsg = name + " expects a numeric argument";
     builtin_verify(args.size() > 0, name + " expects arguments");
-    BobNumber* firstarg = dynamic_cast<BobNumber*>(*args.begin());
-    builtin_verify(firstarg, name + " expectes a numeric argument");
+    BobNumber* firstarg = verify_argtype<BobNumber>(args[0], typeerrmsg);
     int result = firstarg->value();
     for (BuiltinArgs::iterator arg = args.begin() + 1; arg != args.end(); ++arg) {
-        BobNumber* argnum = dynamic_cast<BobNumber*>(*arg);
-        builtin_verify(argnum, name + " expects a numeric argument");
+        BobNumber* argnum = verify_argtype<BobNumber>(*arg, typeerrmsg);
         result = func(result, argnum->value());
     }
     return new BobNumber(result);
@@ -282,7 +274,7 @@ static BobObject* builtin_modulo(BuiltinArgs& args)
 }
 
 
-static BobObject* builtin_comparison_generic(
+//static BobObject* builtin_comparison_generic(
 
 BuiltinsMap make_builtins_map()
 {
