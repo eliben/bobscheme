@@ -223,8 +223,7 @@ static BobObject* eqv_p(BuiltinArgs& args)
 
 
 // A generic arithmetic builtin that's parametrized by a binary operation
-// that must support being called as func(int, int) returning int, and
-// an initial value.
+// that must support being called as func(int, int) returning int.
 //
 template <class ArithmeticFunction>
 static BobObject* builtin_arithmetic_generic(
@@ -274,7 +273,58 @@ static BobObject* builtin_modulo(BuiltinArgs& args)
 }
 
 
-//static BobObject* builtin_comparison_generic(
+// A generic comparison builtin that's parametrized by a binary operation
+// that must support being called as func(int, int) returning bool.
+//
+template <class ComparisonFunction>
+static BobObject* builtin_comparison_generic(
+                        string name,
+                        BuiltinArgs& args,
+                        ComparisonFunction func)
+{
+    string typeerrmsg = name + " expectes a numeric argument";
+    builtin_verify(args.size() > 0, name + " expects arguments");
+    BobNumber* a = verify_argtype<BobNumber>(args[0], typeerrmsg);
+    for (BuiltinArgs::iterator arg = args.begin() + 1; arg != args.end(); ++arg) {
+        BobNumber* b = verify_argtype<BobNumber>(*arg, typeerrmsg);
+        if (func(a->value(), b->value()))
+            a = b;
+        else
+            return new BobBoolean(false);
+    }
+    return new BobBoolean(true);
+}
+
+
+static BobObject* builtin_equal_to(BuiltinArgs& args)
+{
+    return builtin_comparison_generic("=", args, equal_to<int>());
+}
+
+
+static BobObject* builtin_greater_equal(BuiltinArgs& args)
+{
+    return builtin_comparison_generic(">=", args, greater_equal<int>());
+}
+
+
+static BobObject* builtin_less_equal(BuiltinArgs& args)
+{
+    return builtin_comparison_generic("<=", args, less_equal<int>());
+}
+
+
+static BobObject* builtin_greater(BuiltinArgs& args)
+{
+    return builtin_comparison_generic(">", args, greater<int>());
+}
+
+
+static BobObject* builtin_less(BuiltinArgs& args)
+{
+    return builtin_comparison_generic("<", args, less<int>());
+}
+
 
 BuiltinsMap make_builtins_map()
 {
@@ -304,6 +354,11 @@ BuiltinsMap make_builtins_map()
     builtins_map["not"] = builtin_logical_not;
     builtins_map["or"] = builtin_logical_or;
     builtins_map["and"] = builtin_logical_and;
+    builtins_map["="] = builtin_equal_to;
+    builtins_map[">="] = builtin_greater_equal;
+    builtins_map["<="] = builtin_less_equal;
+    builtins_map[">"] = builtin_greater;
+    builtins_map["<"] = builtin_less;
 
     return builtins_map;
 }
