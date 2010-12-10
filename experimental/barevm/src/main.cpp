@@ -21,8 +21,6 @@ int main(int argc, const char* argv[])
 
     try {
         BobCodeObject* bco = deserialize_bytecode(filename);
-        cerr << bco->repr() << endl;
-
         BobVM vm;
         vm.run(bco);
     }

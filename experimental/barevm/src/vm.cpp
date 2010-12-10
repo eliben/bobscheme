@@ -371,10 +371,11 @@ BobObject* VMImpl::builtin_write(BuiltinArgs& args)
 {
     string output_str;
 
-    //cerr << "write called with n args: " << args.size() << endl;
-
     for (BuiltinArgsIteratorConst i = args.begin(); i != args.end(); ++i) {
-        output_str += (*i)->repr() + " ";
+        output_str += (*i)->repr();
+
+        if (i != args.end() - 1)
+            output_str += " ";
     }
     output_str += "\n";
     fputs(output_str.c_str(), m_output_stream);

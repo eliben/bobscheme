@@ -41,7 +41,7 @@ bool BobBoolean::equals_to(const BobObject& other) const
 
 string BobBoolean::repr() const
 {
-    return m_value ? "true" : "false";
+    return m_value ? "#t" : "#f";
 }
 
 

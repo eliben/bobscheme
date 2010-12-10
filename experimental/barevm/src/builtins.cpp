@@ -336,8 +336,8 @@ BuiltinsMap make_builtins_map()
     builtins_map["cdr"] = cdr;
     builtins_map["cadr"] = cadr;
     builtins_map["caddr"] = caddr;
-    builtins_map["set-car"] = set_car;
-    builtins_map["set-cdr"] = set_cdr;
+    builtins_map["set-car!"] = set_car;
+    builtins_map["set-cdr!"] = set_cdr;
     builtins_map["cons"] = cons;
     builtins_map["pair?"] = pair_p;
     builtins_map["number?"] = number_p;
