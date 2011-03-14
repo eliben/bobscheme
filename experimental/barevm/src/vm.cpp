@@ -91,8 +91,9 @@ struct VMImpl
 
     // Builtins with access to VM state
     //
-    BobObject* builtin_write(BuiltinArgs& args);
-    BobObject* builtin_debug_vm(BuiltinArgs& args);
+    BobObject* builtin_write(BuiltinArgs&);
+    BobObject* builtin_debug_vm(BuiltinArgs&);
+    BobObject* builtin_debug_gc(BuiltinArgs&);
 
     // Internal 
     //
@@ -369,6 +370,8 @@ BobEnvironment* VMImpl::create_global_env()
             new BobVMBuiltinProcedure("write", *this, &VMImpl::builtin_write));
     env->define_var("debug-vm", 
             new BobVMBuiltinProcedure("debug-vm", *this, &VMImpl::builtin_debug_vm));
+    env->define_var("debug-gc",
+            new BobVMBuiltinProcedure("debug-gc", *this, &VMImpl::builtin_debug_gc));
 
     return env;
 }
@@ -391,9 +394,8 @@ BobObject* VMImpl::builtin_write(BuiltinArgs& args)
 }
 
 
-BobObject* VMImpl::builtin_debug_vm(BuiltinArgs& args)
+BobObject* VMImpl::builtin_debug_vm(BuiltinArgs&)
 {
-    (void)args;
     string str = repr_vm_state();
     fputs(str.c_str(), m_output_stream);
     return 0;
@@ -441,5 +443,26 @@ string VMImpl::repr_vm_state()
     string str = repr_stack(m_valuestack, "Value", value_printer);
     str += "\n" + repr_stack(m_framestack, "Frame", frame_printer);
     return str;
+}
+
+
+// Print debugging information about the allocator/garbage collector.
+// If an argument is given and it's #t, print all live objects.
+//
+BobObject* VMImpl::builtin_debug_gc(BuiltinArgs& args)
+{
+    string str = BobAllocator::get().stats_general();
+    fputs(str.c_str(), m_output_stream);
+
+    if (args.size() > 0) {
+        if (BobBoolean* boolean = dynamic_cast<BobBoolean*>(args[0])) {
+            if (boolean->value() == true) {
+                str = BobAllocator::get().stats_all_live();
+                fputs("---- Live objects ----\n", m_output_stream);
+                fputs(str.c_str(), m_output_stream);
+            }
+        }
+    }
+    return 0;
 }
 

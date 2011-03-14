@@ -4,7 +4,7 @@
 
 TEST(BasicObjectsRepr, Boolean) {
     BobObject* bobbool = new BobBoolean(true);
-    EXPECT_EQ("true", bobbool->repr());
+    EXPECT_EQ("#t", bobbool->repr());
 }
 
 

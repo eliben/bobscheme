@@ -7,13 +7,10 @@
 # This code is in the public domain
 #-------------------------------------------------------------------------------
 import sys, os
-from subprocess import Popen, PIPE
-import tempfile
 from utils import vm_compiler_runner, interpreter_runner, make_barevm_runner
 
 sys.path.insert(0, '../..')
-from bob.utils import Timer
-
+from bob.utils import Timer 
 barevm_path = "../barevm/barevm.exe"
 
 

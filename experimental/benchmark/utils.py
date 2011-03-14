@@ -1,3 +1,11 @@
+#-------------------------------------------------------------------------------
+# bob: benchmark/utils.py
+#
+# Common utilities for benchmarking in Bob
+#
+# Eli Bendersky (eliben@gmail.com)
+# This code is in the public domain
+#-------------------------------------------------------------------------------
 import sys, os
 from subprocess import Popen, PIPE
 import tempfile

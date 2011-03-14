@@ -8,8 +8,7 @@
 #define BOBALLOCATOR_H
 
 #include <cstdlib>
-
-using std::size_t;
+#include <string>
 
 
 class BobAllocator 
@@ -20,8 +19,11 @@ public:
         return the_allocator;
     }
 
-    void* allocate_object(size_t sz);
+    void* allocate_object(std::size_t sz);
     void release_object(void* p);
+
+    std::string stats_general() const;
+    std::string stats_all_live() const;
 
 private:
     static BobAllocator the_allocator;

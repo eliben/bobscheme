@@ -6,6 +6,7 @@
 //*****************************************************************************
 #include "boballocator.h"
 #include "bobobject.h"
+#include "utils.h"
 #include <list>
 
 using namespace std;
@@ -50,6 +51,25 @@ void* BobAllocator::allocate_object(size_t sz)
 void BobAllocator::release_object(void* p)
 {
     ::operator delete(p);
+}
+
+
+string BobAllocator::stats_general() const
+{
+    string s = format_string("Number of live objects: %u\n", d->live_objects.size());
+    s += format_string("Total allocation size: %u\n", d->total_alloc_size);
+    return s;
+}
+
+
+string BobAllocator::stats_all_live() const
+{
+    string s;
+    for (list<BobObject*>::const_iterator it = d->live_objects.begin(); 
+            it != d->live_objects.end(); ++it) {
+        s += (*it)->repr() + "\n";
+    }
+    return s;
 }
 
 
