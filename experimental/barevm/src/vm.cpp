@@ -368,9 +368,9 @@ BobEnvironment* VMImpl::create_global_env()
     //
     env->define_var("write", 
             new BobVMBuiltinProcedure("write", *this, &VMImpl::builtin_write));
-    env->define_var("debug-vm", 
+    env->define_var("__debug-vm", 
             new BobVMBuiltinProcedure("debug-vm", *this, &VMImpl::builtin_debug_vm));
-    env->define_var("debug-gc",
+    env->define_var("__debug-gc",
             new BobVMBuiltinProcedure("debug-gc", *this, &VMImpl::builtin_debug_gc));
 
     return env;

@@ -41,13 +41,18 @@ public:
     //
     virtual void gc_mark()
     {
-        m_gc_occupied = true;
+        m_gc_marked = true;
         gc_mark_pointed();
     }
 
     virtual void gc_clear() 
     {
-        m_gc_occupied = false;
+        m_gc_marked = false;
+    }
+
+    virtual bool is_gc_marked() const
+    {
+        return m_gc_marked;
     }
 
     // The default implementation does nothing here, to simplify the trivial
@@ -57,7 +62,8 @@ public:
     {
     }
 
-    bool m_gc_occupied;
+protected:
+    bool m_gc_marked;
 };
 
 

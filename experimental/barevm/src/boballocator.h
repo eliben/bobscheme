@@ -22,6 +22,12 @@ public:
     void* allocate_object(std::size_t sz);
     void release_object(void* p);
 
+    // Run the garbage collector
+    //
+    void run_gc();
+
+    // Return various statistics as a string for debugging
+    //
     std::string stats_general() const;
     std::string stats_all_live() const;
 

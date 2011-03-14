@@ -13,7 +13,7 @@ using namespace std;
 
 
 BobObject::BobObject()
-    : m_gc_occupied(false)
+    : m_gc_marked(false)
 {
 }
 

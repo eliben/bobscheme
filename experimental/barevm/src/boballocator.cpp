@@ -73,3 +73,14 @@ string BobAllocator::stats_all_live() const
 }
 
 
+void BobAllocator::run_gc()
+{
+    // Mark each object found in the roots. Marking as implemented by
+    // BobObjectis subclasses is recursive.
+    // Go over all the live objects:
+    //   * Marked objects are used and thus have to keep living. Clear their
+    //     mark flag.
+    //   * Unmarked objects aren't used and can be deleted.
+}
+
+
