@@ -15,6 +15,7 @@
 class BobObject 
 {
 public:
+    BobObject();
     virtual ~BobObject() = 0;
 
     virtual std::string repr() const
@@ -32,6 +33,31 @@ public:
         (void)other;
         return false;
     }
+
+    void* operator new(size_t sz);
+    void operator delete(void* p);
+
+    // Garbage collection code.
+    //
+    virtual void gc_mark()
+    {
+        m_gc_occupied = true;
+        gc_mark_pointed();
+    }
+
+    virtual void gc_clear() 
+    {
+        m_gc_occupied = false;
+    }
+
+    // The default implementation does nothing here, to simplify the trivial
+    // objects that hold no pointers to other objects
+    //
+    virtual void gc_mark_pointed()
+    {
+    }
+
+    bool m_gc_occupied;
 };
 
 

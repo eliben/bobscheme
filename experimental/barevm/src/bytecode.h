@@ -57,6 +57,8 @@ public:
     std::vector<std::string> varnames;
     std::vector<BobObject*> constants;
     std::vector<BobInstruction> code;
+
+    virtual void gc_mark_pointed();
 };
 
 #endif /* BYTECODE_H */

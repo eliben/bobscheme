@@ -105,3 +105,11 @@ string BobCodeObject::repr() const
     return repr_nested(this, 0);
 }
 
+
+void BobCodeObject::gc_mark_pointed()
+{
+    for (vector<BobObject*>::iterator it = constants.begin(); it != constants.end(); ++it)
+        (*it)->gc_mark();
+}
+
+

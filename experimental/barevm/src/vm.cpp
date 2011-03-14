@@ -10,6 +10,7 @@
 #include "environment.h"
 #include "builtins.h"
 #include "basicobjects.h"
+#include "boballocator.h"
 #include <stack>
 #include <algorithm>
 #include <cstdio>
@@ -59,6 +60,12 @@ public:
 
     BobCodeObject* codeobject;
     BobEnvironment* env;
+
+    virtual void gc_mark_pointed()
+    {
+        codeobject->gc_mark();
+        env->gc_mark();
+    }
 };
 
 

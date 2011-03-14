@@ -35,4 +35,12 @@ BobObject* BobEnvironment::set_var_value(const string& name, BobObject* value)
         return value;
     }
 }
+ 
+
+void BobEnvironment::gc_mark_pointed()
+{
+    for (Binding::iterator it = m_binding.begin(); it != m_binding.end(); ++it)
+        it->second->gc_mark();
+}
+
 

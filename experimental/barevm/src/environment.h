@@ -49,6 +49,8 @@ public:
 
     virtual ~BobEnvironment()
     {}
+
+    virtual void gc_mark_pointed();
 private:
     BobEnvironment* m_parent;
     typedef std::map<std::string, BobObject*> Binding;
