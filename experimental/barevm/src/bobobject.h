@@ -9,6 +9,7 @@
 
 #include <string>
 #include <list>
+#include <vector>
 
 
 // Abstract base class for all objects managed by the Bob VM. 
@@ -72,6 +73,9 @@ protected:
 };
 
 
+class BobVM;
+
+
 class BobAllocator 
 {
 public:
@@ -87,6 +91,8 @@ public:
     //
     void run_gc();
 
+    void register_vm_obj(BobVM* vm_obj);
+
     // Return various statistics as a string for debugging
     //
     std::string stats_general() const;
@@ -95,20 +101,14 @@ public:
 private:
     static BobAllocator the_allocator;
 
-    BobAllocator()
-        : total_alloc_size(0)
-    {
-    }
-
-    ~BobAllocator()
-    {
-    }
+    BobAllocator();
+    ~BobAllocator();
 
     BobAllocator(const BobAllocator&);
     BobAllocator& operator=(const BobAllocator&);
 
-    std::list<BobObject*> live_objects;
-    std::size_t total_alloc_size;
+    struct Impl;
+    BobAllocator::Impl* d;
 };
 
 

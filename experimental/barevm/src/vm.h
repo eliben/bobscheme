@@ -10,7 +10,6 @@
 #include "bytecode.h"
 #include <string>
 #include <stdexcept>
-#include <memory>
 
 
 // The exception raised by BobVM for execution errors.
@@ -38,10 +37,16 @@ public:
 
     void run(BobCodeObject* codeobj);
 private:
+    friend class BobAllocator;
     BobVM(const BobVM&);
     BobVM& operator=(const BobVM&);
 
-    std::auto_ptr<VMImpl> d;
+    // Run gc_mark on all root objects the VM holds on to. This method 
+    // is called by the garbage collector.
+    //
+    void run_gc_mark_roots();
+
+    VMImpl* d;
 };
 
 

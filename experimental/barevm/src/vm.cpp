@@ -11,6 +11,7 @@
 #include "builtins.h"
 #include "basicobjects.h"
 #include <stack>
+#include <deque>
 #include <algorithm>
 #include <cstdio>
 #include <stack>
@@ -76,11 +77,11 @@ struct VMImpl
 
     // Explicit stack for execution frames to implement procedure calls.
     //
-    stack<ExecutionFrame> m_framestack;
+    deque<ExecutionFrame> m_framestack;
 
     // Stack for everything else
     //
-    stack<BobObject*> m_valuestack;
+    deque<BobObject*> m_valuestack;
 
     // The current execution frame
     //
@@ -98,6 +99,8 @@ struct VMImpl
     //
     BobEnvironment* create_global_env();
     string repr_vm_state();
+
+    void get_root_objects(vector<BobObject*>& roots);
 };
 
 
@@ -123,6 +126,7 @@ BobVM::~BobVM()
 {
     if (d->m_output_stream != stdout)
         fclose(d->m_output_stream);
+    delete d;
 }
 
 
@@ -161,7 +165,7 @@ void BobVM::run(BobCodeObject* codeobj)
                 assert(instr.arg < cur_codeobj->constants.size() && "Constants offset in bounds");
                 BobObject* val = cur_codeobj->constants[instr.arg];
                 //cerr << "OP_CONST The repr of val on stack is " << val->repr() << endl;
-                d->m_valuestack.push(val);
+                d->m_valuestack.push_back(val);
                 break;
             }
             case OP_LOADVAR:
@@ -171,15 +175,15 @@ void BobVM::run(BobCodeObject* codeobj)
                 BobObject* val = d->m_frame.env->lookup_var(varname);
                 if (!val)
                     throw VMError(format_string("Unknown variable '%s' referenced", varname.c_str()));
-                d->m_valuestack.push(val);
+                d->m_valuestack.push_back(val);
                 break;
             }
             case OP_STOREVAR:
             {
                 assert(instr.arg < cur_codeobj->varnames.size() && "Varnames offset in bounds");
                 assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
-                BobObject* val = d->m_valuestack.top();
-                d->m_valuestack.pop();
+                BobObject* val = d->m_valuestack.back();
+                d->m_valuestack.pop_back();
                 string varname = cur_codeobj->varnames[instr.arg];
                 BobObject* retval = d->m_frame.env->set_var_value(varname, val);
                 if (!retval)
@@ -190,8 +194,8 @@ void BobVM::run(BobCodeObject* codeobj)
             {
                 assert(instr.arg < cur_codeobj->varnames.size() && "Varnames offset in bounds");
                 assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
-                BobObject* val = d->m_valuestack.top();
-                d->m_valuestack.pop();
+                BobObject* val = d->m_valuestack.back();
+                d->m_valuestack.pop_back();
                 d->m_frame.env->define_var(cur_codeobj->varnames[instr.arg], val);
                 break;
             }
@@ -201,7 +205,7 @@ void BobVM::run(BobCodeObject* codeobj)
                 // when there's nothing to pop.
                 //
                 if (!d->m_valuestack.empty())
-                    d->m_valuestack.pop();
+                    d->m_valuestack.pop_back();
                 break;
             }
             case OP_JUMP:
@@ -212,8 +216,8 @@ void BobVM::run(BobCodeObject* codeobj)
             case OP_FJUMP:
             {
                 assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
-                BobBoolean* bool_predicate = dynamic_cast<BobBoolean*>(d->m_valuestack.top());
-                d->m_valuestack.pop();
+                BobBoolean* bool_predicate = dynamic_cast<BobBoolean*>(d->m_valuestack.back());
+                d->m_valuestack.pop_back();
                 if (bool_predicate && !bool_predicate->value())
                     d->m_frame.pc = instr.arg;
                 break;
@@ -224,14 +228,14 @@ void BobVM::run(BobCodeObject* codeobj)
                 BobObject* val = cur_codeobj->constants[instr.arg];
                 BobCodeObject* func_codeobj = dynamic_cast<BobCodeObject*>(val);
                 assert(val && "Expected code object as the argument to OP_FUNCTION");
-                d->m_valuestack.push(new BobClosure(func_codeobj, d->m_frame.env));
+                d->m_valuestack.push_back(new BobClosure(func_codeobj, d->m_frame.env));
                 break;
             }
             case OP_RETURN:
             {
                 assert(!d->m_framestack.empty() && "OP_RETURN needs non-empty frame stack");
-                d->m_frame = d->m_framestack.top();
-                d->m_framestack.pop();
+                d->m_frame = d->m_framestack.back();
+                d->m_framestack.pop_back();
                 break;
             }
             case OP_CALL:
@@ -242,8 +246,8 @@ void BobVM::run(BobCodeObject* codeobj)
                 // The function is either a builtin procedure or a closure.
                 //
                 assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
-                BobObject* func_val = d->m_valuestack.top();
-                d->m_valuestack.pop();
+                BobObject* func_val = d->m_valuestack.back();
+                d->m_valuestack.pop_back();
                 vector<BobObject*> argvalues;
 
                 // Take the function's arguments from the stack. The last
@@ -251,15 +255,15 @@ void BobVM::run(BobCodeObject* codeobj)
                 //
                 for (unsigned i = 0; i < instr.arg; ++i) {
                     assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
-                    argvalues.push_back(d->m_valuestack.top());
-                    d->m_valuestack.pop();
+                    argvalues.push_back(d->m_valuestack.back());
+                    d->m_valuestack.pop_back();
                 }
                 reverse(argvalues.begin(), argvalues.end());
 
                 if (BobBuiltinProcedure* proc = dynamic_cast<BobBuiltinProcedure*>(func_val)) {
                     try {
                         BobObject* retval = proc->exec(argvalues);
-                        d->m_valuestack.push(retval);
+                        d->m_valuestack.push_back(retval);
                     }
                     catch (const BuiltinError& err) {
                         throw VMError(err.what());
@@ -292,7 +296,7 @@ void BobVM::run(BobCodeObject* codeobj)
                     //    will then execute in the next iteration of this 
                     //    loop.
                     //
-                    d->m_framestack.push(d->m_frame);
+                    d->m_framestack.push_back(d->m_frame);
                     ExecutionFrame new_frame;
                     new_frame.codeobject = closure->codeobject;
                     new_frame.pc = 0;
@@ -308,6 +312,15 @@ void BobVM::run(BobCodeObject* codeobj)
                 throw VMError(format_string("Invalid instruction opcode 0x%02X", instr.opcode));
         }
     }
+}
+
+
+void BobVM::run_gc_mark_roots()
+{
+    d->m_frame.codeobject->gc_mark();
+    d->m_frame.env->gc_mark();
+
+    //stack<BobObject*>::iterator it = d->m_valuestack.begin();
 }
 
 
@@ -414,7 +427,7 @@ static string value_printer(BobObject* value)
 
 
 template <class T>
-static string repr_stack(stack<T> thestack, string name, string (*printer)(T))
+static string repr_stack(deque<T> thestack, string name, string (*printer)(T))
 {
     string head = string(8 + name.size(), '-');
     string str = format_string("+%s+\n| %s stack |\n+%s+\n\n",
@@ -426,9 +439,9 @@ static string repr_stack(stack<T> thestack, string name, string (*printer)(T))
     while (!thestack.empty()) {
         str += "     |--------\n";
         str += tos ? "TOS: " : "     ";
-        str += printer(thestack.top()) + "\n";
+        str += printer(thestack.back()) + "\n";
 
-        thestack.pop();
+        thestack.pop_back();
         tos = false;
     }
     str += "     |--------\n";

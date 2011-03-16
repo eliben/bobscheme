@@ -6,6 +6,7 @@
 //*****************************************************************************
 #include "bobobject.h"
 #include "utils.h"
+#include "vm.h"
 #include <typeinfo>
 #include <cstdlib>
 
@@ -46,14 +47,39 @@ void BobObject::operator delete(void* p)
 }
 
 
+// Singleton object definition
+//
 BobAllocator BobAllocator::the_allocator;
+
+
+// The implementation details of the allocator
+//
+struct BobAllocator::Impl 
+{
+    list<BobObject*> live_objects;
+    size_t total_alloc_size;
+
+    BobVM* vm_obj;
+};
+
+
+BobAllocator::BobAllocator()
+    : d(new BobAllocator::Impl)
+{
+}
+
+
+BobAllocator::~BobAllocator()
+{
+    delete d;
+}
 
 
 void* BobAllocator::allocate_object(size_t sz)
 {
     void* mem = ::operator new(sz);
-    live_objects.push_back(static_cast<BobObject*>(mem));
-    total_alloc_size += sz;
+    d->live_objects.push_back(static_cast<BobObject*>(mem));
+    d->total_alloc_size += sz;
     return mem;
 }
 
@@ -64,10 +90,16 @@ void BobAllocator::release_object(void* p)
 }
 
 
+void BobAllocator::register_vm_obj(BobVM* vm_obj)
+{
+    d->vm_obj = vm_obj;
+}
+
+
 string BobAllocator::stats_general() const
 {
-    string s = format_string("Number of live objects: %u\n", live_objects.size());
-    s += format_string("Total allocation size: %u\n", total_alloc_size);
+    string s = format_string("Number of live objects: %u\n", d->live_objects.size());
+    s += format_string("Total allocation size: %u\n", d->total_alloc_size);
     return s;
 }
 
@@ -75,8 +107,8 @@ string BobAllocator::stats_general() const
 string BobAllocator::stats_all_live() const
 {
     string s;
-    for (list<BobObject*>::const_iterator it = live_objects.begin(); 
-            it != live_objects.end(); ++it) {
+    for (list<BobObject*>::const_iterator it = d->live_objects.begin(); 
+            it != d->live_objects.end(); ++it) {
         s += (*it)->repr() + "\n";
     }
     return s;
@@ -91,4 +123,6 @@ void BobAllocator::run_gc()
     //   * Marked objects are used and thus have to keep living. Clear their
     //     mark flag.
     //   * Unmarked objects aren't used and can be deleted.
+    d->vm_obj->run_gc_mark_roots();
 }
+
