@@ -5,6 +5,7 @@
 // This code is in the public domain
 //*****************************************************************************
 #include "bobobject.h"
+#include "builtins.h"
 #include "utils.h"
 #include "vm.h"
 #include <typeinfo>
@@ -109,7 +110,9 @@ string BobAllocator::stats_all_live() const
     string s;
     for (list<BobObject*>::const_iterator it = d->live_objects.begin(); 
             it != d->live_objects.end(); ++it) {
-        s += (*it)->repr() + "\n";
+        BobObject* obj = *it;
+        if (dynamic_cast<BobBuiltinProcedure*>(obj) == 0)
+            s += string(typeid(*obj).name()) + " " + obj->repr() + "\n";
     }
     return s;
 }
