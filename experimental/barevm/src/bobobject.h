@@ -8,9 +8,14 @@
 #define BOBOBJECT_H
 
 #include <string>
+#include <list>
 
 
-// Abstract base class for all objects managed by the Bob VM
+// Abstract base class for all objects managed by the Bob VM. 
+// 
+// Objects deriving from BobObject are automatically garbage-collected. 
+// Therefore, you should only allocate them dynamically with new, and
+// never, *ever* explicitly delete them.
 //
 class BobObject 
 {
@@ -64,6 +69,46 @@ public:
 
 protected:
     bool m_gc_marked;
+};
+
+
+class BobAllocator 
+{
+public:
+    static BobAllocator& get()
+    {
+        return the_allocator;
+    }
+
+    void* allocate_object(std::size_t sz);
+    void release_object(void* p);
+
+    // Run the garbage collector
+    //
+    void run_gc();
+
+    // Return various statistics as a string for debugging
+    //
+    std::string stats_general() const;
+    std::string stats_all_live() const;
+
+private:
+    static BobAllocator the_allocator;
+
+    BobAllocator()
+        : total_alloc_size(0)
+    {
+    }
+
+    ~BobAllocator()
+    {
+    }
+
+    BobAllocator(const BobAllocator&);
+    BobAllocator& operator=(const BobAllocator&);
+
+    std::list<BobObject*> live_objects;
+    std::size_t total_alloc_size;
 };
 
 
