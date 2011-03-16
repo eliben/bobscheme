@@ -14,7 +14,6 @@
 #include <deque>
 #include <algorithm>
 #include <cstdio>
-#include <stack>
 #include <cassert>
 #include <iostream>
 #include <typeinfo>
@@ -76,6 +75,9 @@ struct VMImpl
     FILE* m_output_stream;
 
     // Explicit stack for execution frames to implement procedure calls.
+    // deque<> is used for the stacks and not stack<> because stack<> doesn't
+    // allow iteration over it, so it sucks. deque<> easily makes a stack
+    // with push_back / pop_back / back.
     //
     deque<ExecutionFrame> m_framestack;
 
@@ -317,10 +319,22 @@ void BobVM::run(BobCodeObject* codeobj)
 
 void BobVM::run_gc_mark_roots()
 {
+    // current frame
     d->m_frame.codeobject->gc_mark();
     d->m_frame.env->gc_mark();
 
-    //stack<BobObject*>::iterator it = d->m_valuestack.begin();
+    // all objects in the value stack
+    for (deque<BobObject*>::iterator it = d->m_valuestack.begin(); 
+            it != d->m_valuestack.end(); ++it) {
+        (*it)->gc_mark();
+    }
+
+    // all frames in the frame stack
+    for (deque<ExecutionFrame>::iterator it = d->m_framestack.begin();
+            it != d->m_framestack.end(); ++it) {
+        it->codeobject->gc_mark();
+        it->env->gc_mark();
+    }
 }
 
 
@@ -427,21 +441,19 @@ static string value_printer(BobObject* value)
 
 
 template <class T>
-static string repr_stack(deque<T> thestack, string name, string (*printer)(T))
+static string repr_stack(deque<T>& thestack, string name, string (*printer)(T))
 {
     string head = string(8 + name.size(), '-');
     string str = format_string("+%s+\n| %s stack |\n+%s+\n\n",
                     head.c_str(), name.c_str(), head.c_str());
 
-    // The stack is passed by value here (copied), so we're free to modify it.
-    //
     bool tos = true;
-    while (!thestack.empty()) {
+    for (typename deque<T>::reverse_iterator rit = thestack.rbegin();
+            rit != thestack.rend(); ++rit) {
         str += "     |--------\n";
         str += tos ? "TOS: " : "     ";
-        str += printer(thestack.back()) + "\n";
+        str += printer(*rit) + "\n";
 
-        thestack.pop_back();
         tos = false;
     }
     str += "     |--------\n";

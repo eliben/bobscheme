@@ -41,7 +41,7 @@ private:
     BobVM(const BobVM&);
     BobVM& operator=(const BobVM&);
 
-    // Run gc_mark on all root objects the VM holds on to. This method 
+    // Run gc_mark on all root objects the VM holds. This method 
     // is called by the garbage collector.
     //
     void run_gc_mark_roots();
