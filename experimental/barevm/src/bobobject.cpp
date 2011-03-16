@@ -124,5 +124,18 @@ void BobAllocator::run_gc()
     //     mark flag.
     //   * Unmarked objects aren't used and can be deleted.
     d->vm_obj->run_gc_mark_roots();
+
+    list<BobObject*>::iterator it = d->live_objects.begin();
+    while (it != d->live_objects.end()) {
+        BobObject* obj = *it;
+        if (obj->is_gc_marked()) {
+            obj->gc_clear();
+            ++it;
+        }
+        else {
+            it = d->live_objects.erase(it);
+            delete obj; // garbage!!
+        }
+    }
 }
 

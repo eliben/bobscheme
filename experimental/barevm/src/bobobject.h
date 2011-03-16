@@ -47,8 +47,10 @@ public:
     //
     virtual void gc_mark()
     {
-        m_gc_marked = true;
-        gc_mark_pointed();
+        if (!m_gc_marked) {
+            m_gc_marked = true;
+            gc_mark_pointed();
+        }
     }
 
     virtual void gc_clear() 

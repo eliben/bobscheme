@@ -95,6 +95,7 @@ struct VMImpl
     //
     BobObject* builtin_write(BuiltinArgs&);
     BobObject* builtin_debug_vm(BuiltinArgs&);
+    BobObject* builtin_run_gc(BuiltinArgs&);
     BobObject* builtin_debug_gc(BuiltinArgs&);
 
     // Internal 
@@ -121,6 +122,8 @@ BobVM::BobVM(const string& output_file)
     d->m_frame.codeobject = 0;
     d->m_frame.pc = 0;
     d->m_frame.env = d->create_global_env();
+
+    BobAllocator::get().register_vm_obj(this);
 }
 
 
@@ -395,9 +398,11 @@ BobEnvironment* VMImpl::create_global_env()
     env->define_var("write", 
             new BobVMBuiltinProcedure("write", *this, &VMImpl::builtin_write));
     env->define_var("__debug-vm", 
-            new BobVMBuiltinProcedure("debug-vm", *this, &VMImpl::builtin_debug_vm));
+            new BobVMBuiltinProcedure("__debug-vm", *this, &VMImpl::builtin_debug_vm));
+    env->define_var("__run-gc",
+            new BobVMBuiltinProcedure("__run-gc", *this, &VMImpl::builtin_run_gc));
     env->define_var("__debug-gc",
-            new BobVMBuiltinProcedure("debug-gc", *this, &VMImpl::builtin_debug_gc));
+            new BobVMBuiltinProcedure("__debug-gc", *this, &VMImpl::builtin_debug_gc));
 
     return env;
 }
@@ -416,7 +421,7 @@ BobObject* VMImpl::builtin_write(BuiltinArgs& args)
     output_str += "\n";
     fputs(output_str.c_str(), m_output_stream);
 
-    return 0;
+    return new BobNull;
 }
 
 
@@ -424,7 +429,7 @@ BobObject* VMImpl::builtin_debug_vm(BuiltinArgs&)
 {
     string str = repr_vm_state();
     fputs(str.c_str(), m_output_stream);
-    return 0;
+    return new BobNull;
 }
 
 
@@ -470,6 +475,13 @@ string VMImpl::repr_vm_state()
 }
 
 
+BobObject* VMImpl::builtin_run_gc(BuiltinArgs&)
+{
+    BobAllocator::get().run_gc();
+    return new BobNull;
+}
+
+
 // Print debugging information about the allocator/garbage collector.
 // If an argument is given and it's #t, print all live objects.
 //
@@ -487,6 +499,6 @@ BobObject* VMImpl::builtin_debug_gc(BuiltinArgs& args)
             }
         }
     }
-    return 0;
+    return new BobNull;
 }
 
