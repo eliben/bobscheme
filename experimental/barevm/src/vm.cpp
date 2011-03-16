@@ -494,7 +494,6 @@ BobObject* VMImpl::builtin_debug_gc(BuiltinArgs& args)
         if (BobBoolean* boolean = dynamic_cast<BobBoolean*>(args[0])) {
             if (boolean->value() == true) {
                 str = BobAllocator::get().stats_all_live();
-                fputs("---- Live objects ----\n", m_output_stream);
                 fputs(str.c_str(), m_output_stream);
             }
         }
