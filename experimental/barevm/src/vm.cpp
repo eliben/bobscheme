@@ -10,7 +10,6 @@
 #include "environment.h"
 #include "builtins.h"
 #include "basicobjects.h"
-#include "boballocator.h"
 #include <stack>
 #include <algorithm>
 #include <cstdio>

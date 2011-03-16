@@ -5,7 +5,6 @@
 // This code is in the public domain
 //*****************************************************************************
 #include "bobobject.h"
-#include "boballocator.h"
 #include <typeinfo>
 #include <cstdlib>
 
@@ -45,3 +44,90 @@ void BobObject::operator delete(void* p)
     BobAllocator::get().release_object(p);
 }
 
+
+class BobAllocator 
+{
+public:
+    static BobAllocator& get()
+    {
+        return the_allocator;
+    }
+
+    void* allocate_object(std::size_t sz);
+    void release_object(void* p);
+
+    // Run the garbage collector
+    //
+    void run_gc();
+
+    // Return various statistics as a string for debugging
+    //
+    std::string stats_general() const;
+    std::string stats_all_live() const;
+
+private:
+    static BobAllocator the_allocator;
+
+    BobAllocator()
+        : total_alloc_size(0)
+    {
+    }
+
+    ~BobAllocator()
+    {
+    }
+
+    BobAllocator(const BobAllocator&);
+    BobAllocator& operator=(const BobAllocator&);
+
+    list<BobObject*> live_objects;
+    size_t total_alloc_size;
+};
+
+
+BobAllocator BobAllocator::the_allocator;
+
+
+void* BobAllocator::allocate_object(size_t sz)
+{
+    void* mem = ::operator new(sz);
+    live_objects.push_back(static_cast<BobObject*>(mem));
+    total_alloc_size += sz;
+    return mem;
+}
+
+
+void BobAllocator::release_object(void* p)
+{
+    ::operator delete(p);
+}
+
+
+string BobAllocator::stats_general() const
+{
+    string s = format_string("Number of live objects: %u\n", live_objects.size());
+    s += format_string("Total allocation size: %u\n", total_alloc_size);
+    return s;
+}
+
+
+string BobAllocator::stats_all_live() const
+{
+    string s;
+    for (list<BobObject*>::const_iterator it = live_objects.begin(); 
+            it != live_objects.end(); ++it) {
+        s += (*it)->repr() + "\n";
+    }
+    return s;
+}
+
+
+void BobAllocator::run_gc()
+{
+    // Mark each object found in the roots. Marking as implemented by
+    // BobObjectis subclasses is recursive.
+    // Go over all the live objects:
+    //   * Marked objects are used and thus have to keep living. Clear their
+    //     mark flag.
+    //   * Unmarked objects aren't used and can be deleted.
+}
