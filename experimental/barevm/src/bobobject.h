@@ -89,10 +89,14 @@ public:
     void* allocate_object(std::size_t sz);
     void release_object(void* p);
 
-    // Run the garbage collector
+    // Run the garbage collector if the total allocation size is larger 
+    // than size_threshold.
     //
-    void run_gc();
+    void run_gc(size_t size_threshold);
 
+    // Register a VM object with the GC. The VM object is used to 
+    // mark the roots.
+    //
     void register_vm_obj(BobVM* vm_obj);
 
     // Return various statistics as a string for debugging

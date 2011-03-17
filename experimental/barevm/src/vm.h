@@ -44,7 +44,7 @@ private:
     // Run gc_mark on all root objects the VM holds. This method 
     // is called by the garbage collector.
     //
-    void run_gc_mark_roots();
+    void gc_mark_roots();
 
     VMImpl* d;
 };

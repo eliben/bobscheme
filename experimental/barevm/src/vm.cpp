@@ -89,6 +89,8 @@ struct VMImpl
     //
     ExecutionFrame m_frame;
 
+    size_t gc_size_threshold;
+
     //---------------------------------------------------------------
 
     // Builtins with access to VM state
@@ -122,6 +124,10 @@ BobVM::BobVM(const string& output_file)
     d->m_frame.codeobject = 0;
     d->m_frame.pc = 0;
     d->m_frame.env = d->create_global_env();
+
+    // Default GC size threshold
+    //
+    d->gc_size_threshold = 1024 * 1024;
 
     BobAllocator::get().register_vm_obj(this);
 }
@@ -163,6 +169,18 @@ void BobVM::run(BobCodeObject* codeobj)
             instr = cur_codeobj->code[d->m_frame.pc];
             d->m_frame.pc++;
         }
+
+        // Let the GC run if required. 
+        // Note: it's important to allow the GC to run only in-between
+        // instructions, because during an instruction's executions, some
+        // objects may not be reachable from the roots and the GC will
+        // collect them if run. One example is builtin calls, where the
+        // arguments are taken off the stack before passing control to
+        // the builtin. If the builtin triggered a GC call, these arguments
+        // would be collected which is a very bad thing. So, for extra 
+        // safety, GC is not allowed to run arbitrarily.
+        //
+        BobAllocator::get().run_gc(0);
 
         switch (instr.opcode) {
             case OP_CONST:
@@ -323,7 +341,7 @@ void BobVM::run(BobCodeObject* codeobj)
 }
 
 
-void BobVM::run_gc_mark_roots()
+void BobVM::gc_mark_roots()
 {
     // current frame
     d->m_frame.codeobject->gc_mark();
@@ -480,7 +498,8 @@ string VMImpl::repr_vm_state()
 
 BobObject* VMImpl::builtin_run_gc(BuiltinArgs&)
 {
-    BobAllocator::get().run_gc();
+    // Force a GC run by setting threshold to 0
+    BobAllocator::get().run_gc(0);
     return new BobNull;
 }
 

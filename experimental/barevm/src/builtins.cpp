@@ -9,6 +9,7 @@
 #include "utils.h"
 #include <cassert>
 #include <functional>
+#include <iostream>
 #include <numeric>
 #include <iterator>
 
@@ -97,6 +98,10 @@ static BobObject* set_cdr(BuiltinArgs& args)
 static BobObject* cons(BuiltinArgs& args)
 {
     verify_numargs(args, 2, "cons");
+    //cerr << "==== Before GC In cons\n" << BobAllocator::get().stats_all_live() << endl;
+    //cerr << "====== Running GC ======\n";
+    //BobAllocator::get().run_gc();
+    //cerr << "==== After GC In cons\n" << BobAllocator::get().stats_all_live() << endl;
     return new BobPair(args[0], args[1]);
 }
 

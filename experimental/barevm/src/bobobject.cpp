@@ -64,6 +64,11 @@ struct BobAllocator::Impl
     size_t total_alloc_size;
 
     BobVM* vm_obj;
+
+    Impl()
+        : total_alloc_size(0), vm_obj(0)
+    {
+    }
 };
 
 
@@ -81,12 +86,6 @@ BobAllocator::~BobAllocator()
 
 void* BobAllocator::allocate_object(size_t sz)
 {
-    if (d->total_alloc_size >= 1000) {
-        //cerr << "running gc. alloc size = " << d->total_alloc_size << endl;
-        //run_gc();
-        //cerr << "after gc. alloc size = " << d->total_alloc_size << endl;
-    }
-
     void* mem = ::operator new(sz);
     LiveObject liveobject = make_pair(static_cast<BobObject*>(mem), sz);
     d->live_objects.push_back(liveobject);
@@ -131,15 +130,19 @@ string BobAllocator::stats_all_live() const
 }
 
 
-void BobAllocator::run_gc()
+void BobAllocator::run_gc(size_t size_threshold)
 {
+    if (d->total_alloc_size <= size_threshold)
+        return;
+
+    cerr << "==== Before GC run: " << stats_general() << endl;
     // Mark each object found in the roots. Marking as implemented by
     // BobObjectis subclasses is recursive.
     // Go over all the live objects:
     //   * Marked objects are used and thus have to keep living. Clear their
     //     mark flag.
     //   * Unmarked objects aren't used and can be deleted.
-    d->vm_obj->run_gc_mark_roots();
+    d->vm_obj->gc_mark_roots();
 
     list<LiveObject>::iterator it = d->live_objects.begin();
     while (it != d->live_objects.end()) {
@@ -155,5 +158,6 @@ void BobAllocator::run_gc()
             d->total_alloc_size -= size;
         }
     }
+    cerr << "==== After GC run: " << stats_general()<< endl;
 }
 
