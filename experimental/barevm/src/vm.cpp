@@ -266,6 +266,9 @@ void BobVM::run(BobCodeObject* codeobj)
                 reverse(argvalues.begin(), argvalues.end());
 
                 if (BobBuiltinProcedure* proc = dynamic_cast<BobBuiltinProcedure*>(func_val)) {
+                    // Builtins wrap C++ procedures that should just be called
+                    // with the arguments.
+                    //
                     try {
                         BobObject* retval = proc->exec(argvalues);
                         d->m_valuestack.push_back(retval);

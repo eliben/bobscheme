@@ -10,6 +10,8 @@
 #include "vm.h"
 #include <typeinfo>
 #include <cstdlib>
+#include <iostream>
+#include <utility>
 
 using namespace std;
 
@@ -55,9 +57,10 @@ BobAllocator BobAllocator::the_allocator;
 
 // The implementation details of the allocator
 //
+typedef pair<BobObject*, size_t> LiveObject;
 struct BobAllocator::Impl 
 {
-    list<BobObject*> live_objects;
+    list<LiveObject> live_objects;
     size_t total_alloc_size;
 
     BobVM* vm_obj;
@@ -78,8 +81,15 @@ BobAllocator::~BobAllocator()
 
 void* BobAllocator::allocate_object(size_t sz)
 {
+    if (d->total_alloc_size >= 1000) {
+        //cerr << "running gc. alloc size = " << d->total_alloc_size << endl;
+        //run_gc();
+        //cerr << "after gc. alloc size = " << d->total_alloc_size << endl;
+    }
+
     void* mem = ::operator new(sz);
-    d->live_objects.push_back(static_cast<BobObject*>(mem));
+    LiveObject liveobject = make_pair(static_cast<BobObject*>(mem), sz);
+    d->live_objects.push_back(liveobject);
     d->total_alloc_size += sz;
     return mem;
 }
@@ -109,11 +119,13 @@ string BobAllocator::stats_general() const
 string BobAllocator::stats_all_live() const
 {
     string s = "==== Live objects ====\n";
-    for (list<BobObject*>::const_iterator it = d->live_objects.begin(); 
+    for (list<LiveObject>::const_iterator it = d->live_objects.begin(); 
             it != d->live_objects.end(); ++it) {
-        BobObject* obj = *it;
+        BobObject* obj = it->first;
+        size_t size = it->second;
         if (dynamic_cast<BobBuiltinProcedure*>(obj) == 0)
-            s += string(typeid(*obj).name()) + " " + obj->repr() + "\n";
+            s += format_string("%s(%u) %s\n", 
+                    typeid(*obj).name(), size, obj->repr().c_str());
     }
     return s;
 }
@@ -129,9 +141,10 @@ void BobAllocator::run_gc()
     //   * Unmarked objects aren't used and can be deleted.
     d->vm_obj->run_gc_mark_roots();
 
-    list<BobObject*>::iterator it = d->live_objects.begin();
+    list<LiveObject>::iterator it = d->live_objects.begin();
     while (it != d->live_objects.end()) {
-        BobObject* obj = *it;
+        BobObject* obj = it->first;
+        size_t size = it->second;
         if (obj->is_gc_marked()) {
             obj->gc_clear();
             ++it;
@@ -139,6 +152,7 @@ void BobAllocator::run_gc()
         else {
             it = d->live_objects.erase(it);
             delete obj; // garbage!!
+            d->total_alloc_size -= size;
         }
     }
 }
