@@ -92,6 +92,13 @@ string BobPair::repr() const
 }
 
 
+void BobPair::gc_mark_pointed()
+{
+    m_first->gc_mark();
+    m_second->gc_mark();
+}
+
+
 std::string BobPair::repr_internal() const
 {
     assert(m_first && "Expect valid pointer in m_first");

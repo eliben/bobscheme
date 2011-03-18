@@ -135,7 +135,7 @@ void BobAllocator::run_gc(size_t size_threshold)
     if (d->total_alloc_size <= size_threshold)
         return;
 
-    cerr << "==== Before GC run: " << stats_general() << endl;
+    //cerr << "==== Before GC run: " << stats_general() << endl;
     // Mark each object found in the roots. Marking as implemented by
     // BobObjectis subclasses is recursive.
     // Go over all the live objects:
@@ -158,6 +158,6 @@ void BobAllocator::run_gc(size_t size_threshold)
             d->total_alloc_size -= size;
         }
     }
-    cerr << "==== After GC run: " << stats_general()<< endl;
+    //cerr << "==== After GC run: " << stats_general()<< endl;
 }
 

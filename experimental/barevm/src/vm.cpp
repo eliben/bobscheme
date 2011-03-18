@@ -146,6 +146,9 @@ void BobVM::run(BobCodeObject* codeobj)
     if (!codeobj)
         return;
 
+    cerr << "++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+    cerr << codeobj->repr();
+    cerr << "++++++++++++++++++++++++++++++++++++++++++++++++++\n";
     d->m_frame.codeobject = codeobj;
     d->m_frame.pc = 0;
 
@@ -172,7 +175,7 @@ void BobVM::run(BobCodeObject* codeobj)
 
         // Let the GC run if required. 
         // Note: it's important to allow the GC to run only in-between
-        // instructions, because during an instruction's executions, some
+        // instructions, because during an instruction's execution, some
         // objects may not be reachable from the roots and the GC will
         // collect them if run. One example is builtin calls, where the
         // arguments are taken off the stack before passing control to

@@ -41,6 +41,8 @@ void BobEnvironment::gc_mark_pointed()
 {
     for (Binding::iterator it = m_binding.begin(); it != m_binding.end(); ++it)
         it->second->gc_mark();
+    if (m_parent)
+        m_parent->gc_mark();
 }
 
 

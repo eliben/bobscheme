@@ -107,11 +107,7 @@ public:
     std::string repr() const;
     bool equals_to(const BobObject& other) const;
 
-    virtual void gc_mark_pointed()
-    {
-        m_first->gc_mark();
-        m_second->gc_mark();
-    }
+    virtual void gc_mark_pointed();
 
 private:
     std::string repr_internal() const;
