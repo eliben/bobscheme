@@ -36,6 +36,7 @@ public:
     virtual ~BobVM();
 
     void run(BobCodeObject* codeobj);
+    void set_gc_size_threshold(std::size_t threshold); 
 private:
     friend class BobAllocator;
     BobVM(const BobVM&);

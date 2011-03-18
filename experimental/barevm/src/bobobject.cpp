@@ -62,11 +62,12 @@ struct BobAllocator::Impl
 {
     list<LiveObject> live_objects;
     size_t total_alloc_size;
+    bool debug_on;
 
     BobVM* vm_obj;
 
     Impl()
-        : total_alloc_size(0), vm_obj(0)
+        : total_alloc_size(0), debug_on(false), vm_obj(0)
     {
     }
 };
@@ -106,6 +107,12 @@ void BobAllocator::register_vm_obj(BobVM* vm_obj)
 }
 
 
+void BobAllocator::set_debugging(bool debug_on)
+{
+    d->debug_on = debug_on;
+}
+
+
 string BobAllocator::stats_general() const
 {
     string s = "========================================\n";
@@ -135,7 +142,9 @@ void BobAllocator::run_gc(size_t size_threshold)
     if (d->total_alloc_size <= size_threshold)
         return;
 
-    //cerr << "==== Before GC run: " << stats_general() << endl;
+    size_t old_num_live_objects = d->live_objects.size();
+    size_t old_total_alloc_size = d->total_alloc_size;
+
     // Mark each object found in the roots. Marking as implemented by
     // BobObjectis subclasses is recursive.
     // Go over all the live objects:
@@ -158,6 +167,14 @@ void BobAllocator::run_gc(size_t size_threshold)
             d->total_alloc_size -= size;
         }
     }
-    //cerr << "==== After GC run: " << stats_general()<< endl;
+
+    // Debugging...
+    if (d->debug_on && d->total_alloc_size != old_total_alloc_size) {
+        cerr << "=== GC collection\n";
+        cerr << format_string("--> was %u objects (total size %u)\n", 
+                    old_num_live_objects, old_total_alloc_size);
+        cerr << format_string("--> now %u objects (total size %u)\n",
+                    d->live_objects.size(), d->total_alloc_size);
+    }
 }
 

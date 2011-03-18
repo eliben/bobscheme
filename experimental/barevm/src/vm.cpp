@@ -127,7 +127,7 @@ BobVM::BobVM(const string& output_file)
 
     // Default GC size threshold
     //
-    d->gc_size_threshold = 1024 * 1024;
+    d->gc_size_threshold = 10 * 1024 * 1024;
 
     BobAllocator::get().register_vm_obj(this);
 }
@@ -141,14 +141,17 @@ BobVM::~BobVM()
 }
 
 
+void BobVM::set_gc_size_threshold(size_t threshold)
+{
+    d->gc_size_threshold = threshold;
+}
+
+
 void BobVM::run(BobCodeObject* codeobj)
 {
     if (!codeobj)
         return;
 
-    cerr << "++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-    cerr << codeobj->repr();
-    cerr << "++++++++++++++++++++++++++++++++++++++++++++++++++\n";
     d->m_frame.codeobject = codeobj;
     d->m_frame.pc = 0;
 
@@ -183,7 +186,7 @@ void BobVM::run(BobCodeObject* codeobj)
         // would be collected which is a very bad thing. So, for extra 
         // safety, GC is not allowed to run arbitrarily.
         //
-        BobAllocator::get().run_gc(0);
+        BobAllocator::get().run_gc(d->gc_size_threshold);
 
         switch (instr.opcode) {
             case OP_CONST:

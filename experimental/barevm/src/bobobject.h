@@ -94,6 +94,10 @@ public:
     //
     void run_gc(size_t size_threshold);
 
+    // Set debugging state of the GC
+    //
+    void set_debugging(bool debug_on);
+
     // Register a VM object with the GC. The VM object is used to 
     // mark the roots.
     //
