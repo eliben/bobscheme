@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # The following import is for compatibility with both Python 2.6 and 3.x
 from __future__ import print_function
 import os, sys

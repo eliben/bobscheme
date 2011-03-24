@@ -12,5 +12,7 @@ tags
 cscope.*
 *.bobc
 *.exe
+*.orig
+
 
 
