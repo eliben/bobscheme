@@ -14,7 +14,8 @@
 
 using namespace std;
 
-// Set these for debugging or testing the garbage collector
+// Set these for debugging or testing the garbage collector.
+// A high threshold means the GC won't actually run in the tests.
 //
 const bool GC_DEBUGGING = false;
 const size_t GC_SIZE_THRESHOLD = 20 * 1024 * 1024;
