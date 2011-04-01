@@ -14,5 +14,10 @@ cscope.*
 *.exe
 *.orig
 
+# cmake
+CMakeFiles
+CMakeCache*
+cmake_install*
+
 
 
