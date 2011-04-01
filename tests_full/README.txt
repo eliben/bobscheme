@@ -12,3 +12,8 @@ for more details.
 
 To execute individual testcases for debugging, use the scripts in the
 examples/ directory to compile Scheme into bytecode and then run it with a VM.
+
+Note for Windows: to run the barevm test, edit test_barevm.py to point to
+the path of the barevm executable (this depends on where you asked CMake
+to generate the build directory)
+
