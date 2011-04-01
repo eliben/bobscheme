@@ -11,7 +11,6 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("Expecting a scheme file to interpret")
     else:
-        sys.setrecursionlimit(200000)
         with open(sys.argv[1]) as f:
             interpret_code(f.read())
 

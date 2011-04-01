@@ -7,6 +7,7 @@
 # This code is in the public domain
 #-------------------------------------------------------------------------------
 from __future__ import print_function
+import sys
 import pprint
 
 from .bobparser import BobParser
@@ -187,6 +188,11 @@ def interpret_code(code_str, output_stream=None):
     """
     parsed_exprs = BobParser().parse(code_str)    
     
+    # The interpreter isn't tail-recursive, so ask Python to allow deeper
+    # recursive calls
+    #
+    sys.setrecursionlimit(500000)
+
     interp = BobInterpreter(output_stream)
     for expr in parsed_exprs:
         interp.interpret(expr)
