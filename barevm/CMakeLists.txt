@@ -19,6 +19,13 @@ add_executable(barevm_unittest
     tests_unit/gtest/gtest-all.cc
     tests_unit/gtest/gtest_main.cc
     )
-target_link_libraries(barevm_unittest barevm_lib pthread)
+  
+if(WIN32)
+  set(extra_libs "")
+else()
+  set(extra_libs pthread)
+endif(WIN32)
+
+target_link_libraries(barevm_unittest barevm_lib ${extra_libs})
 
 
