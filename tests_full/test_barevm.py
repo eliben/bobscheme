@@ -38,7 +38,7 @@ def make_runner(barevm_path):
 
 
 if __name__ == '__main__':
-    barevm_path = "../experimental/barevm/barevm.exe"
+    barevm_path = "../barevm/barevm.exe"
     barevm_runner = make_runner(barevm_path)
 
     run_all_tests(barevm_runner)

@@ -14,6 +14,11 @@
 
 using namespace std;
 
+// Set these for debugging or testing the garbage collector
+//
+const bool GC_DEBUGGING = false;
+const size_t GC_SIZE_THRESHOLD = 20 * 1024 * 1024;
+
 
 int main(int argc, const char* argv[])
 {
@@ -28,8 +33,8 @@ int main(int argc, const char* argv[])
     try {
         BobCodeObject* bco = deserialize_bytecode(filename);
         BobVM vm;
-        BobAllocator::get().set_debugging(true);
-        vm.set_gc_size_threshold(20000);
+        BobAllocator::get().set_debugging(GC_DEBUGGING);
+        vm.set_gc_size_threshold(GC_SIZE_THRESHOLD);
         vm.run(bco);
     }
     catch (const DeserializationError& err) {
