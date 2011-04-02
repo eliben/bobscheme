@@ -6,7 +6,6 @@
 <meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
 <title>Bob bytecode reference</title>
 <meta name="author" content="Eli Bendersky" />
-<meta name="date" content="06-Nov-2010" />
 <style type="text/css">
 
 /*
@@ -316,8 +315,8 @@ ul.auto-toc {
 <td>Eli Bendersky</td></tr>
 <tr><th class="docinfo-name">Contact:</th>
 <td><a class="first last reference external" href="mailto:eliben&#64;gmail.com">eliben&#64;gmail.com</a></td></tr>
-<tr><th class="docinfo-name">Date:</th>
-<td>06-Nov-2010</td></tr>
+<tr class="field"><th class="docinfo-name">Updated:</th><td class="field-body">02-Apr-2011</td>
+</tr>
 </tbody>
 </table>
 <div class="contents topic" id="table-of-contents">
@@ -331,14 +330,14 @@ ul.auto-toc {
 </div>
 <div class="section" id="introduction">
 <h1>1&nbsp;&nbsp;&nbsp;Introduction</h1>
-<p>This document describes the bytecode that's produced by the Bob compiler from Scheme source and can be executed on the Bob VM. This bytecode can exist as either an in-memory object, or serialized to a string. It is suitable for generation from a compiler, not by human manual construction - there's no corresponding human-readable &quot;assembly language&quot; syntax that can be used to write the bytecode manually.</p>
+<p>This document describes the bytecode that's produced by the Bob compiler from Scheme source and can be executed on the Bob VM. This bytecode can exist as either an in-memory object, or serialized to a string/file. It is suitable for generation from a compiler, not by human manual construction - there's no corresponding human-readable &quot;assembly language&quot; syntax that can be used to write the bytecode manually.</p>
 </div>
 <div class="section" id="the-bob-stack-based-vm">
 <h1>2&nbsp;&nbsp;&nbsp;The Bob stack-based VM</h1>
 <p>The Bob VM is a <a class="reference external" href="http://en.wikipedia.org/wiki/Stack_machine">stack machine</a>, implemented with two stacks:</p>
 <ul class="simple">
 <li>The explicit value stack, called just <em>the stack</em> throughout the documentation and code. Used to load and store values of variables from and to the symbol table (&quot;environment&quot;), save temporary values, pass arguments to functions and return values from functions.</li>
-<li>An implicit &quot;frame stack&quot; used by the <tt class="docutils literal"><span class="pre">CALL</span></tt> and <tt class="docutils literal"><span class="pre">RETURN</span></tt> instructions to implement function calls, by saving the current VM state (&quot;execution frame&quot;) before calling a function and restoring it when returning from a function.</li>
+<li>An implicit &quot;frame stack&quot; used by the <tt class="docutils literal">CALL</tt> and <tt class="docutils literal">RETURN</tt> instructions to implement function calls, by saving the current VM state (&quot;execution frame&quot;) before calling a function and restoring it when returning from a function.</li>
 </ul>
 </div>
 <div class="section" id="bytecode-instructions">
@@ -399,12 +398,12 @@ ul.auto-toc {
 </tr>
 </tbody>
 </table>
-<p><tt class="docutils literal"><span class="pre">bob/bytecode.py</span></tt> defines the opcodes, as well as the key <tt class="docutils literal"><span class="pre">Instruction</span></tt> and <tt class="docutils literal"><span class="pre">CodeObject</span></tt> classes which act as simple containers for the bytecode.
-The core of the VM implementation is less than 200 lines of commented Python code in <tt class="docutils literal"><span class="pre">bob/vm.py</span></tt>.</p>
+<p><tt class="docutils literal">bob/bytecode.py</tt> defines the opcodes, as well as the key <tt class="docutils literal">Instruction</tt> and <tt class="docutils literal">CodeObject</tt> classes which act as simple containers for the bytecode.
+The core of the VM implementation is less than 200 lines of commented Python code in <tt class="docutils literal">bob/vm.py</tt>.</p>
 </div>
 <div class="section" id="serialization">
 <h1>4&nbsp;&nbsp;&nbsp;Serialization</h1>
-<p>To allow interoperability between different implementations of the VM, Bob supports serialization and de-serialization of bytecode into a platform independent binary string (which can be saved in a file or transmitted over a socket). The serialization scheme was inspired by Python's <tt class="docutils literal"><span class="pre">marshal</span></tt> module and is implemented by the classes <tt class="docutils literal"><span class="pre">Serializer</span></tt> and <tt class="docutils literal"><span class="pre">Deserializer</span></tt> in <tt class="docutils literal"><span class="pre">bob/bytecode.py</span></tt>.</p>
+<p>To allow interoperability between different implementations of the VM, Bob supports serialization and de-serialization of bytecode into a platform independent binary string (which can be saved in a file or transmitted over a socket). The serialization scheme was inspired by Python's <tt class="docutils literal">marshal</tt> module and is implemented by the classes <tt class="docutils literal">Serializer</tt> and <tt class="docutils literal">Deserializer</tt> in <tt class="docutils literal">bob/bytecode.py</tt>.</p>
 </div>
 </div>
 </body>

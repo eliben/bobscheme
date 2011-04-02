@@ -4,7 +4,7 @@
 
 :Author: Eli Bendersky
 :Contact: eliben@gmail.com
-:Date: 06-Nov-2010
+:Updated: 02-Apr-2011
 
 .. contents:: Table of Contents
     :backlinks: none
@@ -44,10 +44,10 @@ What is Bob useful for?
 Bob is a self-educational project. I find that the best way to understand complex concepts and mechanisms is implementing them from scratch. Working on Bob helped me understand the following concepts much better:
 
 * How to write an interpreter for a complete programming-language. This was the easy part, because I've written a few interepreters before. However, it's important in order to provide a base-line implementation with which the other implementations can be compared.
-* How to implement a stack-based virtual machine with its own bytecode. The Bob VM is not much different in its core from "real" VMs, like the one Python itself (to be more exact, the official CPython implementation) runs on. It's just much simpler.
+* How to implement a stack-based virtual machine with its own bytecode. The Bob VM is not much different in its core from "real" VMs, like the one used by Python itself (to be more exact, the official CPython implementation). It's just much simpler.
 * How to compile a high-level programming language into much lower-level VM bytecode.
 
-I learned a lot by working on Bob, and I release its code with the hope that it can help educate other people. Bob is written in Python, which is the closest to executable pseudo-code one can get. The code is relatively compact, clean and well documented. Many such hobby projects exist, but I believe Bob is particularly clean, self-contained and easy to understand. 
+I learned a lot by working on Bob, and I release its code with the hope that it can help educate other people. Bob is written in Python, which is the closest to executable pseudo-code one can get. The code is relatively compact, clean and well documented.
 
 What Scheme does Bob implement?
 -------------------------------
@@ -86,7 +86,7 @@ In addition, the mainline implementation of Python (CPython) has served as an in
 Design philosophy
 -----------------
 
-The single guiding design philosophy of Bob is *clarity and simplicity*. There's a huge amount of optimizations I can envision applying to Bob to make it more compact and faster. I avoided these optimizations on purpose. A sad inherent conflict in software is that optimziation and clarity are almost always at odds - you can gain one, but usually sacrifice the other in the process. 
+The single guiding design philosophy of Bob is *clarity and simplicity*. There's a huge amount of optimizations I can envision applying to Bob to make it more compact and faster. I avoided these optimizations on purpose. A sad inherent conflict in software is that optimization and clarity are almost always at odds - you can gain one, but usually sacrifice the other in the process. 
 
 The mechanisms Bob implements are complex enough even without optimizations. Therefore, I aimed to create a design that's as simple as possible, and implement it with code that's as simple and clean as possible. 
 

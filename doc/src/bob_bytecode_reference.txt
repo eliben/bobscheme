@@ -4,7 +4,7 @@
 
 :Author: Eli Bendersky
 :Contact: eliben@gmail.com
-:Date: 06-Nov-2010
+:Updated: 02-Apr-2011
 
 .. contents:: Table of Contents
     :backlinks: none
@@ -15,7 +15,7 @@
 Introduction
 ************
 
-This document describes the bytecode that's produced by the Bob compiler from Scheme source and can be executed on the Bob VM. This bytecode can exist as either an in-memory object, or serialized to a string. It is suitable for generation from a compiler, not by human manual construction - there's no corresponding human-readable "assembly language" syntax that can be used to write the bytecode manually.
+This document describes the bytecode that's produced by the Bob compiler from Scheme source and can be executed on the Bob VM. This bytecode can exist as either an in-memory object, or serialized to a string/file. It is suitable for generation from a compiler, not by human manual construction - there's no corresponding human-readable "assembly language" syntax that can be used to write the bytecode manually.
 
 The Bob stack-based VM
 **********************

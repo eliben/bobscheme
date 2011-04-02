@@ -6,7 +6,6 @@
 <meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
 <title>Getting started with Bob</title>
 <meta name="author" content="Eli Bendersky" />
-<meta name="date" content="06-Nov-2010" />
 <style type="text/css">
 
 /*
@@ -316,8 +315,8 @@ ul.auto-toc {
 <td>Eli Bendersky</td></tr>
 <tr><th class="docinfo-name">Contact:</th>
 <td><a class="first last reference external" href="mailto:eliben&#64;gmail.com">eliben&#64;gmail.com</a></td></tr>
-<tr><th class="docinfo-name">Date:</th>
-<td>06-Nov-2010</td></tr>
+<tr class="field"><th class="docinfo-name">Updated:</th><td class="field-body">02-Apr-2011</td>
+</tr>
 </tbody>
 </table>
 <div class="contents topic" id="table-of-contents">
@@ -363,17 +362,17 @@ ul.auto-toc {
 </div>
 <div class="section" id="license">
 <h2>1.2&nbsp;&nbsp;&nbsp;License</h2>
-<p>Bob is in the public domain. You can see it defined in more formal terms in the <tt class="docutils literal"><span class="pre">doc/UNLICENSE</span></tt> file, or visit <a class="reference external" href="http://unlicense.org/">unlicense.org</a>.</p>
+<p>Bob is in the public domain. You can see it defined in more formal terms in the <tt class="docutils literal">doc/UNLICENSE</tt> file, or visit <a class="reference external" href="http://unlicense.org/">unlicense.org</a>.</p>
 </div>
 <div class="section" id="what-is-bob-useful-for">
 <h2>1.3&nbsp;&nbsp;&nbsp;What is Bob useful for?</h2>
 <p>Bob is a self-educational project. I find that the best way to understand complex concepts and mechanisms is implementing them from scratch. Working on Bob helped me understand the following concepts much better:</p>
 <ul class="simple">
 <li>How to write an interpreter for a complete programming-language. This was the easy part, because I've written a few interepreters before. However, it's important in order to provide a base-line implementation with which the other implementations can be compared.</li>
-<li>How to implement a stack-based virtual machine with its own bytecode. The Bob VM is not much different in its core from &quot;real&quot; VMs, like the one Python itself (to be more exact, the official CPython implementation) runs on. It's just much simpler.</li>
+<li>How to implement a stack-based virtual machine with its own bytecode. The Bob VM is not much different in its core from &quot;real&quot; VMs, like the one used by Python itself (to be more exact, the official CPython implementation). It's just much simpler.</li>
 <li>How to compile a high-level programming language into much lower-level VM bytecode.</li>
 </ul>
-<p>I learned a lot by working on Bob, and I release its code with the hope that it can help educate other people. Bob is written in Python, which is the closest to executable pseudo-code one can get. The code is relatively compact, clean and well documented. Many such hobby projects exist, but I believe Bob is particularly clean, self-contained and easy to understand.</p>
+<p>I learned a lot by working on Bob, and I release its code with the hope that it can help educate other people. Bob is written in Python, which is the closest to executable pseudo-code one can get. The code is relatively compact, clean and well documented.</p>
 </div>
 <div class="section" id="what-scheme-does-bob-implement">
 <h2>1.4&nbsp;&nbsp;&nbsp;What Scheme does Bob implement?</h2>
@@ -409,7 +408,7 @@ ul.auto-toc {
 </div>
 <div class="section" id="design-philosophy">
 <h2>1.6&nbsp;&nbsp;&nbsp;Design philosophy</h2>
-<p>The single guiding design philosophy of Bob is <em>clarity and simplicity</em>. There's a huge amount of optimizations I can envision applying to Bob to make it more compact and faster. I avoided these optimizations on purpose. A sad inherent conflict in software is that optimziation and clarity are almost always at odds - you can gain one, but usually sacrifice the other in the process.</p>
+<p>The single guiding design philosophy of Bob is <em>clarity and simplicity</em>. There's a huge amount of optimizations I can envision applying to Bob to make it more compact and faster. I avoided these optimizations on purpose. A sad inherent conflict in software is that optimization and clarity are almost always at odds - you can gain one, but usually sacrifice the other in the process.</p>
 <p>The mechanisms Bob implements are complex enough even without optimizations. Therefore, I aimed to create a design that's as simple as possible, and implement it with code that's as simple and clean as possible.</p>
 </div>
 </div>
@@ -417,10 +416,10 @@ ul.auto-toc {
 <h1>2&nbsp;&nbsp;&nbsp;Getting started with Bob</h1>
 <div class="section" id="documentation">
 <h2>2.1&nbsp;&nbsp;&nbsp;Documentation</h2>
-<p>The Bob documentation is collected in the <tt class="docutils literal"><span class="pre">doc</span></tt> directory. It's written in plain text files, in reStructuredText format and is converted to HTML with the <tt class="docutils literal"><span class="pre">doc/src/__gen_html.py</span></tt> script. At the moment, the following documents are available:</p>
+<p>The Bob documentation is collected in the <tt class="docutils literal">doc</tt> directory. It's written in plain text files, in reStructuredText format and is converted to HTML with the <tt class="docutils literal">doc/src/__gen_html.py</tt> script. At the moment, the following documents are available:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">doc/bob_getting_started.html</span></tt>: this document</li>
-<li><tt class="docutils literal"><span class="pre">doc/bob_bytecode_reference.html</span></tt>: reference of the Bob bytecode</li>
+<li><tt class="docutils literal">doc/bob_getting_started.html</tt>: this document</li>
+<li><tt class="docutils literal">doc/bob_bytecode_reference.html</tt>: reference of the Bob bytecode</li>
 </ul>
 <p>However, the best documentation of Bob is its source code. Bob is written in executable pseudo-code (Python) and the internal documentation strings and comments are relatively comprehensive. If you feel something is missing or some part of Bob's code isn't documented well enough, don't hesitate to drop me an email - I will gladly improve it.</p>
 </div>
@@ -431,19 +430,19 @@ ul.auto-toc {
 <div class="section" id="structure-of-the-source-tree">
 <h2>2.3&nbsp;&nbsp;&nbsp;Structure of the source tree</h2>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">doc</span></tt>: Documentation</li>
-<li><tt class="docutils literal"><span class="pre">bob</span></tt>: The Python source code implementing Bob</li>
-<li><tt class="docutils literal"><span class="pre">examples</span></tt>: Some examples of using Bob in a script</li>
-<li><tt class="docutils literal"><span class="pre">tests_full</span></tt>: Tests exercising Bob's code by running complete Scheme programs and making sure they produce the expected output.</li>
-<li><tt class="docutils literal"><span class="pre">experimental</span></tt>: Here be dragons! Experimental code not currently suitable for use.</li>
+<li><tt class="docutils literal">doc</tt>: Documentation</li>
+<li><tt class="docutils literal">bob</tt>: The Python source code implementing Bob</li>
+<li><tt class="docutils literal">examples</tt>: Some examples of using Bob in a script</li>
+<li><tt class="docutils literal">tests_full</tt>: Tests exercising Bob's code by running complete Scheme programs and making sure they produce the expected output.</li>
+<li><tt class="docutils literal">experimental</tt>: Here be dragons! Experimental code not currently suitable for use.</li>
 </ul>
 </div>
 <div class="section" id="running-examples">
 <h2>2.4&nbsp;&nbsp;&nbsp;Running examples</h2>
-<p>Bob is implemented as a set of Python modules that can be imported and used from any Python script. The <tt class="docutils literal"><span class="pre">examples</span></tt> directory contains a few very simple scripts that show how to use Bob.</p>
+<p>Bob is implemented as a set of Python modules that can be imported and used from any Python script. The <tt class="docutils literal">examples</tt> directory contains a few very simple scripts that show how to use Bob.</p>
 <div class="section" id="running-the-interpreter-in-interactive-mode">
 <h3>2.4.1&nbsp;&nbsp;&nbsp;Running the interpreter in interactive mode</h3>
-<p>Bob contains an implementation of a Scheme interpreter. This interpreter has a very rudimentary interactive mode, mimicking a standard Scheme REPL (Read-Eval-Print loop). You can see how to invoke it by running the <tt class="docutils literal"><span class="pre">interactive.py</span></tt> example. Here's a sample interaction:</p>
+<p>Bob contains an implementation of a Scheme interpreter. This interpreter has a very rudimentary interactive mode, mimicking a standard Scheme REPL (Read-Eval-Print loop). You can see how to invoke it by running the <tt class="docutils literal">interactive.py</tt> example. Here's a sample interaction:</p>
 <pre class="literal-block">
 .../examples&gt; interactive.py
 Interactive Bob interpreter. Type a Scheme expression or 'quit'
@@ -459,7 +458,7 @@ Interactive Bob interpreter. Type a Scheme expression or 'quit'
 </div>
 <div class="section" id="compiling-scheme-into-bob-vm-bytecode-and-executing-the-bytecode">
 <h3>2.4.2&nbsp;&nbsp;&nbsp;Compiling Scheme into Bob VM bytecode and executing the bytecode</h3>
-<p>The <tt class="docutils literal"><span class="pre">examples</span></tt> directory contains a simple Scheme program in <tt class="docutils literal"><span class="pre">simple_func.scm</span></tt>:</p>
+<p>The <tt class="docutils literal">examples</tt> directory contains a simple Scheme program in <tt class="docutils literal">simple_func.scm</tt>:</p>
 <pre class="literal-block">
 (define (func a b)
   (lambda (x)
@@ -467,7 +466,7 @@ Interactive Bob interpreter. Type a Scheme expression or 'quit'
 
 (write ((func 4 5) 10))
 </pre>
-<p>The script <tt class="docutils literal"><span class="pre">compile_file.py</span></tt> invokes the Bob compiler to compile Scheme into Bob VM bytecode and serialize this bytecode into a file with extension <tt class="docutils literal"><span class="pre">.bobc</span></tt>. The script <tt class="docutils literal"><span class="pre">run_compiled.py</span></tt> loads Bob VM bytecode from <tt class="docutils literal"><span class="pre">.bobc</span></tt> files and runs it on the Bob VM. Here's a simple interaction with these scripts:</p>
+<p>The script <tt class="docutils literal">compile_file.py</tt> invokes the Bob compiler to compile Scheme into Bob VM bytecode and serialize this bytecode into a file with extension <tt class="docutils literal">.bobc</tt>. The script <tt class="docutils literal">run_compiled.py</tt> loads Bob VM bytecode from <tt class="docutils literal">.bobc</tt> files and runs it on the Bob VM. Here's a simple interaction with these scripts:</p>
 <pre class="literal-block">
 .../examples&gt; compile_file.py simple_func.scm
 Output file created: simple_func.bobc
@@ -479,8 +478,8 @@ Output file created: simple_func.bobc
 </div>
 <div class="section" id="running-tests">
 <h2>2.5&nbsp;&nbsp;&nbsp;Running tests</h2>
-<p>The <tt class="docutils literal"><span class="pre">tests_full</span></tt> directory contains a test suite for running complete Scheme programs with Bob. To make sure Bob runs correctly, execute both <tt class="docutils literal"><span class="pre">test_interpreter.py</span></tt> and <tt class="docutils literal"><span class="pre">test_vm_compiler.py</span></tt>, and see that no errors are reported.</p>
-<p>The file <tt class="docutils literal"><span class="pre">testcases_utils.py</span></tt> contains the simple testing infrastructure code used to implement the actual tests, and the <tt class="docutils literal"><span class="pre">testcases</span></tt> directory contains complete Scheme programs with expected output files. New test cases added to this directory will be automatically &quot;discovered&quot; and run by the testing scripts.</p>
+<p>The <tt class="docutils literal">tests_full</tt> directory contains a test suite for running complete Scheme programs with Bob. To make sure Bob runs correctly, execute both <tt class="docutils literal">test_interpreter.py</tt> and <tt class="docutils literal">test_vm_compiler.py</tt>, and see that no errors are reported.</p>
+<p>The file <tt class="docutils literal">testcases_utils.py</tt> contains the simple testing infrastructure code used to implement the actual tests, and the <tt class="docutils literal">testcases</tt> directory contains complete Scheme programs with expected output files. New test cases added to this directory will be automatically &quot;discovered&quot; and run by the testing scripts.</p>
 </div>
 </div>
 </div>
