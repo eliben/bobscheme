@@ -343,7 +343,7 @@ ul.auto-toc {
 <li><a class="reference internal" href="#running-tests" id="id17">2.5&nbsp;&nbsp;&nbsp;Running tests</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#using-barevm" id="id18">3&nbsp;&nbsp;&nbsp;Using BareVM</a><ul class="auto-toc">
+<li><a class="reference internal" href="#barevm" id="id18">3&nbsp;&nbsp;&nbsp;BareVM</a><ul class="auto-toc">
 <li><a class="reference internal" href="#structure-of-the-barevm-sub-tree" id="id19">3.1&nbsp;&nbsp;&nbsp;Structure of the <tt class="docutils literal">barevm</tt> sub-tree</a></li>
 <li><a class="reference internal" href="#building" id="id20">3.2&nbsp;&nbsp;&nbsp;Building</a></li>
 <li><a class="reference internal" href="#running-and-testing" id="id21">3.3&nbsp;&nbsp;&nbsp;Running and testing</a></li>
@@ -363,7 +363,7 @@ ul.auto-toc {
 <li>A compiler from Scheme to Bob VM bytecode</li>
 <li>A serializer and deserializer for Bob VM bytecode</li>
 </ul>
-<p>In addition, Bob comes with another version of the VM, implemented in C++. It's called &quot;BareVM&quot;. BareVM is an optional implementeation - Bob is fully usable as an implementation of Scheme in pure Python.</p>
+<p>In addition, Bob comes with another version of the VM, implemented in C++. It's called &quot;BareVM&quot;. BareVM is an optional component - Bob is fully usable as an implementation of Scheme in pure Python.</p>
 <p>Here's a schematic description of these parts:</p>
 <div align="center" class="align-center"><img alt="diagrams/bob_toplevel.png" class="align-center" src="diagrams/bob_toplevel.png" /></div>
 <p>Blue boxes represent components implemented in Python. Orange boxes represent components implemented in C++ for BareVM.</p>
@@ -442,7 +442,7 @@ ul.auto-toc {
 <li><tt class="docutils literal">bob</tt>: The Python source code implementing Bob</li>
 <li><tt class="docutils literal">examples</tt>: Some examples of using Bob in a script</li>
 <li><tt class="docutils literal">tests_full</tt>: Tests exercising Bob's code by running complete Scheme programs and making sure they produce the expected output.</li>
-<li><tt class="docutils literal">barevm</tt>: BareVM source code and unit tests. See the <a class="reference internal" href="#using-barevm">Using BareVM</a> section for more details.</li>
+<li><tt class="docutils literal">barevm</tt>: BareVM source code and unit tests. See the <a class="reference internal" href="#barevm">BareVM</a> section for more details.</li>
 <li><tt class="docutils literal">experimental</tt>: Here be dragons! Experimental code not currently suitable for use.</li>
 </ul>
 </div>
@@ -491,13 +491,15 @@ Output file created: simple_func.bobc
 <p>The file <tt class="docutils literal">testcases_utils.py</tt> contains the simple testing infrastructure code used to implement the actual tests, and the <tt class="docutils literal">testcases</tt> directory contains complete Scheme programs with expected output files. New test cases added to this directory will be automatically &quot;discovered&quot; and run by the testing scripts.</p>
 </div>
 </div>
-<div class="section" id="using-barevm">
-<h1>3&nbsp;&nbsp;&nbsp;Using BareVM</h1>
+<div class="section" id="barevm">
+<h1>3&nbsp;&nbsp;&nbsp;BareVM</h1>
 <p>BareVM is an implementation of the Bob VM in C++. It should work as a drop-in replacement for the Python Bob VM, with one small difference:</p>
 <ul class="simple">
 <li>Bob VM is implemented as a library of Python classes. The <tt class="docutils literal">examples/run_compiled.py</tt> example shows how to instantiate a <tt class="docutils literal">Deserializer</tt> object followed by a <tt class="docutils literal">BobVM</tt> object to execute VM bytecode from a <tt class="docutils literal">.bobc</tt> file.</li>
 <li>BareVM compiles to a standalone executable that loads a <tt class="docutils literal">.bobc</tt> file, deserielizes it and executes the bytecode in it.</li>
 </ul>
+<p>Why is BareVM interesting? Python is a powerful programming language - sometimes <em>too</em> powerful. In particular, when implementing a virtual machine, Python makes the task relatively easy. Its powerful object system with duck typing, reflection capabilities and built-in garbage collection is something most Python programmers take for granted.</p>
+<p>And yet, most real-world VMs are implemented in C or C++, since a VM is one of those programs which are never fast enough. Compared to Python, these are low-level languages requiring much more of the implementation to be explicit. BareVM was created as an exercise in VM implementation in a low-level language. One of its most interesting features is a complete mark and sweep garbage collector. BareVM is also significantly faster than the Python Bob VM. Without any particular optimization efforts (following roughtly the same implementation logic as in the Python code), the performance is 5x  on many benchmarks.</p>
 <div class="section" id="structure-of-the-barevm-sub-tree">
 <h2>3.1&nbsp;&nbsp;&nbsp;Structure of the <tt class="docutils literal">barevm</tt> sub-tree</h2>
 <ul class="simple">

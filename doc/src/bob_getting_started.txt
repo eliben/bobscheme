@@ -27,7 +27,7 @@ Bob is a suite of implementations of the Scheme language in Python. It currently
 * A compiler from Scheme to Bob VM bytecode
 * A serializer and deserializer for Bob VM bytecode
 
-In addition, Bob comes with another version of the VM, implemented in C++. It's called "BareVM". BareVM is an optional implementeation - Bob is fully usable as an implementation of Scheme in pure Python.
+In addition, Bob comes with another version of the VM, implemented in C++. It's called "BareVM". BareVM is an optional component - Bob is fully usable as an implementation of Scheme in pure Python.
 
 Here's a schematic description of these parts:
 
@@ -122,7 +122,7 @@ Structure of the source tree
 
 * ``tests_full``: Tests exercising Bob's code by running complete Scheme programs and making sure they produce the expected output.
 
-* ``barevm``: BareVM source code and unit tests. See the `Using BareVM`_ section for more details.
+* ``barevm``: BareVM source code and unit tests. See the `BareVM`_ section for more details.
 
 * ``experimental``: Here be dragons! Experimental code not currently suitable for use.
 
@@ -173,13 +173,18 @@ The ``tests_full`` directory contains a test suite for running complete Scheme p
 
 The file ``testcases_utils.py`` contains the simple testing infrastructure code used to implement the actual tests, and the ``testcases`` directory contains complete Scheme programs with expected output files. New test cases added to this directory will be automatically "discovered" and run by the testing scripts.
 
-Using BareVM
-************
+BareVM
+******
 
 BareVM is an implementation of the Bob VM in C++. It should work as a drop-in replacement for the Python Bob VM, with one small difference:
 
 * Bob VM is implemented as a library of Python classes. The ``examples/run_compiled.py`` example shows how to instantiate a ``Deserializer`` object followed by a ``BobVM`` object to execute VM bytecode from a ``.bobc`` file.
 * BareVM compiles to a standalone executable that loads a ``.bobc`` file, deserielizes it and executes the bytecode in it.
+
+Why is BareVM interesting? Python is a powerful programming language - sometimes *too* powerful. In particular, when implementing a virtual machine, Python makes the task relatively easy. Its powerful object system with duck typing, reflection capabilities and built-in garbage collection is something most Python programmers take for granted.
+
+And yet, most real-world VMs are implemented in C or C++, since a VM is one of those programs which are never fast enough. Compared to Python, these are low-level languages requiring much more of the implementation to be explicit. BareVM was created as an exercise in VM implementation in a low-level language. One of its most interesting features is a complete mark and sweep garbage collector. BareVM is also significantly faster than the Python Bob VM. Without any particular optimization efforts (following roughtly the same implementation logic as in the Python code), the performance is 5x  on many benchmarks.
+
 
 Structure of the ``barevm`` sub-tree
 ------------------------------------
