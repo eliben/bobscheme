@@ -315,7 +315,7 @@ ul.auto-toc {
 <td>Eli Bendersky</td></tr>
 <tr><th class="docinfo-name">Contact:</th>
 <td><a class="first last reference external" href="mailto:eliben&#64;gmail.com">eliben&#64;gmail.com</a></td></tr>
-<tr class="field"><th class="docinfo-name">Updated:</th><td class="field-body">02-Apr-2011</td>
+<tr class="field"><th class="docinfo-name">Updated:</th><td class="field-body">09-Apr-2011</td>
 </tr>
 </tbody>
 </table>
@@ -377,7 +377,7 @@ ul.auto-toc {
 <p>Bob is a self-educational project. I find that the best way to understand complex concepts and mechanisms is implementing them from scratch. Working on Bob helped me understand the following concepts much better:</p>
 <ul class="simple">
 <li>How to write an interpreter for a complete programming-language. This was the easy part, because I've written a few interepreters before. However, it's important in order to provide a base-line implementation with which the other implementations can be compared.</li>
-<li>How to implement a stack-based virtual machine with its own bytecode. The Bob VM is not much different in its core from &quot;real&quot; VMs, like the one used by Python itself (to be more exact, the official CPython implementation). It's just much simpler.</li>
+<li>How to implement a stack-based virtual machine with its own bytecode. Conceptually, the Bob VM is not much different  from &quot;real&quot; VMs, like the one used by Python itself (to be more exact, the official CPython implementation). It's just much simpler.</li>
 <li>How to compile a high-level programming language into much lower-level VM bytecode.</li>
 </ul>
 <p>I learned a lot by working on Bob, and I release its code with the hope that it can help educate other people. Bob is written in Python, which is the closest to executable pseudo-code one can get. The code is relatively compact, clean and well documented.</p>
@@ -407,7 +407,7 @@ ul.auto-toc {
 </div>
 <div class="section" id="references">
 <h2>1.5&nbsp;&nbsp;&nbsp;References</h2>
-<p>Bob doesn't contain too many original ideas - it's mostly based on earlier work. I've done a lot of reading on this subject, both in books and online, but the two foremost resources that stand out are the following two books:</p>
+<p>Bob doesn't contain too many original ideas - it's mostly based on earlier work. I've done a lot of reading on this subject, both in books and online, but the two foremost resources that stand out are the following books:</p>
 <ul class="simple">
 <li>[<a class="reference external" href="http://mitpress.mit.edu/sicp/full-text/book/book.html">SICP</a>] <em>Structure and Implementation of Computer Programs, 2nd edition</em>, by Hal Abelson and Gerald Jay Sussman. The Bob interpreter is based on the <em>meta-circular interpreter</em> presented in this book.</li>
 <li>[<a class="reference external" href="http://norvig.com/paip.html">PAIP</a>] <em>Paradigms of Artificial Intelligence Programming</em>, by Peter Norvig. The Bob VM is inspired by the <em>hyperbolical stack machine</em> presented by Norvig in chapter 23.</li>
@@ -433,14 +433,14 @@ ul.auto-toc {
 </div>
 <div class="section" id="dependencies">
 <h2>2.2&nbsp;&nbsp;&nbsp;Dependencies</h2>
-<p>Bob is implemented in pure Python and is currently completely self-contained. To run it, you just need to have Python installed (version 2.6 or newer, including 3.1)</p>
+<p>Bob is implemented in pure Python and is currently completely self-contained. To run it, you just need to have Python installed. Bob runs with Python 2.6 and later, including 3.x.</p>
 </div>
 <div class="section" id="structure-of-the-source-tree">
 <h2>2.3&nbsp;&nbsp;&nbsp;Structure of the source tree</h2>
 <ul class="simple">
-<li><tt class="docutils literal">doc</tt>: Documentation</li>
-<li><tt class="docutils literal">bob</tt>: The Python source code implementing Bob</li>
-<li><tt class="docutils literal">examples</tt>: Some examples of using Bob in a script</li>
+<li><tt class="docutils literal">doc</tt>: Documentation.</li>
+<li><tt class="docutils literal">bob</tt>: The Python source code implementing Bob.</li>
+<li><tt class="docutils literal">examples</tt>: Some examples of using Bob in a script.</li>
 <li><tt class="docutils literal">tests_full</tt>: Tests exercising Bob's code by running complete Scheme programs and making sure they produce the expected output.</li>
 <li><tt class="docutils literal">barevm</tt>: BareVM source code and unit tests. See the <a class="reference internal" href="#barevm">BareVM</a> section for more details.</li>
 <li><tt class="docutils literal">experimental</tt>: Here be dragons! Experimental code not currently suitable for use.</li>
@@ -496,7 +496,7 @@ Output file created: simple_func.bobc
 <p>BareVM is an implementation of the Bob VM in C++. It should work as a drop-in replacement for the Python Bob VM, with one small difference:</p>
 <ul class="simple">
 <li>Bob VM is implemented as a library of Python classes. The <tt class="docutils literal">examples/run_compiled.py</tt> example shows how to instantiate a <tt class="docutils literal">Deserializer</tt> object followed by a <tt class="docutils literal">BobVM</tt> object to execute VM bytecode from a <tt class="docutils literal">.bobc</tt> file.</li>
-<li>BareVM compiles to a standalone executable that loads a <tt class="docutils literal">.bobc</tt> file, deserielizes it and executes the bytecode in it.</li>
+<li>BareVM compiles to a standalone executable that loads a <tt class="docutils literal">.bobc</tt> file, deserializes it and executes the bytecode in it.</li>
 </ul>
 <p>Why is BareVM interesting? Python is a powerful programming language - sometimes <em>too</em> powerful. In particular, when implementing a virtual machine, Python makes the task relatively easy. Its powerful object system with duck typing, reflection capabilities and built-in garbage collection is something most Python programmers take for granted.</p>
 <p>And yet, most real-world VMs are implemented in C or C++, since a VM is one of those programs which are never fast enough. Compared to Python, these are low-level languages requiring much more of the implementation to be explicit. BareVM was created as an exercise in VM implementation in a low-level language. One of its most interesting features is a complete mark and sweep garbage collector. BareVM is also significantly faster than the Python Bob VM. Without any particular optimization efforts (following roughtly the same implementation logic as in the Python code), the performance is 5x  on many benchmarks.</p>
