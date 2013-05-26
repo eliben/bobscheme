@@ -1,6 +1,7 @@
-Read doc/bob_getting_started.html first
+Documentation is in the doc/ directory in the source.
+Start with ``doc/bob_getting_started.html``.
 
-Diagram:
+The following diagram describes Bob:
 
 .. image:: https://bitbucket.org/eliben/bobscheme/raw/tip/doc/diagrams/bob_toplevel.png
   :align: center
