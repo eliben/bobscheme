@@ -3,6 +3,6 @@ Start with ``doc/bob_getting_started.html``.
 
 The following diagram describes Bob:
 
-.. image:: https://bitbucket.org/eliben/bobscheme/raw/tip/doc/diagrams/bob_toplevel.png
+.. image:: https://raw.github.com/eliben/bobscheme/master/doc/diagrams/bob_toplevel.png
   :align: center
 
