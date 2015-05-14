@@ -3,6 +3,6 @@ Documentation is in the doc/ directory in the source.
 
 The following diagram describes Bob::
 
-.. image:: https://raw.github.com/eliben/bobscheme/master/doc/diagrams/bob_toplevel.png
+.. image:: https://github.com/eliben/bobscheme/blob/master/doc/diagrams/bob_toplevel.png
   :align: center
 
