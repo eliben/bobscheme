@@ -1,5 +1,5 @@
 Documentation is in the doc/ directory in the source.
-Start with ``doc/bob_getting_started.html``.
+`Getting Started <https://github.com/eliben/bobscheme/blob/master/doc/bob_getting_started.rst>`_.
 
 The following diagram describes Bob::
 
