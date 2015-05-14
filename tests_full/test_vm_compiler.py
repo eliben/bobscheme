@@ -10,7 +10,6 @@
 import sys
 from testcases_utils import run_all_tests
 
-sys.path.insert(0, '..')
 from bob.compiler import compile_code
 from bob.vm import BobVM
 from bob.bytecode import Serializer, Deserializer
@@ -29,4 +28,3 @@ def vm_compiler_runner(code, ostream):
 
 
 run_all_tests(runner=vm_compiler_runner)
-

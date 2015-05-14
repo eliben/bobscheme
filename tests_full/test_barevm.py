@@ -12,7 +12,6 @@ from subprocess import Popen, PIPE
 import tempfile
 from testcases_utils import run_all_tests
 
-sys.path.insert(0, '..')
 from bob.compiler import compile_code
 from bob.bytecode import Serializer
 
@@ -24,7 +23,6 @@ def make_runner(barevm_path):
 
         # Get a temporary filename and write the serialized codeobject
         # into it
-        #
         fileobj, filename = tempfile.mkstemp()
         os.write(fileobj, serialized)
         os.close(fileobj)
@@ -38,8 +36,7 @@ def make_runner(barevm_path):
 
 
 if __name__ == '__main__':
-    barevm_path = "../barevm/barevm"
+    barevm_path = "barevm/barevm"
     barevm_runner = make_runner(barevm_path)
 
     run_all_tests(barevm_runner)
-

@@ -10,7 +10,6 @@
 import sys
 from testcases_utils import run_all_tests
 
-sys.path.insert(0, '..')
 from bob.interpreter import interpret_code
 
 

@@ -2,11 +2,11 @@ There are three separate test scripts here:
 
 * test_interpreter.py: test the interpreter
 * test_vm_compiler.py: test the compiler and VM
-* test_barevm.py: test the compiler and barevm
+* test_barevm.py: test the compiler and barevm (barevm has to be built first)
 
 From the main directory, run::
 
-    $ PYTHONPATH=. python tests_full/test_interpretr.py
+    $ PYTHONPATH=. python tests_full/test_interpreter.py
 
 etc.
 
