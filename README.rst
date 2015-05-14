@@ -5,3 +5,4 @@ The following diagram describes Bob::
 
 .. image:: https://raw.github.com/eliben/bobscheme/master/doc/diagrams/bob_toplevel.png
   :align: center
+
