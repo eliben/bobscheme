@@ -19,7 +19,7 @@ class TestCase(object):
         self.expected = expected
 
 
-def all_testcases(dir='testcases/'):
+def all_testcases(dir='tests_full/testcases'):
     for filename in sorted(os.listdir(dir)):
         if filename.endswith('.scm'):
             testname = os.path.splitext(filename)[0]
@@ -76,4 +76,3 @@ def run_all_tests(runner, dir='testcases/'):
     else:
         print('---- Tests had %s errors ----' % errorcount)
     print('Elapsed: %.4s sec' % (time.time() - starttime,))
-
