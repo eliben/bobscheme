@@ -10,7 +10,7 @@
 import os, sys
 from subprocess import Popen, PIPE
 import tempfile
-from testcases_utils import run_all_tests
+from testcases_utils import run_all_tests, bytes2str
 
 from bob.compiler import compile_code
 from bob.bytecode import Serializer
@@ -30,7 +30,7 @@ def make_runner(barevm_path):
         vm_proc = Popen([barevm_path, filename], stdout=PIPE)
         vm_output = vm_proc.stdout.read()
 
-        ostream.write(vm_output)
+        ostream.write(bytes2str(vm_output))
         os.remove(filename)
     return barevm_runner
 

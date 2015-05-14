@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # bob: tests_full/testcases_utils.py
 #
-# Utilities for loading test cases from the testcases/ directory and running 
+# Utilities for loading test cases from the testcases/ directory and running
 # them.
 #
 # Eli Bendersky (eliben@gmail.com)
@@ -25,22 +25,32 @@ def all_testcases(dir='tests_full/testcases'):
             testname = os.path.splitext(filename)[0]
             fullpath = os.path.join(dir, filename)
             code = open(fullpath).read()
-            
+
             exp_path = os.path.join(dir, testname + '.exp.txt')
             expected = open(exp_path).read()
-            
+
             yield TestCase(testname, code, expected)
+
+
+PY3 = sys.version_info[0] == 3
+
+
+def bytes2str(b):
+    if PY3:
+        return b.decode('utf-8')
+    else:
+        return b
 
 
 class StringIOUnicode(StringIO):
     """ For compatibility with both Python 2.6 and 3.x
     """
     def write(self, s):
-        if sys.hexversion > 0x03000000:
+        if PY3:
             StringIO.write(self, s)
         else:
             StringIO.write(self, unicode(s))
-        
+
 
 def run_all_tests(runner, dir='testcases/'):
     """ Runs all tests from the directory with the given runner. A runner
@@ -55,11 +65,11 @@ def run_all_tests(runner, dir='testcases/'):
         numdots = 25 - len(testcase.name)
         dots = '.' * numdots
         print('~~ Running test #%-3s [%s]%s.....' % (testcount, testcase.name, dots), end='')
-        
+
         expected = testcase.expected.lstrip()
         ostream = StringIOUnicode()
         runner(testcase.code, ostream)
-        
+
         if ostream.getvalue() == expected:
             print('OK')
         else:
