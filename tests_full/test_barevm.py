@@ -10,10 +10,11 @@
 import os, sys
 from subprocess import Popen, PIPE
 import tempfile
-from testcases_utils import run_all_tests, bytes2str
+from testcases_utils import run_all_tests
 
 from bob.compiler import compile_code
 from bob.bytecode import Serializer
+from bob.py3compat import bytes2str
 
 
 def make_runner(barevm_path):

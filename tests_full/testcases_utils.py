@@ -35,13 +35,6 @@ def all_testcases(dir='tests_full/testcases'):
 PY3 = sys.version_info[0] == 3
 
 
-def bytes2str(b):
-    if PY3:
-        return b.decode('utf-8')
-    else:
-        return b
-
-
 class StringIOUnicode(StringIO):
     """ For compatibility with both Python 2.6 and 3.x
     """

@@ -10,6 +10,7 @@ from __future__ import print_function
 import sys
 import pprint
 
+from . import py3compat
 from .bobparser import BobParser
 from .builtins import BuiltinProcedure, builtins_map
 from .expr import *
@@ -206,7 +207,7 @@ def interactive_interpreter():
     print("Interactive Bob interpreter. Type a Scheme expression or 'quit'")
 
     while True:
-        inp = raw_input("[bob] >> ")
+        inp = py3compat.input("[bob] >> ")
         if inp == 'quit':
             break
         parsed = parser.parse(inp)

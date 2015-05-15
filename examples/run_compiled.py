@@ -18,5 +18,3 @@ def run_compiled(filename):
 
 if __name__ == '__main__':
     run_compiled(sys.argv[1])
-
-    
