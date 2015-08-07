@@ -199,27 +199,6 @@ def interpret_code(code_str, output_stream=None):
         interp.interpret(expr)
 
 
-def interactive_interpreter():
-    """ Interactive interpreter 
-    """
-    interp = BobInterpreter() # by default output_stream is sys.stdout
-    parser = BobParser()
-    print("Interactive Bob interpreter. Type a Scheme expression or 'quit'")
-
-    while True:
-        inp = py3compat.input("[bob] >> ")
-        if inp == 'quit':
-            break
-        parsed = parser.parse(inp)
-        val = interp.interpret(parsed[0])
-        if val is None:
-            pass
-        elif isinstance(val, Procedure):
-            print(": <procedure object>")
-        else:
-            print(":", expr_repr(val))
-
-
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
     pass

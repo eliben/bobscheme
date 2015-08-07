@@ -9,7 +9,7 @@
 from __future__ import print_function
 from .bytecode import (
         OP_CONST, OP_LOADVAR, OP_STOREVAR, OP_DEFVAR, OP_FUNCTION, OP_POP,
-        OP_JUMP, OP_FJUMP, OP_RETURN, OP_CALL)
+        OP_JUMP, OP_FJUMP, OP_RETURN, OP_CALL, opcode2str)
 from .expr import expr_repr, Boolean
 from .builtins import BuiltinProcedure, builtins_map
 from .environment import Environment
@@ -130,7 +130,7 @@ class BobVM(object):
                 elif isinstance(proc, Closure):
                     if len(proc.codeobject.args) != len(argvalues):
                         raise self.VMError('Calling procedure %s with %s args, expected %s' % (
-                                                proc.codeobject.name, len(args), len(proc.codeobject.args)))
+                                                proc.codeobject.name, len(argvalues), len(proc.codeobject.args)))
                     
                     # We're now going to execute a code object, so save the
                     # current execution frame on the frame stack.
