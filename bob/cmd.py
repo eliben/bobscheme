@@ -6,18 +6,19 @@
 # Dustin J. Mitchell (dustin@v.igoro.us)
 # This code is in the public domain
 #-------------------------------------------------------------------------------
-
 from __future__ import print_function
 
 import os, sys
 import argparse
 
-from bob.compiler import compile_code
-from bob.bytecode import (Serializer, Deserializer)
-from bob.bobparser import BobParser
-from bob.vm import BobVM
-from bob.interpreter import (interpret_code, BobInterpreter, Procedure, expr_repr)
 from bob import py3compat
+from bob.bobparser import BobParser
+from bob.bytecode import (Serializer, Deserializer)
+from bob.compiler import compile_code
+from bob.interpreter import (expr_repr, interpret_code, BobInterpreter,
+                             Procedure)
+from bob.vm import BobVM
+
 
 def compile_file(filename=None, out_filename=None, disassemble=False):
     """ Given the name of a .scm file, compile it with the Bob compiler
@@ -42,6 +43,7 @@ def compile_file(filename=None, out_filename=None, disassemble=False):
         out_file.write(serialized)
         print("Output file created: %s" % out_filename)
 
+
 def interactive_interpreter():
     """ Interactive interpreter 
     """
@@ -62,11 +64,13 @@ def interactive_interpreter():
         else:
             print(":", expr_repr(val))
 
+
 def interpret_file(filename=None):
     if not filename:
         filename = sys.argv[1]
     with open(filename) as f:
         interpret_code(f.read())
+
 
 def run_compiled(filename=None):
     """ Given the name of a compiled Bob file (.bobc), run it with the 
@@ -79,24 +83,30 @@ def run_compiled(filename=None):
     vm = BobVM(output_stream=sys.stdout)
     vm.run(codeobject)
 
+
 def disassemble_file(filename=None):
-    """ Given the name of a compiled Bob file (.bobc), print it in human-readable
-        format.
+    """ Given the name of a compiled Bob file (.bobc), print it in
+        human-readable format.
     """
     bytecode = open(filename, 'rb').read()
     codeobject = Deserializer().deserialize_bytecode(bytecode)
     print(codeobject)
 
+
+DESCRIPTION = '''
+Bob is a suite of implementations of the Scheme language in Python'''
+
+
 def main():
-    parser = argparse.ArgumentParser(
-        description='Bob is a suite of implementations of the Scheme language in Python')
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
     parser.add_argument('-c', '--compile',
-            help="Compile a scheme file to bytecode", action='store_true')
+        help="Compile a scheme file to bytecode", action='store_true')
     parser.add_argument('-d', '--disassemble',
-            help="Disassemble a bytecode file", action='store_true')
+        help="Disassemble a bytecode file", action='store_true')
     parser.add_argument('-o', '--output',
-            help="Output filename for copmilation", type=str)
-    parser.add_argument('filename', nargs="?", help='filename to compile (-c) or run')
+        help="Output filename for copmilation", type=str)
+    parser.add_argument('filename', nargs="?",
+        help='filename to compile (-c) or run')
 
     args = parser.parse_args(sys.argv[1:])
     if args.disassemble and args.output:
@@ -121,3 +131,7 @@ def main():
                 interpret_file(args.filename)
             else:
                 run_compiled(args.filename)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,8 +1,11 @@
 from setuptools import setup, find_packages
 
+DESCRIPTION = '''\
+Bob is a suite of implementations of the Scheme language in Python'''
+
 setup(
     name='bobscheme',
-    description='Bob is a suite of implementations of the Scheme language in Python',
+    description=DESCRIPTION,
     author="Eli Bendersky",
     author_email="eliben@gmail.com",
     version='1.0.0',
@@ -14,4 +17,3 @@ setup(
         ],
     },
 )
-
