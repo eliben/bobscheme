@@ -180,6 +180,9 @@ Bob is implemented as a set of Python modules that can be imported and used from
 any Python script. The ``examples`` directory contains a few very simple scripts
 that show how to use Bob. 
 
+In addition, ``bob/cmd.py`` serves as a command-line interface for Bob. Run it
+with ``--help`` to see the various options it supports.
+
 Running the interpreter in interactive mode
 ===========================================
 
