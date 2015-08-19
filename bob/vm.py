@@ -133,9 +133,14 @@ class BobVM(object):
                                                 proc.codeobject.name, len(argvalues), len(proc.codeobject.args)))
                     
                     # We're now going to execute a code object, so save the
-                    # current execution frame on the frame stack.
+                    # current execution frame on the frame stack.  But do so only
+                    # if this is not a "tail call"; that is, only if this function
+                    # will do something with the result other than simply return
+                    # it.
                     #
-                    self.framestack.push(self.frame)
+                    next_instr = self._peek_next_instruction()
+                    if not next_instr or next_instr.opcode != OP_RETURN:
+                        self.framestack.push(self.frame)
 
                     # Extend the closure's environment with the bindings of
                     # argument names --> passed values. 
@@ -169,6 +174,15 @@ class BobVM(object):
             instr = self.frame.codeobject.code[self.frame.pc]
             self.frame.pc += 1
             return instr
+    
+    def _peek_next_instruction(self):
+        """ Peek at the next instruction from the current code object, without
+            advancing PC.  If the current code object has no next instruction, return None.
+        """
+        if self.frame.pc >= len(self.frame.codeobject.code):
+            return None
+        else:
+            return self.frame.codeobject.code[self.frame.pc]
     
     def _is_in_toplevel_code(self):
         """ Is the VM currently executing the top-level code object?
