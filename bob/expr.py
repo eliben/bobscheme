@@ -1,9 +1,9 @@
 #-------------------------------------------------------------------------------
 # bob: expr.py
 #
-# Internal representation for parsed Scheme code. Scheme code consists of 
-# expressions, which are recursively defined as either "atoms" (numbers, etc.) 
-# or lists of expressions. Lists are represented in the conventional Scheme 
+# Internal representation for parsed Scheme code. Scheme code consists of
+# expressions, which are recursively defined as either "atoms" (numbers, etc.)
+# or lists of expressions. Lists are represented in the conventional Scheme
 # notation of nested cons cells (Pair objects).
 #
 # Eli Bendersky (eliben@gmail.com)
@@ -11,31 +11,31 @@
 #-------------------------------------------------------------------------------
 
 #
-# Classes for expression objects 
+# Classes for expression objects
 # Note: The empty list is in a class of its own in Scheme. Here we represent it
 # by the None object.
 #
 class Pair(object):
-    """ Represents a Scheme pair ("cons cell"). 'first' and 'second' are 
+    """ Represents a Scheme pair ("cons cell"). 'first' and 'second' are
         publicly accessible attributes.
-        
-        Scheme idiomatic accessors can be implemented as follows, given that 
+
+        Scheme idiomatic accessors can be implemented as follows, given that
         p is a Pair:
-        
+
         car     ==> p.first
         cdr     ==> p.second
         cadr    ==> p.second.first
         caadr   ==> p.second.first.first
         ... etc.
-        
-        Note that if any of these actions is semantically invalid, a Python 
-        AttributeError will be raised. This is in accord with the Scheme 
+
+        Note that if any of these actions is semantically invalid, a Python
+        AttributeError will be raised. This is in accord with the Scheme
         standard, which states that (car '()) and (cdr '()) are errors.
     """
     def __init__(self, first, second):
         self.first = first
         self.second = second
-    
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.first == other.first and self.second == other.second
@@ -63,7 +63,7 @@ class Symbol(object):
 
     def __repr__(self):
         return self.value
-    
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.value == other.value
@@ -97,11 +97,11 @@ def expr_repr(expr):
     def repr_rec(obj):
         if obj is None:
             return '()'
-        elif isinstance(obj, (Boolean, Symbol, Number)):            
+        elif isinstance(obj, (Boolean, Symbol, Number)):
             return repr(obj)
         elif isinstance(obj, Pair):
             str = '(' + repr_rec(obj.first)
-            while isinstance(obj.second, Pair): 
+            while isinstance(obj.second, Pair):
                 str += ' ' + repr_rec(obj.second.first)
                 obj = obj.second
             if obj.second is None:
@@ -116,7 +116,7 @@ def expr_repr(expr):
 
 
 def make_nested_pairs(*args):
-    """ Given a list of arguments, creates a list in Scheme representation 
+    """ Given a list of arguments, creates a list in Scheme representation
         (nested Pairs)
     """
     if len(args) == 0:
@@ -127,9 +127,9 @@ def make_nested_pairs(*args):
 def expand_nested_pairs(pair, recursive=False):
     """ Given a list in Scheme representation (nested Pairs), expands it into
         a Python list.
-        
-        When recursive=True, expands nested pairs as well. I.e Scheme's 
-        (1 (2 3) 4) is correctly translated to [1, [2, 3], 4]). 
+
+        When recursive=True, expands nested pairs as well. I.e Scheme's
+        (1 (2 3) 4) is correctly translated to [1, [2, 3], 4]).
         Ignores dotted-pair endings: (1 2 . 3) will be translated to [1, 2]
     """
     lst = []
@@ -150,7 +150,7 @@ def is_scheme_expr(exp):
 
 
 #
-# Dissection of Scheme expressions into their constituents. Roughly follows 
+# Dissection of Scheme expressions into their constituents. Roughly follows
 # section 4.1.2 of SICP.
 #
 def is_self_evaluating(exp):
@@ -241,10 +241,10 @@ def if_alternative(exp):
         return Boolean(False)
     else:
         return alter_exp.first
-  
+
 def make_if(predicate, consequent, alternative):
     return make_nested_pairs(Symbol('if'), predicate, consequent, alternative)
-    
+
 
 def is_begin(exp):
     return is_tagged_list(exp, 'begin')
@@ -294,7 +294,7 @@ def sequence_to_exp(seq):
         return first_exp(seq)
     else:
         return Pair(Symbol('begin'), seq)
-    
+
 
 #
 # 'cond' is a derived expression and is expanded into a series of nested 'if's.
@@ -329,7 +329,7 @@ def expand_cond_clauses(clauses):
             raise ExprError('ELSE clause is not last: %s' % expr_repr(clauses))
     else:
         return make_if(
-                    predicate=cond_predicate(first), 
+                    predicate=cond_predicate(first),
                     consequent=sequence_to_exp(cond_actions(first)),
                     alternative=expand_cond_clauses(rest))
 
@@ -358,7 +358,7 @@ def let_body(exp):
     return exp.second.second
 
 def convert_let_to_application(exp):
-    """ Given a Scheme 'let' expression converts it to the appropriate 
+    """ Given a Scheme 'let' expression converts it to the appropriate
         application of an anonymous procedure.
     """
     # Extract lists of var names and values from the bindings of 'let'.
@@ -366,18 +366,12 @@ def convert_let_to_application(exp):
     #
     vars = []
     vals = []
-    
+
     bindings = let_bindings(exp)
     while bindings is not None:
         vars.append(bindings.first.first)
         vals.append(bindings.first.second.first)
         bindings = bindings.second
-    
+
     lambda_expr = make_lambda(make_nested_pairs(*vars), let_body(exp))
     return make_nested_pairs(lambda_expr, *vals)
-
-
-#------------------------------------------------------------------------------
-if __name__ == '__main__':
-    pass
-    
