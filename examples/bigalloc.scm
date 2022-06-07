@@ -10,6 +10,3 @@
 (attach 700)
 (set! bowl 40)
 (define joe 2)
-
-
-    
