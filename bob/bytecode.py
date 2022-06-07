@@ -42,9 +42,9 @@ def opcode2str(opcode):
 
 
 class Instruction(object):
-    """ A bytecode instruction. The opcode is one of the OP_... constants 
-        defined above. 
-        
+    """ A bytecode instruction. The opcode is one of the OP_... constants
+        defined above.
+
         The argument will be arbitrary when used in a CompiledProcedure, but
         is always numeric when the Instruction is part of a CodeObject.
     """
@@ -56,8 +56,8 @@ class Instruction(object):
 class CodeObject(object):
     """ A code object is a Scheme procedure in its compiled and assembled form,
         suitable by execution by the VM.
-      
-        name: 
+
+        name:
             Procedure name for debugging. Some procedures are anonymous (were
             defined by a 'lambda' and not 'define' and don't have a name).
             The top-level procedure that represents a whole file also doesn't
@@ -70,9 +70,9 @@ class CodeObject(object):
             A list of Instruction objects.
 
         constants:
-            A list of constants. Constants are either Scheme expressions 
+            A list of constants. Constants are either Scheme expressions
             (as defined by the types in the expr module) or CodeObjects (for
-            compiled procedures). The instructions in the code reference 
+            compiled procedures). The instructions in the code reference
             constants by their index in this list.
 
         varnames:
@@ -89,14 +89,14 @@ class CodeObject(object):
     def __repr__(self, nesting=0):
         repr = ''
         prefix = ' ' * nesting
-        
+
         repr += prefix + '----------\n'
         repr += prefix + 'CodeObject: ' + ('' if self.name is None else self.name) + '\n'
         repr += prefix + 'Args: ' + str(self.args) + '\n'
 
         for offset, instr in enumerate(self.code):
             repr += prefix + '  %4s %-12s ' % (offset, opcode2str(instr.opcode))
-            
+
             if instr.opcode == OP_CONST:
                 repr += '%4s {= %s}\n' % (instr.arg, expr_repr(self.constants[instr.arg]))
             elif instr.opcode in (OP_LOADVAR, OP_STOREVAR, OP_DEFVAR):
@@ -113,24 +113,24 @@ class CodeObject(object):
                 repr += self.constants[instr.arg].__repr__(nesting + 8)
             else:
                 assert False, "Unexpected opcode %s" % instr.opcode
-        
+
         repr += prefix + '----------\n'
         return repr
 
 
 # The serialization scheme is similar to Python's marshalling of code. Each
-# object is serialized by prepending a single "type" byte, followed by 
+# object is serialized by prepending a single "type" byte, followed by
 # the object's serialized representation. See the code of Serializer for the
 # details of how each type is serialized - it's pretty simple!
 #
 # A serialized bytecode consists of a string containing a magic constant
-# followed by the serialized top-level CodeObject in the bytecode. This is 
+# followed by the serialized top-level CodeObject in the bytecode. This is
 # created by Serializer.serialize_bytecode
-# 
-# The Deserializer class can convert a serialized string back into a 
+#
+# The Deserializer class can convert a serialized string back into a
 # CodeObject, in Deserializer.deserialize_bytecode
 #
-# The "magic" constant starting any serialized Bob bytecode consists of a 
+# The "magic" constant starting any serialized Bob bytecode consists of a
 # version in the high two bytes and 0B0B in the low two bytes.
 #
 # IMPORTANT: For compatibility with Python 2.6 and 3.x, bytecode is serialized
@@ -152,7 +152,7 @@ TYPE_CODEOBJECT = b'c'
 class Serializer(object):
     """ Serializes a CodeObject to a string.
     """
-    # Each function beginning with _s serializes some type and returns 
+    # Each function beginning with _s serializes some type and returns
     # a string representing the serialized object.
     #
     def __init__(self):
@@ -178,7 +178,7 @@ class Serializer(object):
         s = self._s_word(MAGIC_CONST)
         s += self._s_codeobject(codeobject)
         return s
-    
+
     def _s_word(self, wordvalue):
         """ word - a 32-bit integer, serialized in 4 bytes as little-endian
         """
@@ -189,7 +189,7 @@ class Serializer(object):
             objects and for Bob Symbol objects.
         """
         return TYPE_STRING + self._s_word(len(string)) + string.encode('ascii')
-           
+
     def _s_object(self, obj):
         """ Generic dispatcher for serializing an arbitrary object
         """
@@ -208,8 +208,8 @@ class Serializer(object):
         return TYPE_SYMBOL + self._s_word(len(symbol.value)) + symbol.value.encode('ascii')
 
     def _s_pair(self, pair):
-        return (    TYPE_PAIR + 
-                    self._s_object(pair.first) + 
+        return (    TYPE_PAIR +
+                    self._s_object(pair.first) +
                     self._s_object(pair.second))
 
     def _s_sequence(self, seq):
@@ -220,7 +220,7 @@ class Serializer(object):
         return TYPE_SEQUENCE + self._s_word(len(seq)) + s_seq
 
     def _s_instruction(self, instr):
-        """ Instructions are mapped into words, with the opcode taking 
+        """ Instructions are mapped into words, with the opcode taking
             the high byte and the argument the low 3 bytes.
         """
         arg = instr.arg or 0
@@ -240,7 +240,7 @@ class Serializer(object):
 class Deserializer(object):
     """ Deserializes a CodeObjct from a string
     """
-    
+
     class DeserializationError(Exception): pass
 
     # Each function beginning with _d deserializes an object from the given
@@ -252,7 +252,7 @@ class Deserializer(object):
     def __init__(self):
         self._deserialize_type_dispatch = {
             TYPE_NULL:          self._d_null,
-            TYPE_BOOLEAN:       self._d_boolean, 
+            TYPE_BOOLEAN:       self._d_boolean,
             TYPE_NUMBER:        self._d_number,
             TYPE_SYMBOL:        self._d_symbol,
             TYPE_PAIR:          self._d_pair,
@@ -278,7 +278,7 @@ class Deserializer(object):
             return self._d_codeobject(stream)
         except StopIteration as e:
             raise self.DeserializationError("Unexpected end of serialized stream")
-        
+
     def _match_type(self, stream, type):
         b = next(stream)
         if byte_literal(b) != type:
@@ -323,7 +323,7 @@ class Deserializer(object):
     def _d_instruction(self, stream):
         word = self._d_word(stream)
         return Instruction(word >> 24, word & 0xFFFFFF)
-    
+
     def _d_codeobject(self, stream):
         co = CodeObject()
         self._match_type(stream, TYPE_STRING)

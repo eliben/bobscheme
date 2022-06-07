@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # bob: compiler.py
 #
-# Scheme compiler. 
+# Scheme compiler.
 #
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
@@ -19,14 +19,14 @@ DEBUG = False
 class CompiledLabel(object):
     def __init__(self, name):
         self.name = name
-    
+
     def __repr__(self):
         return str(self.name)
 
 
 class CompiledProcedure(object):
     """ Represents a compiled procedure.
-    
+
         A procedure contains arguments (list of symbol names), code (list
         of compiled instructions) and optionally a name (for debugging).
     """
@@ -36,15 +36,15 @@ class CompiledProcedure(object):
         self.name = name
 
     def __repr__(self, nesting=0):
-        """ Obtain a string representation of a compiled procedure. 
+        """ Obtain a string representation of a compiled procedure.
         """
         repr = ''
         prefix = ' ' * nesting
-        
+
         repr += prefix + '----------\n'
         repr += prefix + 'Proc: ' + ('' if self.name is None else self.name) + '\n'
         repr += prefix + 'Args: ' + str(self.args) + '\n'
-        
+
         for instr in self.code:
             if isinstance(instr, CompiledLabel):
                 repr += prefix + '  %s:\n' % instr.name
@@ -66,22 +66,22 @@ class CompiledProcedure(object):
                     else:
                         arg_repr = str(instr.arg)
                     repr += arg_repr + '\n'
-        
+
         repr += prefix + '----------\n'
         return repr
 
 
 class BobCompiler(object):
-    """ A Scheme compiler. 
+    """ A Scheme compiler.
     """
     class CompileError(Exception): pass
 
     def __init__(self):
         self.labelstate = 0
-        
+
     def compile(self, exprlist):
-        """ Compile a list of parsed expressions (what's returned by 
-            BobParser.parse) into a single argument-less CompiledProcedure 
+        """ Compile a list of parsed expressions (what's returned by
+            BobParser.parse) into a single argument-less CompiledProcedure
             with the instructions stored in its .code attribute.
         """
         compiled_exprs = self._comp_exprlist(exprlist)
@@ -96,7 +96,7 @@ class BobCompiler(object):
         """ A helper creator for instructions.
         """
         return [Instruction(opcode, arg)]
-        
+
     def _instr_seq(self, *args):
         """ Create a sequence (list) of instructions, where each argument can
             be either a single instruction or a sequence of instructions.
@@ -105,7 +105,7 @@ class BobCompiler(object):
 
     def _comp(self, expr):
         """ Compile an expression.
-        
+
             Always returns a (Python) list of instructions.
         """
         if DEBUG: print('~~~~ Comp called on %s [%s]' % (expr_repr(expr), type(expr)))
@@ -136,14 +136,14 @@ class BobCompiler(object):
             return self._comp_application(expr)
         else:
             raise self.CompileError("Unknown expression in COMPILE: %s" % expr)
-    
+
     def _comp_lambda(self, expr):
         # The lambda parameters are in Scheme's nested Pair format. Convert
         # them into a normal Python list
         #
         args = expand_nested_pairs(lambda_parameters(expr))
         arglist = []
-        
+
         # Some sanity checking: only symbol arguments are supported
         #
         for sym in args:
@@ -151,48 +151,48 @@ class BobCompiler(object):
                 arglist.append(sym.value)
             else:
                 raise self.CompileError("Expected symbol in argument list, got: %s" % expr_repr(sym))
-        
+
         # For the code - compile lambda body as a sequence and append a RETURN
         # instruction to the end
         #
         proc_code = self._instr_seq(self._comp_begin(lambda_body(expr)),
                                     self._instr(OP_RETURN))
-        
-        return self._instr( OP_FUNCTION, 
+
+        return self._instr( OP_FUNCTION,
                             CompiledProcedure(
                                 args=arglist,
                                 code=proc_code))
 
     def _comp_begin(self, exprs):
-        # To compile a 'begin' we append the compiled versions of all the 
-        # expressions in it, with a POP instruction inserted after each one 
-        # except the last. 
+        # To compile a 'begin' we append the compiled versions of all the
+        # expressions in it, with a POP instruction inserted after each one
+        # except the last.
         #
         exprlist = expand_nested_pairs(exprs, recursive=False)
         return self._comp_exprlist(exprlist)
 
     def _comp_exprlist(self, exprlist):
         instr_pop_pairs = list(self._instr_seq(self._comp(expr), self._instr(OP_POP)) for expr in exprlist)
-        instrs = self._instr_seq(*instr_pop_pairs)        
+        instrs = self._instr_seq(*instr_pop_pairs)
         return instrs[:-1] if len(instrs) > 0 else instrs
 
-    def _comp_definition(self, expr):        
+    def _comp_definition(self, expr):
         compiled_val = self._comp(definition_value(expr))
-        
+
         # If the value is a procedure (a lambda), assign its .name attribute
         # to the variable name (for debugging)
         #
         var = definition_variable(expr)
-        if (    isinstance(compiled_val[-1], Instruction) and 
+        if (    isinstance(compiled_val[-1], Instruction) and
                 isinstance(compiled_val[-1].arg, CompiledProcedure)):
             compiled_val[-1].arg.name = var.value
-        
+
         return self._instr_seq(compiled_val, self._instr(OP_DEFVAR, var))
 
     def _comp_if(self, expr):
         label_else = self._make_label()
         label_after_else = self._make_label()
-        
+
         return self._instr_seq(
                         self._comp(if_predicate(expr)),
                         self._instr(OP_FJUMP, label_else),
@@ -201,7 +201,7 @@ class BobCompiler(object):
                         [label_else],
                         self._comp(if_alternative(expr)),
                         [label_after_else])
-    
+
     def _comp_application(self, expr):
         args = expand_nested_pairs(application_operands(expr), recursive=False)
         compiled_args = self._instr_seq(*[self._comp(arg) for arg in args])
@@ -218,9 +218,9 @@ class BobAssembler(object):
         """
         label_offsets = self._compute_label_offsets(proc)
         return self._assemble_to_code(proc, label_offsets)
-        
+
     def _compute_label_offsets(self, proc):
-        """ The first pass of the assembler - compute addresses (offsets) of all 
+        """ The first pass of the assembler - compute addresses (offsets) of all
             labels in the code. Return a dict mapping label name -> offset.
         """
         d = {}
@@ -239,7 +239,7 @@ class BobAssembler(object):
         co = CodeObject()
         co.name = proc.name
         co.args = proc.args
-        
+
         for instr in proc.code:
             if isinstance(instr, CompiledLabel):
                 continue
@@ -269,22 +269,18 @@ class BobAssembler(object):
                 arg = None
             else:
                 assert False, "Unexpected opcode %s" % instr.opcode
-                
+
             co.code.append(Instruction(instr.opcode, arg))
 
         return co
 
 
 def compile_code(code_str):
-    """ Convenience function for compiling (& assembling) a string containing 
+    """ Convenience function for compiling (& assembling) a string containing
         Scheme code into a code object.
     """
-    parsed_exprs = BobParser().parse(code_str)    
+    parsed_exprs = BobParser().parse(code_str)
     compiled = BobCompiler().compile(parsed_exprs)
-    
+
     return BobAssembler().assemble(compiled)
 
-
-#-------------------------------------------------------------------------------
-if __name__ == '__main__':
-    pass
