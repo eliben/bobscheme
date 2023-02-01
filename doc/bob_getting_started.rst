@@ -229,6 +229,8 @@ scripts::
 Running tests
 -------------
 
+To run all the tests simply run ``make test``.
+
 The ``tests_full`` directory contains a test suite for running complete Scheme
 programs with Bob. To make sure Bob runs correctly, execute both
 ``test_interpreter.py`` and ``test_vm_compiler.py``, and see that no errors are
