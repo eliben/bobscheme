@@ -21,11 +21,7 @@ $(TESTS)::
 	$(PYTHON) tests_full/$@.py
 
 clean:
-	git status --ignored | \
-	    grep -A9999 '^Ignored' | \
-	    grep $$'^\t' | \
-	    cut -f2 | \
-	    xargs -r $(RM) -r
+	git clean -dXf
 
 barevm/barevm:
 	$(if $(shell command -v cmake),,$(error No cmake binary found))
