@@ -4,7 +4,7 @@
 
 :Author: Eli Bendersky
 :Contact: eliben@gmail.com
-:Updated: 14-May-2015
+:Updated: 03-Feb-2023
 
 .. contents:: Table of Contents
     :backlinks: none
@@ -152,8 +152,7 @@ Dependencies
 ------------
 
 Bob is implemented in pure Python and is currently completely self-contained. To
-run it, you just need to have Python installed. Bob runs with Python 2.6 and
-later, including 3.x.
+run it, you just need to have Python 3 installed.
 
 Structure of the source tree
 ----------------------------
@@ -229,7 +228,7 @@ scripts::
 Running tests
 -------------
 
-To run all the tests simply run ``make test``.
+To run tests, execute ``make test``.
 
 The ``tests_full`` directory contains a test suite for running complete Scheme
 programs with Bob. To make sure Bob runs correctly, execute both
@@ -308,3 +307,6 @@ whole set of full testcases. By default, the path to barevm in
 ``tests_full/test_barevm.py`` points to the executable generated on Linux. If
 you want to run these tests on Windows or move the executable to another
 location, modify the path accordingly.
+
+You can also execute ``make test-all`` to build and test BareVM.
+
