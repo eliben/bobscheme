@@ -8,7 +8,6 @@ export PYTHONPATH := $(PWD)
 PYTHON_TESTS := \
     test_interpreter \
     test_vm_compiler \
-    test_barevm \
 
 BAREVM_TESTS := \
     test_barevm \
@@ -17,18 +16,27 @@ BAREVM_TESTS := \
 
 default:
 
-test: $(PYTHON_TESTS) barevm_unittest
+test: test-python
 
-$(BAREVM_TESTS):: barevm/barevm
+test-all: test-python test-barevm
+
+test-python: $(PYTHON_TESTS)
+
+test-barevm: $(BAREVM_TESTS)
+
+clean:
+	git clean -dXf
 
 $(PYTHON_TESTS)::
 	$(PYTHON) tests_full/$@.py
 
+$(BAREVM_TESTS):: barevm/barevm
+
+test_barevm::
+	$(PYTHON) tests_full/$@.py
+
 barevm_unittest::
 	$(MAKE) --no-print-directory -C barevm -f CMakeFiles/Makefile2 barevm_unittest
-
-clean:
-	git clean -dXf
 
 barevm/barevm:
 	$(if $(shell command -v cmake),,$(error No cmake binary found))
