@@ -14,8 +14,8 @@ using namespace std;
 
 // ----------- BobNull ------------
 //
-bool BobNull::equals_to(const BobObject& other) const 
-{ 
+bool BobNull::equals_to(const BobObject& other) const
+{
     (void)other;
     // This will be called only for another BobNull, and two nulls are
     // always equal
@@ -62,7 +62,7 @@ string BobNumber::repr() const
 
 // ----------- BobSymbol ------------
 //
-bool BobSymbol::equals_to(const BobObject& other) const 
+bool BobSymbol::equals_to(const BobObject& other) const
 {
     const BobSymbol& other_sym = static_cast<const BobSymbol&>(other);
     return other_sym.m_value == m_value;
@@ -77,8 +77,8 @@ string BobSymbol::repr() const
 
 // ----------- BobPair ------------
 //
-bool BobPair::equals_to(const BobObject& other) const 
-{ 
+bool BobPair::equals_to(const BobObject& other) const
+{
     const BobPair& other_pair = static_cast<const BobPair&>(other);
     return (objects_equal(m_first, other_pair.m_first) &&
             objects_equal(m_second, other_pair.m_second));
@@ -103,7 +103,7 @@ std::string BobPair::repr_internal() const
 {
     assert(m_first && "Expect valid pointer in m_first");
     string rep = m_first->repr();
-    
+
     // Linearizes a nested pair structure. I.e:
     // Pair(1, Pair(2, Null)) ==> 1 2
     // The loop runs until the current pair's m_second is no longer a pair.

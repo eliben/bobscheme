@@ -58,7 +58,7 @@ BobAllocator BobAllocator::the_allocator;
 // The implementation details of the allocator
 //
 typedef pair<BobObject*, size_t> LiveObject;
-struct BobAllocator::Impl 
+struct BobAllocator::Impl
 {
     list<LiveObject> live_objects;
     size_t total_alloc_size;
@@ -125,12 +125,12 @@ string BobAllocator::stats_general() const
 string BobAllocator::stats_all_live() const
 {
     string s = "==== Live objects ====\n";
-    for (list<LiveObject>::const_iterator it = d->live_objects.begin(); 
+    for (list<LiveObject>::const_iterator it = d->live_objects.begin();
             it != d->live_objects.end(); ++it) {
         BobObject* obj = it->first;
         size_t size = it->second;
         if (dynamic_cast<BobBuiltinProcedure*>(obj) == 0)
-            s += format_string("%s(%u) %s\n", 
+            s += format_string("%s(%u) %s\n",
                     typeid(*obj).name(), size, obj->repr().c_str());
     }
     return s;
@@ -171,7 +171,7 @@ void BobAllocator::run_gc(size_t size_threshold)
     // Debugging...
     if (d->debug_on && d->total_alloc_size != old_total_alloc_size) {
         cerr << "=== GC collection\n";
-        cerr << format_string("--> was %u objects (total size %u)\n", 
+        cerr << format_string("--> was %u objects (total size %u)\n",
                     old_num_live_objects, old_total_alloc_size);
         cerr << format_string("--> now %u objects (total size %u)\n",
                     d->live_objects.size(), d->total_alloc_size);
