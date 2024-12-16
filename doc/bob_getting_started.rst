@@ -267,7 +267,7 @@ BareVM was created as an exercise in VM implementation in a low-level language.
 One of its most interesting features is a complete mark and sweep garbage
 collector. BareVM is also significantly faster than the Python Bob VM. Without
 any particular optimization efforts (following roughtly the same implementation
-logic as in the Python code), the performance is 5x  on many benchmarks.
+logic as in the Python code), the performance is 5x on many benchmarks.
 
 Structure of the ``barevm`` sub-tree
 ------------------------------------
@@ -309,4 +309,3 @@ you want to run these tests on Windows or move the executable to another
 location, modify the path accordingly.
 
 You can also execute ``make test-all`` to build and test BareVM.
-

@@ -41,7 +41,7 @@ class Lexer(object):
         See below for an example of usage.
     """
     def __init__(self, rules, skip_whitespace=True):
-        """ Create a lexer.
+        r""" Create a lexer.
 
             rules:
                 A list of rules. Each rule is a `regex, type`
@@ -73,7 +73,7 @@ class Lexer(object):
 
         self.regex = re.compile('|'.join(regex_parts))
         self.skip_whitespace = skip_whitespace
-        self.re_ws_skip = re.compile('\S')
+        self.re_ws_skip = re.compile(r'\S')
 
     def input(self, buf):
         """ Initialize the lexer with a buffer as input.
@@ -118,26 +118,3 @@ class Lexer(object):
             tok = self.token()
             if tok is None: break
             yield tok
-
-
-if __name__ == '__main__':
-    rules = [
-        ('\d+',             'NUMBER'),
-        ('[a-zA-Z_]\w+',    'IDENTIFIER'),
-        ('\+',              'PLUS'),
-        ('\-',              'MINUS'),
-        ('\*',              'MULTIPLY'),
-        ('\/',              'DIVIDE'),
-        ('\(',              'LP'),
-        ('\)',              'RP'),
-        ('=',               'EQUALS'),
-    ]
-
-    lx = Lexer(rules, skip_whitespace=True)
-    lx.input('erw = _abc + 12*(R4-623902)  ')
-
-    try:
-        for tok in lx.tokens():
-            print(tok)
-    except LexerError as err:
-        print('LexerError at position %s' % err.pos)

@@ -145,9 +145,9 @@ void BobAllocator::run_gc(size_t size_threshold)
     size_t old_num_live_objects = d->live_objects.size();
     size_t old_total_alloc_size = d->total_alloc_size;
 
-    // Mark each object found in the roots. Marking as implemented by
-    // BobObjectis subclasses is recursive.
-    // Go over all the live objects:
+    // * Mark each object found in the roots. Marking as implemented by
+    //   BobObject's subclasses is recursive.
+    // * Sweep phase: go over all the live objects
     //   * Marked objects are used and thus have to keep living. Clear their
     //     mark flag.
     //   * Unmarked objects aren't used and can be deleted.
