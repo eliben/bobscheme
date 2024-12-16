@@ -11,9 +11,8 @@ called "BareVM". BareVM is an optional component - Bob is fully usable as an
 implementation of Scheme in pure Python.
 
 There's some documentation in the ``doc/`` directory in the source.
-`Getting Started <https://github.com/eliben/bobscheme/blob/master/doc/bob_getting_started.rst>`_.
+[Getting Started](https://github.com/eliben/bobscheme/blob/master/doc/bob_getting_started.rst).
 
 The following diagram describes Bob:
 
-.. image:: https://github.com/eliben/bobscheme/blob/master/doc/diagrams/bob_toplevel.png
-  :align: center
+![Diagram describing Bob](https://github.com/eliben/bobscheme/blob/master/doc/diagrams/bob_toplevel.png)
