@@ -100,7 +100,7 @@ struct VMImpl
     BobObject* builtin_run_gc(BuiltinArgs&);
     BobObject* builtin_debug_gc(BuiltinArgs&);
 
-    // Internal 
+    // Internal
     //
     BobEnvironment* create_global_env();
     string repr_vm_state();
@@ -112,7 +112,7 @@ struct VMImpl
 BobVM::BobVM(const string& output_file)
     : d(new VMImpl)
 {
-    if (output_file == "") 
+    if (output_file == "")
         d->m_output_stream = stdout;
     else {
         d->m_output_stream = fopen(output_file.c_str(), "w");
@@ -166,7 +166,7 @@ void BobVM::run(BobCodeObject* codeobj)
         //
         BobInstruction instr;
         if (d->m_frame.pc >= cur_codeobj->code.size()) {
-            if (d->m_framestack.size() == 0) 
+            if (d->m_framestack.size() == 0)
                 return;
             else
                 throw VMError("Code object ended prematurely");
@@ -176,14 +176,14 @@ void BobVM::run(BobCodeObject* codeobj)
             d->m_frame.pc++;
         }
 
-        // Let the GC run if required. 
+        // Let the GC run if required.
         // Note: it's important to allow the GC to run only in-between
         // instructions, because during an instruction's execution, some
         // objects may not be reachable from the roots and the GC will
         // collect them if run. One example is builtin calls, where the
         // arguments are taken off the stack before passing control to
         // the builtin. If the builtin triggered a GC call, these arguments
-        // would be collected which is a very bad thing. So, for extra 
+        // would be collected which is a very bad thing. So, for extra
         // safety, GC is not allowed to run arbitrarily.
         //
         BobAllocator::get().run_gc(d->gc_size_threshold);
@@ -302,7 +302,7 @@ void BobVM::run(BobCodeObject* codeobj)
                     }
                 }
                 else if (BobClosure* closure = dynamic_cast<BobClosure*>(func_val)) {
-                    // Extend the closure's environment with one where its code 
+                    // Extend the closure's environment with one where its code
                     // object's arguments are bound to the values passed to it
                     // in the call.
                     //
@@ -325,7 +325,7 @@ void BobVM::run(BobCodeObject* codeobj)
                     //    and the extendend environment.
                     // 3. Start executing the frame by making it the current
                     //    frame with pc=0. The procedure's first instruction
-                    //    will then execute in the next iteration of this 
+                    //    will then execute in the next iteration of this
                     //    loop.
                     //
                     d->m_framestack.push_back(d->m_frame);
@@ -335,7 +335,7 @@ void BobVM::run(BobCodeObject* codeobj)
                     new_frame.env = call_env;
                     d->m_frame = new_frame;
                 }
-                else 
+                else
                     assert(0 && "Expected callable object on TOS for OP_CALL");
 
                 break;
@@ -354,7 +354,7 @@ void BobVM::gc_mark_roots()
     d->m_frame.env->gc_mark();
 
     // all objects in the value stack
-    for (deque<BobObject*>::iterator it = d->m_valuestack.begin(); 
+    for (deque<BobObject*>::iterator it = d->m_valuestack.begin();
             it != d->m_valuestack.end(); ++it) {
         (*it)->gc_mark();
     }
@@ -368,14 +368,14 @@ void BobVM::gc_mark_roots()
 }
 
 
-// What follows is an attempt to create builtins that have access to the 
+// What follows is an attempt to create builtins that have access to the
 // internal state of the VM in a relatively clean way.
 // The problem is that BuiltinProc is a pointer to a simple function that takes
 // arguments and returns a value - it has no access to the VM. However, we
 // also want to be able to create builtins that do have access to the VM.
 // The way to do this is derive a special class from BobBuiltinProcedure.
 // Instead of taking a BuiltinProc, BobVMBuiltinProcedure takes a VMImpl
-// object and a pointer to a BobVM member function. 
+// object and a pointer to a BobVM member function.
 // This way, by overriding exec(), it can be called in a way exactly
 // similar to a normal BobBuiltinProcedure, but use its VM object reference
 // and member function pointer to call a builtin function that's actually
@@ -419,12 +419,12 @@ BobEnvironment* VMImpl::create_global_env()
         env->define_var(i->first, proc);
     }
 
-    // Now add the builtins defined as member functions of BobVM and have 
+    // Now add the builtins defined as member functions of BobVM and have
     // access to its state.
     //
-    env->define_var("write", 
+    env->define_var("write",
             new BobVMBuiltinProcedure("write", *this, &VMImpl::builtin_write));
-    env->define_var("__debug-vm", 
+    env->define_var("__debug-vm",
             new BobVMBuiltinProcedure("__debug-vm", *this, &VMImpl::builtin_debug_vm));
     env->define_var("__run-gc",
             new BobVMBuiltinProcedure("__run-gc", *this, &VMImpl::builtin_run_gc));
