@@ -13,7 +13,6 @@ BAREVM_TESTS := \
     test_barevm \
     barevm_unittest \
 
-
 default:
 
 test: test-python
@@ -32,12 +31,12 @@ $(PYTHON_TESTS)::
 
 $(BAREVM_TESTS):: barevm/barevm
 
-test_barevm::
+test_barevm:: barevm/barevm
 	$(PYTHON) tests_full/$@.py
 
 barevm_unittest::
 	$(MAKE) --no-print-directory -C barevm -f CMakeFiles/Makefile2 barevm_unittest
 
-barevm/barevm:
+barevm/barevm: barevm/src/*.cpp barevm/src/*.h
 	$(if $(shell command -v cmake),,$(error No cmake binary found))
 	cd barevm && cmake . && $(MAKE)

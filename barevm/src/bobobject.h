@@ -11,14 +11,13 @@
 #include <list>
 #include <vector>
 
-
-// Abstract base class for all objects managed by the Bob VM. 
-// 
-// Objects deriving from BobObject are automatically garbage-collected. 
+// Abstract base class for all objects managed by the Bob VM.
+//
+// Objects deriving from BobObject are automatically garbage-collected.
 // Therefore, you should only allocate them dynamically with new, and
 // never, *ever* explicitly delete them.
 //
-class BobObject 
+class BobObject
 {
 public:
     BobObject();
@@ -30,30 +29,33 @@ public:
     }
 
     // Derived classes that want to be comparable should override this
-    // method. 
+    // method.
     // It shall be invoked only with 'other' of the same class as the
     // object it's invoked on.
     //
-    virtual bool equals_to(const BobObject& other) const
+    virtual bool equals_to(const BobObject &other) const
     {
         (void)other;
         return false;
     }
 
-    void* operator new(size_t sz);
-    void operator delete(void* p);
+    void *operator new(size_t sz);
+    void operator delete(void *p);
 
-    // Garbage collection code.
+    // Mark this object and its pointed-to objects as live. Subclasses are
+    // expected to implement gc_mark_pointed() to mark their own pointers.
     //
     virtual void gc_mark()
     {
-        if (!m_gc_marked) {
+        // Only recurse if not already marked; this prevents infinite recursion.
+        if (!m_gc_marked)
+        {
             m_gc_marked = true;
             gc_mark_pointed();
         }
     }
 
-    virtual void gc_clear() 
+    virtual void gc_clear()
     {
         m_gc_marked = false;
     }
@@ -63,33 +65,34 @@ public:
         return m_gc_marked;
     }
 
+protected:
+    bool m_gc_marked;
+
+    // Mark all objects pointed to by this object as live.
     // The default implementation does nothing here, to simplify the trivial
     // objects that hold no pointers to other objects
     //
     virtual void gc_mark_pointed()
     {
     }
-
-protected:
-    bool m_gc_marked;
 };
-
 
 class BobVM;
 
-
-class BobAllocator 
+// Singleton memory allocator for BobObject instances. Use the get() static
+// method to get the allocator instance.
+class BobAllocator
 {
 public:
-    static BobAllocator& get()
+    static BobAllocator &get()
     {
         return the_allocator;
     }
 
-    void* allocate_object(std::size_t sz);
-    void release_object(void* p);
+    void *allocate_object(std::size_t sz);
+    void release_object(void *p);
 
-    // Run the garbage collector if the total allocation size is larger 
+    // Run the garbage collector if the total allocation size is larger
     // than size_threshold.
     //
     void run_gc(size_t size_threshold);
@@ -98,10 +101,10 @@ public:
     //
     void set_debugging(bool debug_on);
 
-    // Register a VM object with the GC. The VM object is used to 
+    // Register a VM object with the GC. The VM object is used to
     // mark the roots.
     //
-    void register_vm_obj(BobVM* vm_obj);
+    void register_vm_obj(BobVM *vm_obj);
 
     // Return various statistics as a string for debugging
     //
@@ -114,17 +117,15 @@ private:
     BobAllocator();
     ~BobAllocator();
 
-    BobAllocator(const BobAllocator&);
-    BobAllocator& operator=(const BobAllocator&);
+    BobAllocator(const BobAllocator &);
+    BobAllocator &operator=(const BobAllocator &);
 
     struct Impl;
-    BobAllocator::Impl* d;
+    BobAllocator::Impl *d;
 };
-
 
 // Compare two objects of any type derived from BobObject
 //
-bool objects_equal(const BobObject*, const BobObject*);
-
+bool objects_equal(const BobObject *, const BobObject *);
 
 #endif /* BOBOBJECT_H */
