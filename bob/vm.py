@@ -29,13 +29,13 @@ class Closure(object):
 
 
 class ExecutionFrame(object):
-    """ Encapsulates the execution "frame": state of the VM. 
-    
-        codeobject: 
+    """ Encapsulates the execution "frame": state of the VM.
+
+        codeobject:
             The current code object executed by the VM
-        pc: 
+        pc:
             An index into the code object of the next instruction to execute
-        env: 
+        env:
             The environment in which the code is being executed
     """
     def __init__(self, codeobject, pc, env):
@@ -45,50 +45,50 @@ class ExecutionFrame(object):
 
 
 class BobVM(object):
-    """ Implementation of the Bob VM. Initialize and then .run() with a 
+    """ Implementation of the Bob VM. Initialize and then .run() with a
         CodeObject.
     """
     class VMError(Exception): pass
-        
+
     def __init__(self, output_stream=None):
         self.valuestack = Stack()
         self.framestack = Stack()
-        
+
         self.frame = ExecutionFrame(
                         codeobject=None,
                         pc=None,
                         env=self._create_global_env())
-        
+
         if output_stream is None:
             import sys
             self.output_stream = sys.stdout
         else:
             self.output_stream = output_stream
-    
+
     def run(self, codeobject):
         """ The main execution function of the VM. Accepts a CodeObject, and
             runs it until there are no more instructions to execute.
         """
         self.frame.codeobject = codeobject
         self.frame.pc = 0
-        
+
         #
         # The big VM loop!
         #
         while True:
-            # If there are no more instructions in this code object, it's either 
+            # If there are no more instructions in this code object, it's either
             # because we're done executing the program, or an error.
             #
             instr = self._get_next_instruction()
-            
+
             if instr is None:
                 if self._is_in_toplevel_code():
                     break
                 else:
                     raise self.VMError('Code object ended prematurely: %s' % self.codeobject)
-            
+
             if DEBUG: print(opcode2str(instr.opcode), instr.arg)
-            
+
             if instr.opcode == OP_CONST:
                 self.valuestack.push(self.frame.codeobject.constants[instr.arg])
             elif instr.opcode == OP_LOADVAR:
@@ -114,7 +114,7 @@ class BobVM(object):
                 closure = Closure(func_codeobject, self.frame.env)
                 self.valuestack.push(closure)
             elif instr.opcode == OP_CALL:
-                # For CALL what we have on TOS the function and then the 
+                # For CALL what we have on TOS the function and then the
                 # arguments to pass to it - the last argument is highest on
                 # the stack.
                 # The function is either a BuiltinProcedure or a Closure (for
@@ -123,7 +123,7 @@ class BobVM(object):
                 proc = self.valuestack.pop()
                 argvalues = [self.valuestack.pop() for i in range(instr.arg)]
                 argvalues.reverse()
-                
+
                 if isinstance(proc, BuiltinProcedure):
                     result = proc.apply(argvalues)
                     self.valuestack.push(result)
@@ -131,20 +131,20 @@ class BobVM(object):
                     if len(proc.codeobject.args) != len(argvalues):
                         raise self.VMError('Calling procedure %s with %s args, expected %s' % (
                                                 proc.codeobject.name, len(argvalues), len(proc.codeobject.args)))
-                    
+
                     # We're now going to execute a code object, so save the
                     # current execution frame on the frame stack.
                     #
                     self.framestack.push(self.frame)
 
                     # Extend the closure's environment with the bindings of
-                    # argument names --> passed values. 
+                    # argument names --> passed values.
                     #
                     arg_bindings = {}
                     for i, argname in enumerate(proc.codeobject.args):
                         arg_bindings[argname] = argvalues[i]
                     extended_env = Environment(arg_bindings, proc.env)
-                    
+
                     # Start executing the procedure
                     #
                     self.frame = ExecutionFrame(
@@ -153,14 +153,14 @@ class BobVM(object):
                                     env=extended_env)
                 else:
                     raise self.VMError('Invalid object on TOS for CALL: %s' % proc)
-                
+
             elif instr.opcode == OP_RETURN:
                 self.frame = self.framestack.pop()
             else:
                 raise self.VMError('Unknown instruction opcode: %s' % instr.opcode)
-    
+
     def _get_next_instruction(self):
-        """ Get the next instruction from the current code object and advance 
+        """ Get the next instruction from the current code object and advance
             PC. If the code object has no more instructions, return None.
         """
         if self.frame.pc >= len(self.frame.codeobject.code):
@@ -169,12 +169,12 @@ class BobVM(object):
             instr = self.frame.codeobject.code[self.frame.pc]
             self.frame.pc += 1
             return instr
-    
+
     def _is_in_toplevel_code(self):
         """ Is the VM currently executing the top-level code object?
         """
         return len(self.framestack) == 0
-    
+
     def _create_global_env(self):
         global_binding = {}
         for name, func in builtins_map.items():
@@ -203,19 +203,19 @@ class BobVM(object):
                 return '| BuiltinProcedure <%s>\n' % item.name
             else:
                 return '| %s\n' % expr_repr(item)
-        
+
         def frame_printer(item):
             str = 'Code: <%s>' % item.codeobject.name
             str += ' [PC=%s]\n' % item.pc
             return str
-        
+
         def show_stack(stack, name, item_printer):
             str = ''
             head = '-' * (8 + len(name))
             str += '+%s+\n' % head
             str += '| %s stack |\n' % name
             str += '+%s+\n\n' % head
-            
+
             i = 0
             while i < len(stack):
                 str += '      |--------\n'
