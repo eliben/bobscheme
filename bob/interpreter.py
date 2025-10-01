@@ -57,61 +57,88 @@ class BobInterpreter(object):
         return self._eval(expr, self.global_env)
 
     def _eval(self, expr, env):
-        if DEBUG: print('~~~~ Eval called on %s [%s]' % (expr_repr(expr), type(expr)))
-        if DEBUG: print('Env:')
-        if DEBUG: pprint.pprint(env.binding)
+        """ Evaluate a scheme expression in an environment
+            and return the result.
+            If the return result is just another scheme expression
+            to evaluate (e.g. a tail call) then loop and evaluate
+            the new scheme expression
+        """
+        while True:
+            if DEBUG: print('~~~~ Eval called on %s [%s]' % (expr_repr(expr), type(expr)))
+            if DEBUG: print('Env:')
+            if DEBUG: pprint.pprint(env.binding)
 
-        # Standard Scheme eval (SICP 4.1.1)
-        #
-        if is_self_evaluating(expr):
-            return expr
-        elif is_variable(expr):
-            return env.lookup_var(expr.value)
-        elif is_quoted(expr):
-            return text_of_quotation(expr)
-        elif is_assignment(expr):
-            env.set_var_value(
-                var=assignment_variable(expr).value,
-                value=self._eval(assignment_value(expr), env))
-            return None
-        elif is_definition(expr):
-            env.define_var(
-                var=definition_variable(expr).value,
-                value=self._eval(definition_value(expr), env))
-            return None
-        elif is_if(expr):
-            predicate = self._eval(if_predicate(expr), env)
-            if predicate == Boolean(False):
-                return self._eval(if_alternative(expr), env)
-            else:
-                return self._eval(if_consequent(expr), env)
-        elif is_cond(expr):
-            return self._eval(convert_cond_to_ifs(expr), env)
-        elif is_let(expr):
-            return self._eval(convert_let_to_application(expr), env)
-        elif is_lambda(expr):
-            return Procedure(
+            # Standard Scheme eval (SICP 4.1.1)
+            #
+            if is_self_evaluating(expr):
+                return expr
+            elif is_variable(expr):
+                return env.lookup_var(expr.value)
+            elif is_quoted(expr):
+                return text_of_quotation(expr)
+            elif is_assignment(expr):
+                env.set_var_value(
+                    var=assignment_variable(expr).value,
+                    value=self._eval(assignment_value(expr), env))
+                return None
+            elif is_definition(expr):
+                env.define_var(
+                    var=definition_variable(expr).value,
+                    value=self._eval(definition_value(expr), env))
+                return None
+            elif is_if(expr):
+                predicate = self._eval(if_predicate(expr), env)
+                if predicate == Boolean(False):
+                    # replace current expression with
+                    #  the if alternative and loop
+                    expr = if_alternative(expr)
+                else:
+                    # replace current expression with
+                    #  the if consequent and loop
+                    expr = if_consequent(expr)
+            elif is_cond(expr):
+                # replace current expression with
+                #  the converted cond and loop
+                expr = convert_cond_to_ifs(expr)
+            elif is_let(expr):
+                # replace current expression with
+                #  the converted let and loop
+                expr = convert_let_to_application(expr)
+            elif is_lambda(expr):
+                return Procedure(
                         args=lambda_parameters(expr),
                         body=lambda_body(expr),
                         env=env)
-        elif is_begin(expr):
-            return self._eval_sequence(begin_actions(expr), env)
-        elif is_application(expr):
-            return self._apply(
+            elif is_begin(expr):
+                # _eval_sequence evaluates in order a sequence of expressions with _eval
+                #  but returns the last expression unevaluated
+                # loop and evaluate the last expression
+                expr = self._eval_sequence(begin_actions(expr), env)
+            elif is_application(expr):
+                # if the expression operator is a builtin,
+                #  _apply returns (True, builtin_return_value, None)
+                # otherwise, it returns
+                #  (False, lambda_body_last_expression, lambda_environment)
+                (is_builtin, expr, env) = self._apply(
                             self._eval(application_operator(expr), env),
                             self._list_of_values(application_operands(expr), env))
-        else:
-            raise self.InterpretError("Unknown expression in EVAL: %s" % expr)
+                if is_builtin:
+                    return expr
+                # if is_builtin == False then loop and evaluate
+                #  lambda_body_last_expression in lambda_environment
+            else:
+                raise self.InterpretError("Unknown expression in EVAL: %s" % expr)
 
     def _eval_sequence(self, exprs, env):
-        # Evaluates a sequence of expressions with _eval and returns the value
-        # of the last one
-        #
-        first_val = self._eval(first_exp(exprs), env)
-        if is_last_exp(exprs):
-            return first_val
-        else:
-            return self._eval_sequence(rest_exps(exprs), env)
+        """ Evaluates all but the last of a sequence of expressions with _eval
+            Returns the last expression for _eval to evaluate as a tail call
+        """
+        while True:
+            if is_last_exp(exprs):
+                return first_exp(exprs)
+            else:
+                self._eval(first_exp(exprs), env)
+                exprs = rest_exps(exprs)
 
     def _list_of_values(self, exprs, env):
         # Evaluates a list of expressions with _eval and returns a list of
@@ -134,17 +161,25 @@ class BobInterpreter(object):
             # The '' builtin gets the current output stream as a custom
             # argument
             #
-            return proc.apply(expand_nested_pairs(args))
+            # Return a tuple to _eval with the result
+            #  and is_builtin == True
+            return (True, proc.apply(expand_nested_pairs(args)), None)
 
         elif isinstance(proc, Procedure):
             if DEBUG: print("~~~~ Applying procedure with args: %s" % proc.params)
             if DEBUG: print("     and body:\n%s" % expr_repr(proc.body))
-            return self._eval_sequence(
-                    exprs=proc.body,
-                    env=self._extend_env_for_procedure(
+            # assemble the extented environment
+            new_env = self._extend_env_for_procedure(
                                 env=proc.env,
                                 args=proc.args,
-                                args_vals=args))
+                                args_vals=args)
+            # Use _eval_sequence to evaluate pre-final expressions
+            #  in the lambda body and get the final expression
+            # Return a tuple to _eval with is_builtin == False,
+            #  the final lambda body expression, and the lambda environment
+            return (False,
+                    self._eval_sequence(exprs=proc.body, env=new_env),
+                    new_env)
         else:
             raise self.InterpretError("Unknown procedure type in APPLY: %s" % proc)
 
