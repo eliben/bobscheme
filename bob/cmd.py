@@ -45,7 +45,7 @@ def compile_file(filename=None, out_filename=None, disassemble=False):
 
 
 def interactive_interpreter():
-    """ Interactive interpreter 
+    """ Interactive interpreter
     """
     interp = BobInterpreter() # by default output_stream is sys.stdout
     parser = BobParser()
@@ -73,7 +73,7 @@ def interpret_file(filename=None):
 
 
 def run_compiled(filename=None):
-    """ Given the name of a compiled Bob file (.bobc), run it with the 
+    """ Given the name of a compiled Bob file (.bobc), run it with the
         Bob VM with output redirected to stdout.
     """
     if not filename:
@@ -104,7 +104,7 @@ def main():
     parser.add_argument('-d', '--disassemble',
         help="Disassemble a bytecode file", action='store_true')
     parser.add_argument('-o', '--output',
-        help="Output filename for copmilation", type=str)
+        help="Output filename for compilation", type=str)
     parser.add_argument('filename', nargs="?",
         help='filename to compile (-c) or run')
 

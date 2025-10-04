@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # bob: builtins.py
 #
-# Some builtin Sheme procedures used by the interpreter and VM. 
+# Some builtin Sheme procedures used by the interpreter and VM.
 #
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
