@@ -15,4 +15,6 @@ There's some documentation in the ``doc/`` directory in the source.
 
 The following diagram describes Bob:
 
-![Diagram describing Bob](https://github.com/eliben/bobscheme/blob/main/doc/diagrams/bob_toplevel.png).
+<p align="center">
+  <img alt="Bob diagram" src="doc/diagrams/bob_toplevel.png" />
+</p>
