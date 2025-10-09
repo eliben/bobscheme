@@ -18,9 +18,7 @@ from bob.bytecode import Serializer, Deserializer
 def vm_compiler_runner(code, ostream):
     codeobject = compile_code(code)
 
-    # Run the code through (de+)serialization to test how that works
-    # too
-    #
+    # Run the code through (de+)serialization to exercise it.
     ser = Serializer().serialize_bytecode(codeobject)
     codeobject = Deserializer().deserialize_bytecode(ser)
     vm = BobVM(output_stream=ostream)

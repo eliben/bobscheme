@@ -32,17 +32,11 @@ def all_testcases(dir='tests_full/testcases'):
             yield TestCase(testname, code, expected)
 
 
-PY3 = sys.version_info[0] == 3
-
-
 class StringIOUnicode(StringIO):
     """ For compatibility with both Python 2.6 and 3.x
     """
     def write(self, s):
-        if PY3:
-            StringIO.write(self, s)
-        else:
-            StringIO.write(self, unicode(s))
+        StringIO.write(self, s)
 
 
 def run_all_tests(runner, dir='testcases/'):

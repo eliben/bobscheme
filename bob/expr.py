@@ -168,6 +168,7 @@ def is_tagged_list(exp, tag):
 def is_quoted(exp):
     return is_tagged_list(exp, 'quote')
 
+
 def text_of_quotation(exp):
     return exp.second.first
 
@@ -175,8 +176,10 @@ def text_of_quotation(exp):
 def is_assignment(exp):
     return is_tagged_list(exp, 'set!')
 
+
 def assignment_variable(exp):
     return exp.second.first
+
 
 def assignment_value(exp):
     return exp.second.second.first
