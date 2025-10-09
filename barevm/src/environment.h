@@ -12,10 +12,10 @@
 #include <map>
 
 
-// An environment in which variables are bound to values. Variable names are 
+// An environment in which variables are bound to values. Variable names are
 // strings, values are BobObject*.
-// 
-// Environment objects are linked via parent pointers. When bindings are 
+//
+// Environment objects are linked via parent pointers. When bindings are
 // queried or assigned and the variable name isn't bound in the environment,
 // its parent is searched.
 //
@@ -31,7 +31,7 @@ public:
         : m_parent(parent)
     {}
 
-    // Lookup the variable in this environment or its parents. Return the 
+    // Lookup the variable in this environment or its parents. Return the
     // object if found, 0 otherwise.
     //
     BobObject* lookup_var(const std::string& name);
@@ -42,7 +42,7 @@ public:
     void define_var(const std::string& name, BobObject* value);
 
     // Find the binding of name in this environment or its parents and assign
-    // the new value to it. Return the value if successful, or 0 if no 
+    // the new value to it. Return the value if successful, or 0 if no
     // binding for the name was found.
     //
     BobObject* set_var_value(const std::string& name, BobObject* value);
