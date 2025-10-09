@@ -10,7 +10,6 @@ from __future__ import print_function
 import sys
 import pprint
 
-from . import py3compat
 from .bobparser import BobParser
 from .builtins import BuiltinProcedure, builtins_map
 from .expr import *

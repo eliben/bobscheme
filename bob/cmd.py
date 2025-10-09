@@ -11,7 +11,6 @@ from __future__ import print_function
 import os, sys
 import argparse
 
-from bob import py3compat
 from bob.bobparser import BobParser
 from bob.bytecode import (Serializer, Deserializer)
 from bob.compiler import compile_code
@@ -52,7 +51,7 @@ def interactive_interpreter():
     print("Interactive Bob interpreter. Type a Scheme expression or 'quit'")
 
     while True:
-        inp = py3compat.input("[bob] >> ")
+        inp = input("[bob] >> ")
         if inp == 'quit':
             break
         parsed = parser.parse(inp)
