@@ -336,12 +336,3 @@ class Deserializer(object):
         co.args, co.constants, co.varnames, co.code = seqs
 
         return co
-
-
-#-----------------------------------------------------------------------------
-if __name__ == '__main__':
-    ss = Serializer()
-    print(ss._s_boolean(Boolean(False)).encode('hex'))
-    print(ss._s_instruction(Instruction(OP_CALL, 34)).encode('hex'))
-
-

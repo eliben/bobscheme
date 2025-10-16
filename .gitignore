@@ -24,6 +24,9 @@ barevm/src/Makefile
 
 *.egg-info
 
+.vscode
+
 # Binaries
 barevm/barevm
 barevm/barevm_unittest
+barevm/build

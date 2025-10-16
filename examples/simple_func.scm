@@ -4,3 +4,4 @@
 
 (write ((func 4 5) 10))
 
+(write (cons 2 3))

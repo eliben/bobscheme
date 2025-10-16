@@ -29,7 +29,7 @@ static inline void verify_numargs(BuiltinArgs& args, size_t num, const string& n
 }
 
 
-// Try to dynamically case arg to T* and return the cast pointer. On failure, 
+// Try to dynamically case arg to T* and return the cast pointer. On failure,
 // throw BuiltinError with message as the error.
 //
 template <class T>
@@ -186,7 +186,7 @@ static BobObject* builtin_logical_or(BuiltinArgs& args)
 {
     if (args.size() < 1)
         return new BobBoolean(false);
-    
+
     for (BuiltinArgs::iterator arg = args.begin(); arg != args.end(); ++arg) {
         BobBoolean* boolval = dynamic_cast<BobBoolean*>(*arg);
         if (boolval && boolval->value())
@@ -201,7 +201,7 @@ static BobObject* builtin_logical_and(BuiltinArgs& args)
 {
     if (args.size() < 1)
         return new BobBoolean(true);
-    
+
     for (BuiltinArgs::iterator arg = args.begin(); arg != args.end(); ++arg) {
         BobBoolean* boolval = dynamic_cast<BobBoolean*>(*arg);
         if (boolval && !boolval->value())
@@ -233,7 +233,7 @@ static BobObject* eqv_p(BuiltinArgs& args)
 template <class ArithmeticFunction>
 static BobObject* builtin_arithmetic_generic(
                         string name,
-                        BuiltinArgs& args, 
+                        BuiltinArgs& args,
                         ArithmeticFunction func)
 {
     string typeerrmsg = name + " expects a numeric argument";

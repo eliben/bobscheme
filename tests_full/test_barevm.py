@@ -14,7 +14,6 @@ from testcases_utils import run_all_tests
 
 from bob.compiler import compile_code
 from bob.bytecode import Serializer
-from bob.py3compat import bytes2str
 
 
 def make_runner(barevm_path):
@@ -31,7 +30,7 @@ def make_runner(barevm_path):
         vm_proc = Popen([barevm_path, filename], stdout=PIPE)
         vm_output = vm_proc.stdout.read()
 
-        ostream.write(bytes2str(vm_output))
+        ostream.write(vm_output.decode('utf-8'))
         os.remove(filename)
     return barevm_runner
 
