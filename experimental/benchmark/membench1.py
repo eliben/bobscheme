@@ -1,9 +1,8 @@
 import sys, os
 from utils import vm_compiler_runner, interpreter_runner, make_barevm_runner
 
-sys.path.insert(0, '../..')
-from bob.utils import Timer 
-barevm_path = "../barevm/barevm.exe"
+from bob.utils import Timer
+barevm_path = "barevm/barevm"
 
 code_str = '''
 (define (foobar)
@@ -24,4 +23,3 @@ code_str = '''
 '''
 
 make_barevm_runner(barevm_path)(code_str, sys.stdout)
-

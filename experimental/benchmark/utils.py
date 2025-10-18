@@ -32,7 +32,6 @@ def make_barevm_runner(barevm_path):
 
         # Get a temporary filename and write the serialized codeobject
         # into it
-        #
         fileobj, filename = tempfile.mkstemp()
         os.write(fileobj, serialized)
         os.close(fileobj)
@@ -41,6 +40,6 @@ def make_barevm_runner(barevm_path):
         vm_output = vm_proc.stdout.read()
 
         if ostream:
-            ostream.write(vm_output)
+            ostream.write(vm_output.decode('utf-8'))
         os.remove(filename)
     return barevm_runner
