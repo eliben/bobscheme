@@ -176,6 +176,22 @@ void BobVM::run(BobCodeObject* codeobj)
             d->m_frame.pc++;
         }
 
+        // short cut if the next instruction is OP_JUMP
+        //  (note: next_opcode is used in the OP_CALL case below)
+        BobInstruction next_instr;
+        unsigned next_opcode;
+        if (d->m_frame.pc >= cur_codeobj->code.size()) {
+          next_opcode = OP_CONST; // anything not OP_RETURN
+        } else {
+          next_instr = cur_codeobj->code[d->m_frame.pc];
+          next_opcode = next_instr.opcode;
+          while (next_opcode == OP_JUMP) {
+            d->m_frame.pc = next_instr.arg;
+            next_instr = cur_codeobj->code[d->m_frame.pc];
+            next_opcode = next_instr.opcode;
+          }
+        }
+
         // Let the GC run if required.
         // Note: it's important to allow the GC to run only in-between
         // instructions, because during an instruction's execution, some
@@ -237,11 +253,13 @@ void BobVM::run(BobCodeObject* codeobj)
                     d->m_valuestack.pop_back();
                 break;
             }
+            /*
             case OP_JUMP:
             {
                 d->m_frame.pc = instr.arg;
                 break;
             }
+            */
             case OP_FJUMP:
             {
                 assert(!d->m_valuestack.empty() && "Pop value from non-empty valuestack");
@@ -321,6 +339,7 @@ void BobVM::run(BobCodeObject* codeobj)
 
                     // To execute the procedure:
                     // 1. Save the current execution frame on the frame stack
+                    //    if the new procedure is not in tail position
                     // 2. Create a new frame from the closure's code object
                     //    and the extendend environment.
                     // 3. Start executing the frame by making it the current
@@ -328,7 +347,18 @@ void BobVM::run(BobCodeObject* codeobj)
                     //    will then execute in the next iteration of this
                     //    loop.
                     //
-                    d->m_framestack.push_back(d->m_frame);
+
+                    switch (next_opcode) {
+                      case OP_RETURN:
+                        // The next thing to do after this OP_CALL is to return
+                        // So do not push this frame on the framestack
+                        // Instead, replace this frame with the new frame
+                        // (That is, tail call the OP_CALL)
+                        break;
+                      default:
+                        d->m_framestack.push_back(d->m_frame);
+                    }
+
                     ExecutionFrame new_frame;
                     new_frame.codeobject = closure->codeobject;
                     new_frame.pc = 0;
