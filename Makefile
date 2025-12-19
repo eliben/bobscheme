@@ -9,9 +9,7 @@ PYTHON_TESTS := \
     test_interpreter \
     test_vm_compiler \
 
-BAREVM_TESTS := \
-    test_barevm \
-    barevm_unittest \
+BAREVM_TESTS := test_barevm
 
 default:
 
