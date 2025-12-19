@@ -11,10 +11,6 @@ PYTHON_TESTS := \
 
 BAREVM_TESTS := test_barevm
 
-default:
-
-test: test-python
-
 test-all: test-python test-barevm
 
 test-python: $(PYTHON_TESTS)
