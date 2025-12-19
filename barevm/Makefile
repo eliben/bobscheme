@@ -1,8 +1,8 @@
 CXX ?= g++
 CXXFLAGS ?= -O2 -std=c++11 -Wall -Wextra -pedantic
-CPPFLAGS := -Isrc -MMD -MP
+CPPFLAGS := -I. -MMD -MP
 
-SRCDIR := src
+SRCDIR := .
 OBJDIR := build/obj
 
 SOURCES := $(wildcard $(SRCDIR)/*.cpp)

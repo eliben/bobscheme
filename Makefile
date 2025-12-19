@@ -36,6 +36,6 @@ barevm_unittest::
 	$(MAKE) --no-print-directory -C barevm -f CMakeFiles/Makefile2 barevm_unittest
 	./barevm/barevm_unittest
 
-barevm/barevm: barevm/src/*.cpp barevm/src/*.h
+barevm/barevm: barevm/*.cpp barevm/*.h
 	$(if $(shell command -v cmake),,$(error No cmake binary found))
 	cd barevm && cmake . && $(MAKE)
