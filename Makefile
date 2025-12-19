@@ -33,5 +33,4 @@ test_barevm:: barevm/barevm
 	$(PYTHON) tests_full/$@.py
 
 barevm/barevm: barevm/*.cpp barevm/*.h
-	$(if $(shell command -v cmake),,$(error No cmake binary found))
 	cd barevm && $(MAKE)
