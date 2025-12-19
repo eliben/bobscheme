@@ -13,16 +13,10 @@ cscope.*
 *.exe
 *.orig
 
-# cmake
-CMakeFiles
-CMakeCache*
-cmake_install*
-
 *.egg-info
 
 .vscode
 
-# Binaries
+# Binaries / build artifacts
 barevm/barevm
-barevm/barevm_unittest
 barevm/build
