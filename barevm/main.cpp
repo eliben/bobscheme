@@ -1,5 +1,5 @@
 //*****************************************************************************
-// bob: main 
+// bob: main
 //
 // Eli Bendersky (eliben@gmail.com)
 // This code is in the public domain
@@ -46,6 +46,6 @@ int main(int argc, const char* argv[])
         cerr << "VM ERROR: " << err.what() << endl;
         return 1;
     }
-    
+
     return 0;
 }
