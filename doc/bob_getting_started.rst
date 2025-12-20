@@ -2,10 +2,6 @@
  Getting started with Bob
 ==========================
 
-:Author: Eli Bendersky
-:Contact: eliben@gmail.com
-:Updated: 03-Feb-2023
-
 .. contents:: Table of Contents
     :backlinks: none
 
@@ -29,8 +25,8 @@ includes:
 * A serializer and deserializer for Bob VM bytecode
 
 In addition, Bob comes with another version of the VM, implemented in C++. It's
-called "BareVM". BareVM is an optional component - Bob is fully usable as an
-implementation of Scheme in pure Python.
+called "BareVM". Bob itself is a fully usable implementation of Scheme in pure
+Python; BareVM is an optional component.
 
 Here's a schematic description of these parts:
 
@@ -95,7 +91,7 @@ function defined by using it::
     (define fact (Y F*))
     (write (fact 8))
 
-In any case, extending Bob to support more functionality from R5RS is very easy.
+Extending Bob to support more functionality from R5RS is very easy.
 I'm adding features on a per-need basis from time to time.
 
 References
@@ -122,7 +118,7 @@ Design philosophy
 -----------------
 
 The single guiding design philosophy of Bob is *clarity and simplicity*. There's
-a huge amount of optimizations I can envision applying to Bob to make it more
+a huge number of optimizations I can envision applying to Bob to make it more
 compact and faster. I avoided these optimizations on purpose. A sad inherent
 conflict in software is that optimization and clarity are almost always at odds
 - you can gain one, but usually sacrifice the other in the process. 
