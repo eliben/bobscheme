@@ -9,23 +9,17 @@ PYTHON_TESTS := \
     test_interpreter \
     test_vm_compiler \
 
-BAREVM_TESTS := test_barevm
-
 test-all: test-python test-barevm
 
 test-python: $(PYTHON_TESTS)
 
-test-barevm: $(BAREVM_TESTS)
+test-barevm: barevm/barevm
+	$(PYTHON) tests_full/test_barevm.py
 
 clean:
 	git clean -dXf
 
 $(PYTHON_TESTS)::
-	$(PYTHON) tests_full/$@.py
-
-$(BAREVM_TESTS):: barevm/barevm
-
-test_barevm:: barevm/barevm
 	$(PYTHON) tests_full/$@.py
 
 barevm/barevm: barevm/*.cpp barevm/*.h
