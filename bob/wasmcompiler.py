@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from io import StringIO
 from typing import List, TextIO
 
-from .expr import Symbol, Pair, Number, Boolean, Nil, expr_repr
+from .expr import *
 
 
 class WasmCompiler:
@@ -36,7 +36,85 @@ class WasmCompiler:
         self.tailcall_pos = 0
 
     def compile(self, exprlist):
-        pass
+        nestedlist = make_nested_pairs(*exprlist)
+        tpl = self._expand_exprlist(nestedlist)
+        return tpl
+
+    def _expand_exprlist(self, exprlist):
+        # Sequence of expressions. We iterate over it from the last to the first
+        # to build a nested BEGIN structure (in 'result'). For each expression,
+        # if it's a definition, _expand_definition expands it and returns the
+        # defined names, which we prepend to the names list.
+        result = None
+        names = None
+        for expr in reverse_iter_pairs(exprlist):
+            expr, def_name = self._expand_definition(expr)
+            if result is None:
+                result = expr
+            else:
+                result = Pair(Symbol("begin"), Pair(expr, result))
+            if def_name is not None:
+                names = Pair(def_name, names)
+
+        # No internal definitions? Just return the result.
+        if names is None:
+            return result
+
+        # There are internal definitions, and the names they define are in
+        # 'names'. We need to wrap the result in a lambda that takes these
+        # names as parameters, and then call this lambda with empty lists
+        # as values (_expand_definition emitted set! for each definition that
+        # executes at runtime).
+
+        # Build the argument list for the lambda. It's a list of '() constants
+        # of the same length as 'names'.
+        args = None
+        for name in iter_pairs(names):
+            args = Pair(Symbol("()"), args)
+
+        # Return the application (lamba args).
+        return Pair(make_lambda(names, result), args)
+
+    def _expand_definition(self, expr):
+        if is_definition(expr):
+            def_name = definition_variable(expr).value
+            def_value = definition_value(expr)
+
+            setbang = make_assignment(def_name, self._expand_expr(def_value))
+            return setbang, def_name
+
+        # Not a definition, forward to _expand_expr.
+        return self._expand_expr(expr), None
+
+    def _expand_expr(self, expr):
+        if isinstance(expr, Symbol):
+            return expr
+        elif is_self_evaluating(expr):
+            return expr
+
+        assert isinstance(expr, Pair)
+        if isinstance(expr.first, Symbol):
+            match expr.first.value:
+                case "lambda":
+                    return make_lambda(
+                        lambda_parameters(expr),
+                        self._expand_exprlist(lambda_body(expr)),
+                    )
+                case "if":
+                    return make_if(
+                        self._expand_expr(if_predicate(expr)),
+                        self._expand_expr(if_consequent(expr)),
+                        self._expand_expr(if_alternative(expr)),
+                    )
+                case "begin":
+                    return self._expand_exprlist(begin_actions(expr))
+                case "set!":
+                    return make_assignment(
+                        assignment_variable(expr),
+                        self._expand_expr(assignment_value(expr)),
+                    )
+                case _:
+                    return self._expand_exprlist(expr)
 
     def _emit_module(self):
         self._emit_text("(module")
@@ -57,8 +135,31 @@ class WasmCompiler:
             # they are enqueued onto the runtime environment in _emit_startfunc.
             self.lexical_env[-1].insert(0, blt.name)
 
+        self._emit_startfunc()
+
         self.indent -= 4
         self._emit_text(")")
+
+    def _emit_startfunc(self):
+        self._emit_line("")
+        self._emit_line('(func (export "start") (result i32)')
+        self.indent += 4
+        self._emit_line("(local $builtins anyref)")
+
+        # Build the builtins environment frame.
+        # Each builtin has a corresponding table index which is its position
+        # in the list of builtins.
+        for i, blt in enumerate(_builtins):
+            self._emit_line(
+                f"(local.set $builtins (struct.new $PAIR (struct.new $CLOSURE (ref.null $ENV) (i32.const {i})) (local.get $builtins)))"
+            )
+
+        self._emit_line("")
+        self._emit_line(";; call toplevel user function")
+        self._emit_line("(call $user_func_0 (local.get $builtins) (ref.null $ENV))")
+        self._emit_line("(i32.const 0)")
+        self.indent -= 4
+        self._emit_line(")")
 
     def _emit_line(self, line: str):
         self.stream.write(" " * self.indent + line + "\n")

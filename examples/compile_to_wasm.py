@@ -16,3 +16,15 @@ exprs = parser.parse(scmprog)
 for expr in exprs:
     print("----")
     print(expr_repr(expr))
+
+from bob.wasmcompiler import WasmCompiler
+
+# Create a stringio to hold the wasm output
+import io
+
+output_stream = io.StringIO()
+
+compiler = WasmCompiler(output_stream)
+wasm_tpl = compiler.compile(exprs)
+print(wasm_tpl)
+print(expr_repr(wasm_tpl))
