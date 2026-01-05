@@ -36,8 +36,29 @@ class WasmCompiler:
         self.tailcall_pos = 0
 
     def compile(self, exprlist):
-        compiled_exprs = self._comp_exprlist(exprlist)
-        return CompiledProcedure(args=[], name="", code=compiled_exprs)
+        pass
+
+    def _emit_module(self):
+        self._emit_text("(module")
+        self.indent += 4
+        # TODO: do these exports in a builtin together
+        self._emit_text('  (func $write_i32 (import "" "write_i32") (param i32))')
+        self._emit_text(_builtin_types)
+
+        # Start a new lexical frame for the builtins.
+        self.lexical_env.append([])
+
+        for blt in _builtins:
+            self._emit_text(
+                blt.code_templ.format(**blt.code_params),
+            )
+
+            # Add the builtin to the lexical environment, in the same order
+            # they are enqueued onto the runtime environment in _emit_startfunc.
+            self.lexical_env[-1].insert(0, blt.name)
+
+        self.indent -= 4
+        self._emit_text(")")
 
     def _emit_line(self, line: str):
         self.stream.write(" " * self.indent + line + "\n")
@@ -45,6 +66,28 @@ class WasmCompiler:
     def _emit_text(self, text: str):
         for line in text.splitlines():
             self._emit_line(line)
+
+
+# Function call ABI / convention in emitted code
+# ----------------------------------------------
+#
+# All functions (built-in and user-defined) have the same signature:
+#
+#   (func (param anyref) (param (ref null $ENV)) (result anyref))
+#
+# The first parameter is the argument list (as a PAIR struct), and the second
+# parameter is the environment (as an ENV struct). The first argument is
+# obtained by casting the first parameter to PAIR and taking its car, etc. These
+# functions are emitted to the WAT code and registered in the function table for
+# indirect calls.
+#
+# On entry, each function updates the environment by creating a new ENV struct
+# whose parent is the passed-in environment, and whose values are the arguments
+# passed in the first parameter.
+#
+# The run-time representation of a function is as a CLOSURE struct, holding a
+# reference to the runtime lexical environment at the time of the function's
+# creation, and the function index in the function table.
 
 
 _builtin_types = r"""
