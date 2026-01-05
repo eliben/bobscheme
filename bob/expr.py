@@ -113,9 +113,7 @@ def expr_repr(expr):
                 str += " . " + repr_rec(obj.second) + ")"
             return str
         else:
-            return f"s>{obj}<"
-        # else:
-        #     raise ExprError("Unexpected type: %s" % type(obj))
+            raise ExprError("Unexpected type: %s" % type(obj))
 
     return repr_rec(expr)
 

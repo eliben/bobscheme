@@ -77,7 +77,7 @@ class WasmCompiler:
 
     def _expand_definition(self, expr):
         if is_definition(expr):
-            def_name = definition_variable(expr).value
+            def_name = definition_variable(expr)
             def_value = definition_value(expr)
 
             setbang = make_assignment(def_name, self._expand_expr(def_value))
