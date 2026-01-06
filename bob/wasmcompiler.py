@@ -36,7 +36,10 @@ class WasmCompiler:
         self.tailcall_pos = 0
 
     def compile(self, exprlist):
-        nestedlist = make_nested_pairs(*exprlist)
+        print(expr_tree_repr(exprlist[0]))
+        # print(exprlist)
+        # nestedlist = make_nested_pairs(*exprlist)
+        # print(expr_tree_repr(nestedlist))
         tpl = self._expand_exprlist(nestedlist)
         return tpl
 
@@ -113,8 +116,8 @@ class WasmCompiler:
                         assignment_variable(expr),
                         self._expand_expr(assignment_value(expr)),
                     )
-                case _:
-                    return self._expand_exprlist(expr)
+
+        return self._expand_exprlist(expr)
 
     def _emit_module(self):
         self._emit_text("(module")
@@ -167,6 +170,27 @@ class WasmCompiler:
     def _emit_text(self, text: str):
         for line in text.splitlines():
             self._emit_line(line)
+
+
+def expr_tree_repr(expr):
+    sbuf = StringIO()
+
+    def rec(v, indent):
+        prefix = " " * indent
+        if v is None:
+            return
+        match v:
+            case Boolean() | Symbol() | Number():
+                sbuf.write(f"{prefix}{repr(v)}\n")
+            case Pair(first=first, second=second):
+                sbuf.write(f"{prefix}Pair\n")
+                rec(first, indent + 2)
+                rec(second, indent + 2)
+            case _:
+                raise ExprError("Unexpected type: %s" % type(v))
+
+    rec(expr, 0)
+    return sbuf.getvalue()
 
 
 # Function call ABI / convention in emitted code

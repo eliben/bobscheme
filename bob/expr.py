@@ -136,6 +136,7 @@ def iter_pairs(pair):
         pair = pair.second
 
 
+# TODO: do i need these?
 def reverse_iter_pairs(pair):
     """Given a list in Scheme representation (nested Pairs), yields its
     elements in reverse order.
