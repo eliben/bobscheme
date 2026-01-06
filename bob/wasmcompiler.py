@@ -36,21 +36,27 @@ class WasmCompiler:
         self.tailcall_pos = 0
 
     def compile(self, exprlist):
-        print(expr_tree_repr(exprlist[0]))
+        # print("tree0\n", expr_tree_repr(exprlist[0]))
+        # print("tree1\n", expr_tree_repr(exprlist[1]))
         # print(exprlist)
-        # nestedlist = make_nested_pairs(*exprlist)
-        # print(expr_tree_repr(nestedlist))
-        tpl = self._expand_exprlist(nestedlist)
+        nestedlist = make_nested_pairs(*exprlist)
+        print("tree_nested\n", expr_tree_repr(nestedlist))
+        tpl = self._expand_block(nestedlist)
         return tpl
 
-    def _expand_exprlist(self, exprlist):
+    def _expand_block(self, exprlist):
         # Sequence of expressions. We iterate over it from the last to the first
         # to build a nested BEGIN structure (in 'result'). For each expression,
         # if it's a definition, _expand_definition expands it and returns the
         # defined names, which we prepend to the names list.
+        # print("expanding exprlist:\n", expr_tree_repr(exprlist))
+        if not isinstance(exprlist, Pair):
+            return self._expand_expr(exprlist)
+
         result = None
         names = None
         for expr in reverse_iter_pairs(exprlist):
+            # print("expanding expr:\n", expr_tree_repr(expr))
             expr, def_name = self._expand_definition(expr)
             if result is None:
                 result = expr
@@ -101,7 +107,7 @@ class WasmCompiler:
                 case "lambda":
                     return make_lambda(
                         lambda_parameters(expr),
-                        self._expand_exprlist(lambda_body(expr)),
+                        self._expand_block(lambda_body(expr)),
                     )
                 case "if":
                     return make_if(
@@ -110,14 +116,25 @@ class WasmCompiler:
                         self._expand_expr(if_alternative(expr)),
                     )
                 case "begin":
-                    return self._expand_exprlist(begin_actions(expr))
+                    return self._expand_block(begin_actions(expr))
                 case "set!":
                     return make_assignment(
                         assignment_variable(expr),
                         self._expand_expr(assignment_value(expr)),
                     )
 
-        return self._expand_exprlist(expr)
+        return self._expand_list(expr)
+
+    def _expand_list(self, sexp):
+        # Recurisve list expansion: expand head with _expand_expr, and tail
+        # with _expand_list.
+        if sexp is None:
+            return None
+        assert isinstance(sexp, Pair)
+        return Pair(
+            self._expand_expr(sexp.first),
+            self._expand_list(sexp.second),
+        )
 
     def _emit_module(self):
         self._emit_text("(module")
