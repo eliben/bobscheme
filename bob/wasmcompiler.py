@@ -130,7 +130,7 @@ class WasmCompiler:
             self._expand_list(sexp.second),
         )
 
-    def _emit_module(self):
+    def _emit_module(self, expr):
         self._emit_text("(module")
         self.indent += 4
         # TODO: do these exports in a builtin together
@@ -150,6 +150,30 @@ class WasmCompiler:
             self.lexical_env[-1].insert(0, blt.name)
 
         self._emit_startfunc()
+
+        # Emit user code, recursively, starting with the toplevel expression.
+        # These are emitted into their own streams stored in self.user_funcs.
+        self._emit_proc(expr)
+
+        # Emit all user-defined functions to the output stream.
+        for i, func_stream in enumerate(self.user_funcs):
+            self._emit_text(func_stream.getvalue())
+
+        # Emit table and element section.
+        self._emit_line("")
+        self._emit_line(
+            "(table {} funcref)".format(len(_builtins) + len(self.user_funcs))
+        )
+        elem_index = 0
+        for blt in _builtins:
+            name = blt.name
+            if blt.code_params.get("NAME", False):
+                name = blt.code_params["NAME"]
+            self._emit_line(f"(elem (i32.const {elem_index}) ${name})")
+            elem_index += 1
+        for i in range(len(self.user_funcs)):
+            self._emit_line(f"(elem (i32.const {elem_index}) $user_func_{i})")
+            elem_index += 1
 
         self.indent -= 4
         self._emit_text(")")
@@ -174,6 +198,9 @@ class WasmCompiler:
         self._emit_line("(i32.const 0)")
         self.indent -= 4
         self._emit_line(")")
+
+    def _emit_proc(self, expr):
+        pass
 
     def _emit_line(self, line: str):
         self.stream.write(" " * self.indent + line + "\n")
@@ -299,6 +326,16 @@ _nullp_code = r"""
 )
 """
 
+_write_code = r"""
+(func $write (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+    (call $write_i32
+        (i31.get_s
+            (ref.cast (ref i31)
+                (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))))
+    (ref.null any)
+)
+"""
+
 _binop_arith_code = r"""
 (func ${NAME} (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
     (ref.i31 ({BINOP}
@@ -336,6 +373,7 @@ _register_builtin("car", _car_code, {})
 _register_builtin("cdr", _cdr_code, {})
 _register_builtin("cons", _cons_code, {})
 _register_builtin("null?", _nullp_code, {})
+_register_builtin("write", _write_code, {})
 _register_builtin(
     "+",
     _binop_arith_code,
