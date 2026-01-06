@@ -36,11 +36,7 @@ class WasmCompiler:
         self.tailcall_pos = 0
 
     def compile(self, exprlist):
-        # print("tree0\n", expr_tree_repr(exprlist[0]))
-        # print("tree1\n", expr_tree_repr(exprlist[1]))
-        # print(exprlist)
         nestedlist = make_nested_pairs(*exprlist)
-        print("tree_nested\n", expr_tree_repr(nestedlist))
         tpl = self._expand_block(nestedlist)
         return tpl
 
@@ -49,14 +45,12 @@ class WasmCompiler:
         # to build a nested BEGIN structure (in 'result'). For each expression,
         # if it's a definition, _expand_definition expands it and returns the
         # defined names, which we prepend to the names list.
-        # print("expanding exprlist:\n", expr_tree_repr(exprlist))
         if not isinstance(exprlist, Pair):
             return self._expand_expr(exprlist)
 
         result = None
         names = None
         for expr in reverse_iter_pairs(exprlist):
-            # print("expanding expr:\n", expr_tree_repr(expr))
             expr, def_name = self._expand_definition(expr)
             if result is None:
                 result = expr
