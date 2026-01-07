@@ -200,7 +200,77 @@ class WasmCompiler:
         self._emit_line(")")
 
     def _emit_proc(self, expr):
+        # Create a new stream for this function's body; the current one will
+        # be restored at the end of this function.
+        saved_stream = self.stream
+        saved_indent = self.indent
+        saved_tailcall_pos = self.tailcall_pos
+
+        self.stream = StringIO()
+        self.indent = 0
+        self.tailcall_pos = 0
+
+        func_idx = len(self.user_funcs)
+        self.user_funcs.append(self.stream)
+
+        self._emit_line(
+            f"(func $user_func_{func_idx} (param $arg anyref) (param $env (ref null $ENV)) (result anyref)"
+        )
+        self.indent += 4
+        self._emit_line("(local $clostemp (ref null $CLOSURE))")
+        self._emit_line(";; prologue: env = new ENV(env, args)")
+        self._emit_line(
+            "(local.set $env (struct.new $ENV (local.get $env) (local.get $arg)))"
+        )
+        self._emit_expr(sexp)
+        self.indent -= 4
+        self._emit_line(")")
+        self.indent = saved_indent
+        self.stream = saved_stream
+        self.tailcall_pos = saved_tailcall_pos
+        return func_idx
+
+    def _emit_expr(self, expr):
         pass
+
+    def _emit_constant(self, expr):
+        match expr:
+            case Number(value=n):
+                self._emit_line(f"(ref.i31 (i32.const {n}))")
+            case Boolean(value=b):
+                # TODO: special struct for booleans?
+                if b:
+                    self._emit_line("(ref.i31 (i32.const 1))")
+                else:
+                    self._emit_line("(ref.i31 (i32.const 1))")
+            case Pair(first=first, second=second):
+                # TODO: how to detect/emit constant pairs??
+                pass
+            case _:
+                raise ExprError("Unexpected constant type: %s" % type(expr))
+
+    def _emit_var(self, name: str):
+        # What it leaves on the stack is not the value of the variable, but
+        # the cons cell holding it; the caller is responsible for loading
+        # the value from the cell, or for mutating it if needed (in set!).
+        frame_index = len(self.lexical_env) - 1
+        self._emit_line(f";; lookup variable '{name}' in lexical environment")
+        self._emit_line("local.get $env")
+        while frame_index >= 0:
+            try:
+                var_index = self.lexical_env[frame_index].index(name)
+                # Get list of args from this env frame.
+                self._emit_line(f";; found in frame, at index {var_index}")
+                self._emit_line("struct.get $ENV 1")
+                for _ in range(var_index):
+                    self._emit_line("(struct.get $PAIR 1 (ref.cast (ref $PAIR)))")
+                return
+            except ValueError:
+                # Not found in this frame; go to parent.
+                self._emit_line("struct.get $ENV 0 ;; get parent env")
+                frame_index -= 1
+
+        raise ValueError(f"Variable '{name}' not found in lexical environment")
 
     def _emit_line(self, line: str):
         self.stream.write(" " * self.indent + line + "\n")
