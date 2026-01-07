@@ -3,11 +3,7 @@ from bob.bobparser import BobParser
 from bob.expr import expr_repr
 
 scmprog = """
-(define (factorial n)
-    (if (= n 0)
-        1
-        (* n (factorial (- n 1)))))
-(write (factorial 5))
+(write 5)
 """
 
 parser = BobParser()
@@ -25,6 +21,7 @@ import io
 output_stream = io.StringIO()
 
 compiler = WasmCompiler(output_stream)
-wasm_tpl = compiler.compile(exprs)
-print(wasm_tpl)
-print(expr_tree_repr(wasm_tpl))
+compiler.compile(exprs)
+
+print("WASM output:")
+print(output_stream.getvalue())

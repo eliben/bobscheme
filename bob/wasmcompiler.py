@@ -38,7 +38,7 @@ class WasmCompiler:
     def compile(self, exprlist):
         nestedlist = make_nested_pairs(*exprlist)
         tpl = self._expand_block(nestedlist)
-        return tpl
+        self._emit_module(tpl)
 
     def _expand_block(self, exprlist):
         # Sequence of expressions. We iterate over it from the last to the first
@@ -119,22 +119,22 @@ class WasmCompiler:
 
         return self._expand_list(expr)
 
-    def _expand_list(self, sexp):
+    def _expand_list(self, expr):
         # Recurisve list expansion: expand head with _expand_expr, and tail
         # with _expand_list.
-        if sexp is None:
+        if expr is None:
             return None
-        assert isinstance(sexp, Pair)
+        assert isinstance(expr, Pair)
         return Pair(
-            self._expand_expr(sexp.first),
-            self._expand_list(sexp.second),
+            self._expand_expr(expr.first),
+            self._expand_list(expr.second),
         )
 
     def _emit_module(self, expr):
         self._emit_text("(module")
         self.indent += 4
         # TODO: do these exports in a builtin together
-        self._emit_text('  (func $write_i32 (import "" "write_i32") (param i32))')
+        self._emit_text('(func $write_i32 (import "" "write_i32") (param i32))')
         self._emit_text(_builtin_types)
 
         # Start a new lexical frame for the builtins.
@@ -222,7 +222,7 @@ class WasmCompiler:
         self._emit_line(
             "(local.set $env (struct.new $ENV (local.get $env) (local.get $arg)))"
         )
-        self._emit_expr(sexp)
+        self._emit_expr(expr)
         self.indent -= 4
         self._emit_line(")")
         self.indent = saved_indent
@@ -231,7 +231,61 @@ class WasmCompiler:
         return func_idx
 
     def _emit_expr(self, expr):
-        pass
+        if is_self_evaluating(expr):
+            self._emit_constant(expr)
+        elif isinstance(expr, Symbol):
+            self._emit_var(expr.value)
+        elif is_assignment(expr):
+            name = assignment_variable(expr).value
+            self._emit_line(f";; set! '{name}' = expression")
+            self._emit_var(name)
+            self._emit_line("(ref.cast (ref $PAIR))")
+            self.tailcall_pos += 1
+            self._emit_expr(assignment_value(expr))
+            self.tailcall_pos -= 1
+            self._emit_line("(struct.set $PAIR 0)")
+            self._emit_line("(ref.null any)")
+        elif is_begin(expr):
+            self._emit_line(";; begin")
+            self.tailcall_pos += 1
+            self._emit_expr(begin_actions(expr).first)
+            self.tailcall_pos -= 1
+            self._emit_line("drop")
+            self._emit_expr(begin_actions(expr).second)
+        elif is_lambda(expr):
+            self._emit_line(";; lambda expression")
+            # Add the lambda parameters to the lexical environment and
+            # emit the body into a separate function.
+            frame = [p.name for p in iter_list(lambda_parameters(expr))]
+            self.lexical_env.append(frame)
+            func_idx = self._emit_proc(lambda_body(expr))
+            self.lexical_env.pop()
+            # func_idx is the index of the function in the user_funcs list.
+            # Since we emit builtins first, we need to offset it by
+            # len(_builtins).
+            elem_idx = func_idx + len(_builtins)
+            self._emit_line(
+                f"(struct.new $CLOSURE (local.get $env) (i32.const {elem_idx}))"
+            )
+        elif is_application(expr):
+            self.tailcall_pos += 1
+            self._emit_list(application_operands(expr))
+            self._emit_expr(application_operator(expr))
+            self.tailcall_pos -= 1
+            self._emit_line(";; call function")
+            self._emit_line("ref.cast (ref $CLOSURE)")
+            self._emit_line("local.tee $clostemp")
+            self._emit_line("struct.get $CLOSURE 0  ;; get env")
+            self._emit_line("local.get $clostemp")
+            self._emit_line("struct.get $CLOSURE 1  ;; get function index")
+            self._emit_line(";; stack for call: [args] [env] [func idx]")
+
+            if self.tailcall_pos == 0:
+                self._emit_line("return_call_indirect (type $FUNC)")
+            else:
+                self._emit_line("call_indirect (type $FUNC)")
+        else:
+            raise ExprError(f"Unexpected expression {expr}")
 
     def _emit_constant(self, expr):
         match expr:
@@ -248,6 +302,14 @@ class WasmCompiler:
                 pass
             case _:
                 raise ExprError("Unexpected constant type: %s" % type(expr))
+
+    def _emit_list(self, lst):
+        if isinstance(lst, Pair):
+            self._emit_expr(lst.first)
+            self._emit_list(lst.second)
+            self._emit_line("struct.new $PAIR")
+        else:
+            self._emit_line("(ref.null any)")
 
     def _emit_var(self, name: str):
         # What it leaves on the stack is not the value of the variable, but
