@@ -17,6 +17,9 @@ cscope.*
 
 .vscode
 
+*.wasm
+*.wat
+
 # Binaries / build artifacts
 barevm/barevm
 barevm/build
