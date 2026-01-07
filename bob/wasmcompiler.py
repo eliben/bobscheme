@@ -236,6 +236,8 @@ class WasmCompiler:
             self._emit_constant(expr)
         elif isinstance(expr, Symbol):
             self._emit_var(expr.value)
+            self._emit_line(";; load variable value from its cons cell")
+            self._emit_line("(struct.get $PAIR 0 (ref.cast (ref $PAIR)))")
         elif is_assignment(expr):
             name = assignment_variable(expr).value
             self._emit_line(f";; set! '{name}' = expression")
