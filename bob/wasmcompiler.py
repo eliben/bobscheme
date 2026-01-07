@@ -134,7 +134,7 @@ class WasmCompiler:
         self._emit_text("(module")
         self.indent += 4
         # TODO: do these exports in a builtin together
-        self._emit_text('(func $write_i32 (import "" "write_i32") (param i32))')
+        self._emit_text('(func $write_i32 (import "env" "write_i32") (param i32))')
         self._emit_text(_builtin_types)
 
         # Start a new lexical frame for the builtins.
@@ -195,6 +195,7 @@ class WasmCompiler:
         self._emit_line("")
         self._emit_line(";; call toplevel user function")
         self._emit_line("(call $user_func_0 (local.get $builtins) (ref.null $ENV))")
+        self._emit_line("drop")
         self._emit_line("(i32.const 0)")
         self.indent -= 4
         self._emit_line(")")
