@@ -19,23 +19,26 @@ class TestCase(object):
         self.expected = expected
 
 
-def all_testcases(dir="tests_full/testcases"):
-    for filename in sorted(os.listdir(dir)):
+def all_testcases():
+    basedir = os.path.dirname(os.path.abspath(__file__))
+    testdir = os.path.join(basedir, "testcases")
+    for filename in sorted(os.listdir(testdir)):
         if filename.endswith(".scm"):
             testname = os.path.splitext(filename)[0]
-            fullpath = os.path.join(dir, filename)
+            fullpath = os.path.join(testdir, filename)
             code = open(fullpath).read()
 
-            exp_path = os.path.join(dir, testname + ".exp.txt")
+            exp_path = os.path.join(testdir, testname + ".exp.txt")
             expected = open(exp_path).read()
 
             yield TestCase(testname, code, expected)
 
 
-def run_all_tests(runner, dir="testcases/"):
-    """Runs all tests from the directory with the given runner. A runner
-    is a function accepting Scheme code as a string and an output stream
-    for calls to 'write' - it's expected to run the code.
+def run_tests(runner):
+    """Runs all tests found under the testcases directory next to this file
+    with the given runner. A runner is a function accepting Scheme code as a
+    string and an output stream for calls to 'write' - it's expected to run
+    the code.
     """
     starttime = time.time()
     testcount = 1

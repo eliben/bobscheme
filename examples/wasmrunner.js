@@ -1,3 +1,10 @@
+// Node.js loader and runner for scheme compiled to WebAssembly.
+//
+// Expects a single argument: the path to a .wasm (binary) file.
+// Loads the "start" function and runs it, sending its output to stdout.
+// The "start" function name is part of an ABI agreement between code emitted
+// from wasmcompiler.py and this runner.
+
 const fs = require('fs');
 const path = require('path');
 
