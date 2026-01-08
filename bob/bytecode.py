@@ -139,10 +139,6 @@ class CodeObject(object):
 #
 # The "magic" constant starting any serialized Bob bytecode consists of a
 # version in the high two bytes and 0B0B in the low two bytes.
-#
-# IMPORTANT: For compatibility with Python 2.6 and 3.x, bytecode is serialized
-# into 'bytes' objects.
-#
 MAGIC_CONST = 0x00010B0B
 
 TYPE_NULL = b"0"
