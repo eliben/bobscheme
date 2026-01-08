@@ -34,51 +34,45 @@ def wasm_compiler_runner(code: str, ostream: io.StringIO) -> None:
     captured and written into 'ostream'. Errors are caught and surfaced as
     output so the harness can report them per-test without aborting the run.
     """
-    try:
-        parser = BobParser()
-        exprs = parser.parse(code)
+    parser = BobParser()
+    exprs = parser.parse(code)
 
-        wat_stream = io.StringIO()
-        WasmCompiler(wat_stream).compile(exprs)
-        wat_text = wat_stream.getvalue()
+    wat_stream = io.StringIO()
+    WasmCompiler(wat_stream).compile(exprs)
+    wat_text = wat_stream.getvalue()
 
-        with tempfile.TemporaryDirectory() as tmpd:
-            tmpdir = Path(tmpd)
-            wat_path = tmpdir / "program.wat"
-            wasm_path = tmpdir / "program.wasm"
-            wat_path.write_text(wat_text)
+    with tempfile.TemporaryDirectory() as tmpd:
+        tmpdir = Path(tmpd)
+        wat_path = tmpdir / "program.wat"
+        wasm_path = tmpdir / "program.wasm"
+        wat_path.write_text(wat_text)
 
-            # Convert WAT -> WASM using wasm-tools CLI (like examples/compile_to_wasm.py).
-            parse_proc = subprocess.run(
-                [WASM_TOOLS, "parse", str(wat_path), "-o", str(wasm_path)],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                check=False,
-            )
-            if parse_proc.returncode != 0:
-                ostream.write(f"[wasm-tools parse failed]\n{parse_proc.stderr}\n")
-                return
+        # Convert WAT -> WASM using wasm-tools CLI (like examples/compile_to_wasm.py).
+        parse_proc = subprocess.run(
+            [WASM_TOOLS, "parse", str(wat_path), "-o", str(wasm_path)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+        if parse_proc.returncode != 0:
+            ostream.write(f"[wasm-tools parse failed]\n{parse_proc.stderr}\n")
+            return
 
-            # Execute with Node.js runner to produce stdout for comparison.
-            runner_js = (
-                Path(__file__).resolve().parents[1] / "examples" / "wasmrunner.js"
-            )
-            run_proc = subprocess.run(
-                [NODE, str(runner_js), str(wasm_path)],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                check=False,
-            )
-            if run_proc.returncode != 0:
-                ostream.write(f"[node execution failed]\n{run_proc.stderr}\n")
-                return
+        # Execute with Node.js runner to produce stdout for comparison.
+        runner_js = Path(__file__).resolve().parents[1] / "examples" / "wasmrunner.js"
+        run_proc = subprocess.run(
+            [NODE, str(runner_js), str(wasm_path)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+        if run_proc.returncode != 0:
+            ostream.write(f"[node execution failed]\n{run_proc.stderr}\n")
+            return
 
-            ostream.write(run_proc.stdout)
-    except Exception as e:
-        # Surface any unexpected exception as test output so the harness logs it.
-        ostream.write(f"[exception]\n{e}\n")
+        ostream.write(run_proc.stdout)
 
 
 supported_tests = {
