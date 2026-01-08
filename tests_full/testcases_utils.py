@@ -34,17 +34,21 @@ def all_testcases():
             yield TestCase(testname, code, expected)
 
 
-def run_tests(runner):
+def run_tests(runner, testnames=None):
     """Runs all tests found under the testcases directory next to this file
     with the given runner. A runner is a function accepting Scheme code as a
     string and an output stream for calls to 'write' - it's expected to run
     the code.
+
+    If testnames is given, only tests with names in that list are run.
     """
     starttime = time.time()
     testcount = 1
     errorcount = 0
 
     for testcase in all_testcases():
+        if testnames is not None and testcase.name not in testnames:
+            continue
         numdots = 25 - len(testcase.name)
         dots = "." * numdots
         print(
