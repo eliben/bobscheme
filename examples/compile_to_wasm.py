@@ -12,6 +12,10 @@ from bob.bobparser import BobParser
 from bob.expr import expr_repr
 from bob.wasmcompiler import WasmCompiler, expr_tree_repr
 
+default_scheme_program = """
+(write (cdr (cons 42 23)))
+"""
+
 
 def main():
     ap = argparse.ArgumentParser(
@@ -36,9 +40,7 @@ def main():
         except OSError as e:
             raise SystemExit(f"Failed to read Scheme file '{args.scheme_file}': {e}")
     else:
-        scmprog = """
-        (write 5)
-        """
+        scmprog = default_scheme_program
 
     parser = BobParser()
     exprs = parser.parse(scmprog)
