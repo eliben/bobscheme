@@ -37,7 +37,10 @@ class WasmCompiler:
 
     def compile(self, exprlist):
         nestedlist = make_nested_pairs(*exprlist)
+        # print(expr_tree_repr(nestedlist)) # TODO
         tpl = self._expand_block(nestedlist)
+        # print("----")
+        # print(expr_tree_repr(tpl))
         self._emit_module(tpl)
 
     def _expand_block(self, exprlist):
@@ -73,7 +76,7 @@ class WasmCompiler:
         # of the same length as 'names'.
         args = None
         for name in iter_pairs(names):
-            args = Pair(Symbol("()"), args)
+            args = Pair(None, args)
 
         # Return the application (lamba args).
         return Pair(make_lambda(names, result), args)
@@ -232,7 +235,9 @@ class WasmCompiler:
         return func_idx
 
     def _emit_expr(self, expr):
-        if is_self_evaluating(expr):
+        if expr is None:
+            self._emit_line("(ref.null any)")
+        elif is_self_evaluating(expr):
             self._emit_constant(expr)
         elif isinstance(expr, Symbol):
             self._emit_var(expr.value)
@@ -259,7 +264,7 @@ class WasmCompiler:
             self._emit_line(";; lambda expression")
             # Add the lambda parameters to the lexical environment and
             # emit the body into a separate function.
-            frame = [p.name for p in iter_list(lambda_parameters(expr))]
+            frame = [p.value for p in iter_pairs(lambda_parameters(expr))]
             self.lexical_env.append(frame)
             func_idx = self._emit_proc(lambda_body(expr))
             self.lexical_env.pop()

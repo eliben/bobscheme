@@ -13,7 +13,8 @@ from bob.expr import expr_repr
 from bob.wasmcompiler import WasmCompiler, expr_tree_repr
 
 default_scheme_program = """
-(write (cdr (cons 42 23)))
+(define k (cons 21 2))
+(write (car k))
 """
 
 

@@ -78,6 +78,7 @@ def wasm_compiler_runner(code: str, ostream: io.StringIO) -> None:
 supported_tests = {
     "abasic1",
     # "abasic2",   # needs printing of booleans
+    "abasic3",
     # "numeric1",  # doesn't know builtins, and printing of booleans
 }
 
