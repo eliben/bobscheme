@@ -136,8 +136,7 @@ class WasmCompiler:
     def _emit_module(self, expr):
         self._emit_text("(module")
         self.indent += 4
-        # TODO: do these exports in a builtin together
-        self._emit_text('(func $write_i32 (import "env" "write_i32") (param i32))')
+        self._emit_text(_imports)
         self._emit_text(_builtin_types)
 
         # Start a new lexical frame for the builtins.
@@ -393,9 +392,17 @@ def expr_tree_repr(expr):
 # creation, and the function index in the function table.
 
 
+_imports = r"""
+(import "env" "write_char" (func $write_char (param i32)))
+(import "env" "write_i32" (func $write_i32 (param i32)))
+"""
+
 _builtin_types = r"""
 ;; PAIR holds the car and cdr of a cons cell.
 (type $PAIR (struct (field (mut anyref)) (field (mut anyref))))
+
+;; BOOL represents a Scheme boolean. zero -> false, nonzero -> true.
+(type $BOOL (struct (field i32)))
 
 ;; ENV holds a reference to the parent env, and a list of values.
 (type $ENV (struct (field (ref null $ENV)) (field anyref)))
@@ -472,6 +479,8 @@ _write_code = r"""
         (i31.get_s
             (ref.cast (ref i31)
                 (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))))
+
+    (call $write_char (i32.const 10)) ;; newline
     (ref.null any)
 )
 """

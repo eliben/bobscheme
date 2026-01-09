@@ -24,8 +24,11 @@ const path = require('path');
     const bytes = fs.readFileSync(wasmArg);
     let importObject = {
         env: {
+            write_char : n => {
+                process.stdout.write(String.fromCharCode(n));
+            },
             write_i32: n => {
-                console.log(`${n}`);
+                process.stdout.write(`${n}`);
             }
         }
     };
