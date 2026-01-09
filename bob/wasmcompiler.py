@@ -252,6 +252,9 @@ class WasmCompiler:
             self.tailcall_pos -= 1
             self._emit_line("(struct.set $PAIR 0)")
             self._emit_line("(ref.null any)")
+        elif is_quoted(expr):
+            qval = text_of_quotation(expr)
+            self._emit_constant(qval)
         elif is_begin(expr):
             self._emit_line(";; begin")
             self.tailcall_pos += 1
@@ -296,6 +299,8 @@ class WasmCompiler:
 
     def _emit_constant(self, expr):
         match expr:
+            case None:
+                self._emit_line("(ref.null any)")
             case Number(value=n):
                 self._emit_line(f"(ref.i31 (i32.const {n}))")
             case Boolean(value=b):
@@ -304,8 +309,10 @@ class WasmCompiler:
                 else:
                     self._emit_line("(struct.new $BOOL (i32.const 0))")
             case Pair(first=first, second=second):
-                # TODO: how to detect/emit constant pairs??
-                pass
+                self._emit_line(";; cons cell for constant")
+                self._emit_constant(first)
+                self._emit_constant(second)
+                self._emit_line("struct.new $PAIR")
             case _:
                 raise ExprError("Unexpected constant type: %s" % type(expr))
 
