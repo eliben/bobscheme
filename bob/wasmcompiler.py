@@ -299,11 +299,10 @@ class WasmCompiler:
             case Number(value=n):
                 self._emit_line(f"(ref.i31 (i32.const {n}))")
             case Boolean(value=b):
-                # TODO: special struct for booleans?
                 if b:
-                    self._emit_line("(ref.i31 (i32.const 1))")
+                    self._emit_line("(struct.new $BOOL (i32.const 1))")
                 else:
-                    self._emit_line("(ref.i31 (i32.const 1))")
+                    self._emit_line("(struct.new $BOOL (i32.const 0))")
             case Pair(first=first, second=second):
                 # TODO: how to detect/emit constant pairs??
                 pass
@@ -474,13 +473,102 @@ _nullp_code = r"""
 """
 
 _write_code = r"""
-(func $write (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
-    (call $write_i32
-        (i31.get_s
-            (ref.cast (ref i31)
-                (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))))
+;; The emit* functions use the imported write_char and write_i32 host functions.
+(func $emit (param $c i32)
+    (call $write_char (local.get $c))
+)
 
-    (call $write_char (i32.const 10)) ;; newline
+(func $emit_lparen  (call $emit (i32.const 40))) ;; '('
+(func $emit_rparen  (call $emit (i32.const 41))) ;; ')'
+(func $emit_space   (call $emit (i32.const 32))) ;; ' '
+(func $emit_newline (call $emit (i32.const 10))) ;; '\n'
+
+(func $emit_bool (param $b (ref $BOOL))
+    (call $emit (i32.const 35)) ;; '#'
+    (if (i32.eqz (struct.get $BOOL 0 (local.get $b)))
+        (then (call $emit (i32.const 102))) ;; 'f'
+        (else (call $emit (i32.const 116))) ;; 't'
+    )
+)
+
+(func $emit_value (param $v anyref)
+    ;; nil
+    (if (ref.is_null (local.get $v))
+        (then
+            (call $emit_lparen)
+            (call $emit_rparen)
+            (return)
+        )
+    )
+
+    ;; integer
+    (if (ref.test (ref i31) (local.get $v))
+        (then
+            (call $write_i32 (i31.get_s (ref.cast (ref i31) (local.get $v))))
+            (return)
+        )
+    )
+
+    ;; bool
+    (if (ref.test (ref $BOOL) (local.get $v))
+        (then
+            (call $emit_bool (ref.cast (ref $BOOL) (local.get $v)))
+            (return)
+        )
+    )
+
+    ;; pair
+    (if (ref.test (ref $PAIR) (local.get $v))
+        (then
+            (call $emit_pair (ref.cast (ref $PAIR) (local.get $v)))
+            (return)
+        )
+    )
+
+    ;; unknown type: emit '?'
+    (call $emit (i32.const 63))
+)
+
+(func $emit_pair (param $p (ref $PAIR))
+    (local $cur (ref null $PAIR))
+    (local $cdr anyref)
+
+    (call $emit_lparen)
+    (local.set $cur (local.get $p))
+
+    (loop $loop (block $breakloop
+        ;; print car
+        (call $emit_value (struct.get $PAIR 0 (local.get $cur)))
+
+        (local.set $cdr (struct.get $PAIR 1 (local.get $cur)))
+        
+        ;; end of list?
+        (br_if $breakloop (ref.is_null (local.get $cdr)))
+
+        ;; cdr is another pair, continue loop
+        (if (ref.test (ref $PAIR) (local.get $cdr))
+            (then
+                (call $emit_space)
+                (local.set $cur (ref.cast (ref $PAIR) (local.get $cdr)))
+                br $loop
+            )
+            (else
+                ;; cdr is not a pair, print dot and the cdr value, then end
+                (call $emit (i32.const 32)) ;; space
+                (call $emit (i32.const 46)) ;; '.'
+                (call $emit (i32.const 32)) ;; space
+                (call $emit_value (local.get $cdr))
+                br $breakloop
+            )
+        )
+    ))
+
+    (call $emit_rparen)
+)
+
+(func $write (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+    (call $emit_value (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
+    (call $emit (i32.const 10)) ;; newline
     (ref.null any)
 )
 """
