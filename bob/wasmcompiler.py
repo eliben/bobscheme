@@ -37,7 +37,7 @@ class WasmCompiler:
 
     def compile(self, exprlist):
         nestedlist = make_nested_pairs(*exprlist)
-        # print(expr_tree_repr(nestedlist)) # TODO
+        # print(expr_tree_repr(nestedlist))  # TODO
         tpl = self._expand_block(nestedlist)
         # print("----")
         # print(expr_tree_repr(tpl))
@@ -478,6 +478,14 @@ _cdr_code = r"""
 )
 """
 
+_cadr_code = r"""
+(func $cadr (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+    (struct.get $PAIR 0
+        (ref.cast (ref $PAIR)
+            (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $arg)))))
+)
+"""
+
 _cons_code = r"""
 (func $cons (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
     (struct.new $PAIR
@@ -486,6 +494,38 @@ _cons_code = r"""
         (struct.get $PAIR 0
             (ref.cast (ref $PAIR)
                 (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $arg))))))
+)
+"""
+
+# The argument list of an application is already constructed as a list with
+# PAIR structs, so we just need to return it.
+_list_code = r"""
+(func $list (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+    (local.get $arg)
+)
+"""
+
+_set_car_code = r"""
+(func $set-car! (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+    (struct.set $PAIR 0
+        (ref.cast (ref $PAIR)
+            (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
+        (struct.get $PAIR 0
+            (ref.cast (ref $PAIR)
+                (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $arg))))))
+    (ref.null any)
+)
+"""
+
+_set_cdr_code = r"""
+(func $set-cdr! (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+    (struct.set $PAIR 1
+        (ref.cast (ref $PAIR)
+            (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
+        (struct.get $PAIR 0
+            (ref.cast (ref $PAIR)
+                (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $arg))))))
+    (ref.null any)
 )
 """
 
@@ -636,7 +676,11 @@ _binop_cmp_code = r"""
 
 _register_builtin("car", _car_code, {})
 _register_builtin("cdr", _cdr_code, {})
+_register_builtin("cadr", _cadr_code, {})
 _register_builtin("cons", _cons_code, {})
+_register_builtin("list", _list_code, {})
+_register_builtin("set-car!", _set_car_code, {})
+_register_builtin("set-cdr!", _set_cdr_code, {})
 _register_builtin("null?", _nullp_code, {})
 _register_builtin("write", _write_code, {})
 _register_builtin(
