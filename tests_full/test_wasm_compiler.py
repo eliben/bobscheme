@@ -81,6 +81,7 @@ supported_tests = {
     "abasic3",
     "func1",
     "vars1",
+    "cond1",
     # "numeric1",  # doesn't know builtins, and printing of booleans
 }
 

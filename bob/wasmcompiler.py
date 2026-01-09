@@ -112,6 +112,8 @@ class WasmCompiler:
                         self._expand_expr(if_consequent(expr)),
                         self._expand_expr(if_alternative(expr)),
                     )
+                case "cond":
+                    return self._expand_expr(convert_cond_to_ifs(expr))
                 case "begin":
                     return self._expand_block(begin_actions(expr))
                 case "set!":
@@ -277,6 +279,24 @@ class WasmCompiler:
             self._emit_line(
                 f"(struct.new $CLOSURE (local.get $env) (i32.const {elem_idx}))"
             )
+        elif is_if(expr):
+            self._emit_line(";; ifelse condition")
+            self.tailcall_pos += 1
+            self._emit_expr(if_predicate(expr))
+            self.tailcall_pos -= 1
+            self._emit_line("ref.is_null")
+            self._emit_line("if (result anyref)")
+            self.indent += 4
+            self._emit_line(";; else branch")
+            self._emit_expr(if_alternative(expr))
+            self.indent -= 4
+            self._emit_line("else")
+            self.indent += 4
+            self._emit_line(";; then branch")
+            self._emit_expr(if_consequent(expr))
+            self.indent -= 4
+            self._emit_line("end")
+
         elif is_application(expr):
             self.tailcall_pos += 1
             self._emit_list(application_operands(expr))
