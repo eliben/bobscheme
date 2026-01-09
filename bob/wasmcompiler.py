@@ -93,12 +93,13 @@ class WasmCompiler:
         return self._expand_expr(expr), None
 
     def _expand_expr(self, expr):
-        if isinstance(expr, Symbol):
+        if isinstance(expr, Symbol) or expr is None:
             return expr
         elif is_self_evaluating(expr):
             return expr
 
-        assert isinstance(expr, Pair)
+        if not isinstance(expr, Pair):
+            raise ExprError("Unexpected expression type: %s" % type(expr))
         if isinstance(expr.first, Symbol):
             match expr.first.value:
                 case "lambda":
