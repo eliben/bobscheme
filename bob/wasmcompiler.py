@@ -710,6 +710,49 @@ _eqp_code = r"""
 )
 """
 
+_and_code = r"""
+(func $and (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
+    (local $cur (ref null eq))
+    (local.set $cur (local.get $arg))
+    (loop $loop (block $breakloop
+        (br_if $breakloop (ref.is_null (local.get $cur)))
+        (if (i32.eqz
+                (struct.get $BOOL 0 (ref.cast (ref $BOOL)
+                    (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $cur))))))
+            (then
+                (return (struct.new $BOOL (i32.const 0)))
+            )
+        )
+        (local.set $cur
+            (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $cur))))
+        br $loop
+    ))
+    (struct.new $BOOL (i32.const 1))
+)
+"""
+
+_or_code = r"""
+(func $or (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
+    (local $cur (ref null eq))
+    (local.set $cur (local.get $arg))
+    (loop $loop (block $breakloop
+        (br_if $breakloop (ref.is_null (local.get $cur)))
+        (if (i32.ne
+                (struct.get $BOOL 0 (ref.cast (ref $BOOL)
+                    (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $cur)))))
+                (i32.const 0))
+            (then
+                (return (struct.new $BOOL (i32.const 1)))
+            )
+        )
+        (local.set $cur
+            (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $cur))))
+        br $loop
+    ))
+    (struct.new $BOOL (i32.const 0))
+)
+"""
+
 _write_code = r"""
 ;; The emit* functions use the imported write_char and write_i32 host functions.
 (func $emit (param $c i32)
@@ -888,6 +931,8 @@ _register_builtin("pair?", _pairp_code, {})
 _register_builtin("zero?", _zerop_code, {})
 _register_builtin("eqv?", _eqvp_code, {})
 _register_builtin("eq?", _eqp_code, {})
+_register_builtin("and", _and_code, {})
+_register_builtin("or", _or_code, {})
 _register_builtin("write", _write_code, {})
 _register_builtin(
     "+",

@@ -88,7 +88,7 @@ supported_tests = {
     "lists2",
     "lists3",
     "symbolic1",
-    # "symbolic-diff",
+    "symbolic-diff",
     "numeric1",
     "builtins",
     "builtins-list-access",
