@@ -955,9 +955,19 @@ _register_builtin(
     {"NAME": "_lt", "BINOP": "i32.lt_s"},
 )
 _register_builtin(
+    "<=",
+    _binop_cmp_code,
+    {"NAME": "_le", "BINOP": "i32.le_s"},
+)
+_register_builtin(
     ">",
     _binop_cmp_code,
     {"NAME": "_gt", "BINOP": "i32.gt_s"},
+)
+_register_builtin(
+    ">=",
+    _binop_cmp_code,
+    {"NAME": "_ge", "BINOP": "i32.ge_s"},
 )
 _register_builtin(
     "=",
