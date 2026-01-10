@@ -87,8 +87,9 @@ supported_tests = {
     "lists2",
     "lists3",
     "symbolic1",
-    "symbolic-diff",
-    "numeric1",  # doesn't know builtins, and printing of booleans
+    # "symbolic-diff",
+    "numeric1",
+    "builtins",
 }
 
 run_tests(runner=wasm_compiler_runner, testnames=supported_tests)

@@ -587,6 +587,28 @@ _numberp_code = r"""
 )
 """
 
+_booleanp_code = r"""
+(func $boolean? (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+    (ref.test (ref $BOOL) (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
+    if (result anyref)
+        (struct.new $BOOL (i32.const 1))
+    else
+        (struct.new $BOOL (i32.const 0))
+    end
+)
+"""
+
+_pairp_code = r"""
+(func $pair? (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+    (ref.test (ref $PAIR) (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
+    if (result anyref)
+        (struct.new $BOOL (i32.const 1))
+    else
+        (struct.new $BOOL (i32.const 0))
+    end
+)
+"""
+
 _zerop_code = r"""
 (func $zero? (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
     (i31.get_s (ref.cast (ref i31) (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg)))))
@@ -782,6 +804,8 @@ _register_builtin("set-cdr!", _set_cdr_code, {})
 _register_builtin("null?", _nullp_code, {})
 _register_builtin("number?", _numberp_code, {})
 _register_builtin("symbol?", _symbolp_code, {})
+_register_builtin("boolean?", _booleanp_code, {})
+_register_builtin("pair?", _pairp_code, {})
 _register_builtin("zero?", _zerop_code, {})
 _register_builtin("write", _write_code, {})
 _register_builtin(
