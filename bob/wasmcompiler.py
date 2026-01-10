@@ -500,25 +500,34 @@ def _register_builtin(name: str, code_templ: str, code_params: dict[str, str]):
 
 _car_code = r"""
 (func $car (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
-    (struct.get $PAIR 0
-        (ref.cast (ref $PAIR)
-            (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg)))))
+    (struct.get $PAIR 0 (ref.cast (ref $PAIR)
+        (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg)))))
 )
 """
 
 _cdr_code = r"""
 (func $cdr (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
-    (struct.get $PAIR 1
-        (ref.cast (ref $PAIR)
-            (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg)))))
+    (struct.get $PAIR 1 (ref.cast (ref $PAIR)
+        (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg)))))
 )
 """
 
 _cadr_code = r"""
 (func $cadr (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
-    (struct.get $PAIR 0
-        (ref.cast (ref $PAIR)
-            (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $arg)))))
+    (struct.get $PAIR 0 (ref.cast (ref $PAIR)
+        (struct.get $PAIR 1 (ref.cast (ref $PAIR)
+            (struct.get $PAIR 0 (ref.cast (ref $PAIR)
+                (local.get $arg)))))))
+)
+"""
+
+_caddr_code = r"""
+(func $caddr (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+    (struct.get $PAIR 0 (ref.cast (ref $PAIR)
+        (struct.get $PAIR 1 (ref.cast (ref $PAIR)
+            (struct.get $PAIR 1 (ref.cast (ref $PAIR)
+                (struct.get $PAIR 0 (ref.cast (ref $PAIR)
+                    (local.get $arg)))))))))
 )
 """
 
@@ -797,6 +806,7 @@ _binop_cmp_code = r"""
 _register_builtin("car", _car_code, {})
 _register_builtin("cdr", _cdr_code, {})
 _register_builtin("cadr", _cadr_code, {})
+_register_builtin("caddr", _caddr_code, {})
 _register_builtin("cons", _cons_code, {})
 _register_builtin("list", _list_code, {})
 _register_builtin("set-car!", _set_car_code, {})

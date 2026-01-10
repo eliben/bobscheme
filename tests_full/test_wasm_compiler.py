@@ -90,6 +90,7 @@ supported_tests = {
     # "symbolic-diff",
     "numeric1",
     "builtins",
+    "builtins-list-access",
 }
 
 run_tests(runner=wasm_compiler_runner, testnames=supported_tests)
