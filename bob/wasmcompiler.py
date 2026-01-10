@@ -950,6 +950,16 @@ _register_builtin(
     {"NAME": "_mul", "BINOP": "i32.mul"},
 )
 _register_builtin(
+    "quotient",
+    _binop_arith_code,
+    {"NAME": "_div", "BINOP": "i32.div_s"},
+)
+_register_builtin(
+    "modulo",
+    _binop_arith_code,
+    {"NAME": "_mod", "BINOP": "i32.rem_s"},
+)
+_register_builtin(
     "<",
     _binop_cmp_code,
     {"NAME": "_lt", "BINOP": "i32.lt_s"},
