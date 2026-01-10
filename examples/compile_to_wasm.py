@@ -13,12 +13,9 @@ from bob.expr import expr_repr
 from bob.wasmcompiler import WasmCompiler, expr_tree_repr
 
 default_scheme_program = """
-(define myp (cons 1 2))
-(write myp)
-(set-car! myp 5)
-(write myp)
-(set-cdr! myp (cons 4 (cons 6 '())))
-(write myp)
+(write 'hello)
+(write '(hello world))
+(write '(write cons))
 
 """
 

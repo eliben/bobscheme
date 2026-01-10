@@ -35,6 +35,15 @@ class WasmCompiler:
         # same frame.
         self.tailcall_pos = 0
 
+        # Symbol offset in linear memory. This is where the next allocated
+        # symbol will be placed.
+        self.symbol_offset = 2048
+
+        # Symbolmap for "interning" symbols, mapping names to offsets in memory.
+        # When the compiler ecnounters the sample symbol in multiple places, it
+        # uses the same offset.
+        self.symbolmap: dict[str, int] = {}
+
     def compile(self, exprlist):
         nestedlist = make_nested_pairs(*exprlist)
         # print(expr_tree_repr(nestedlist))  # TODO
@@ -162,6 +171,7 @@ class WasmCompiler:
 
         # Emit all user-defined functions to the output stream.
         for i, func_stream in enumerate(self.user_funcs):
+            self._emit_line("")
             self._emit_text(func_stream.getvalue())
 
         # Emit table and element section.
@@ -179,6 +189,17 @@ class WasmCompiler:
         for i in range(len(self.user_funcs)):
             self._emit_line(f"(elem (i32.const {elem_index}) $user_func_{i})")
             elem_index += 1
+
+        # Emit data for symbol names, if needed.
+        # We need to emit the (memory ...) declaration in any case; otherwise,
+        # the emit_symbol function will fail to compile.
+        self._emit_line("(memory 16)")
+        if len(self.symbolmap) > 0:
+            self._emit_line("")
+            # Emit all symbol names at their assigned offsets.
+            sorted_symbols = sorted(self.symbolmap.items(), key=lambda item: item[1])
+            for sym, offset in sorted_symbols:
+                self._emit_line(f'(data (i32.const {offset}) "{sym}")')
 
         self.indent -= 4
         self._emit_text(")")
@@ -329,6 +350,15 @@ class WasmCompiler:
                     self._emit_line("(struct.new $BOOL (i32.const 1))")
                 else:
                     self._emit_line("(struct.new $BOOL (i32.const 0))")
+            case Symbol(value=s):
+                if s not in self.symbolmap:
+                    offset = self.symbol_offset
+                    self.symbolmap[s] = offset
+                    self.symbol_offset += len(s)
+                offset = self.symbolmap[s]
+                self._emit_line(
+                    f"(struct.new $SYMBOL (i32.const {offset}) (i32.const {len(s)}))"
+                )
             case Pair(first=first, second=second):
                 self._emit_line(";; cons cell for constant")
                 self._emit_constant(first)
@@ -430,6 +460,10 @@ _builtin_types = r"""
 
 ;; BOOL represents a Scheme boolean. zero -> false, nonzero -> true.
 (type $BOOL (struct (field i32)))
+
+;; SYMBOL represents a Scheme symbol. It holds an offset in linear memory
+;; and the length of the symbol name.
+(type $SYMBOL (struct (field i32) (field i32)))
 
 ;; ENV holds a reference to the parent env, and a list of values.
 (type $ENV (struct (field (ref null $ENV)) (field anyref)))
@@ -559,6 +593,26 @@ _write_code = r"""
     )
 )
 
+(func $emit_symbol (param $s (ref $SYMBOL))
+    (local $addr i32)
+    (local $len i32)
+    (local $i i32)
+    (local.set $addr (struct.get $SYMBOL 0 (local.get $s)))
+    (local.set $len  (struct.get $SYMBOL 1 (local.get $s)))
+
+    (local.set $i (i32.const 0))
+    (loop $loop (block $breakloop
+        (br_if $breakloop (i32.ge_u (local.get $i) (local.get $len)))
+        (call $emit
+            (i32.load8_u
+                (i32.add
+                    (local.get $addr)
+                    (local.get $i))))
+        (local.set $i (i32.add (local.get $i) (i32.const 1)))
+        br $loop
+    ))
+)
+
 (func $emit_value (param $v anyref)
     ;; nil
     (if (ref.is_null (local.get $v))
@@ -581,6 +635,14 @@ _write_code = r"""
     (if (ref.test (ref $BOOL) (local.get $v))
         (then
             (call $emit_bool (ref.cast (ref $BOOL) (local.get $v)))
+            (return)
+        )
+    )
+
+    ;; symbol
+    (if (ref.test (ref $SYMBOL) (local.get $v))
+        (then
+            (call $emit_symbol (ref.cast (ref $SYMBOL) (local.get $v)))
             (return)
         )
     )
@@ -609,7 +671,7 @@ _write_code = r"""
         (call $emit_value (struct.get $PAIR 0 (local.get $cur)))
 
         (local.set $cdr (struct.get $PAIR 1 (local.get $cur)))
-        
+
         ;; end of list?
         (br_if $breakloop (ref.is_null (local.get $cdr)))
 

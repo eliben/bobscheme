@@ -86,6 +86,7 @@ supported_tests = {
     "lists1",
     "lists2",
     "lists3",
+    "symbolic1",
     # "numeric1",  # doesn't know builtins, and printing of booleans
 }
 
