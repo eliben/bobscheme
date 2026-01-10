@@ -210,7 +210,7 @@ class WasmCompiler:
         self._emit_line("")
         self._emit_line('(func (export "start") (result i32)')
         self.indent += 4
-        self._emit_line("(local $builtins anyref)")
+        self._emit_line("(local $builtins (ref null eq))")
 
         # Build the builtins environment frame.
         # Each builtin has a corresponding table index which is its position
@@ -243,7 +243,7 @@ class WasmCompiler:
         self.user_funcs.append(self.stream)
 
         self._emit_line(
-            f"(func $user_func_{func_idx} (param $arg anyref) (param $env (ref null $ENV)) (result anyref)"
+            f"(func $user_func_{func_idx} (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))"
         )
         self.indent += 4
         self._emit_line("(local $clostemp (ref null $CLOSURE))")
@@ -261,7 +261,7 @@ class WasmCompiler:
 
     def _emit_expr(self, expr):
         if expr is None:
-            self._emit_line("(ref.null any)")
+            self._emit_line("(ref.null eq)")
         elif is_self_evaluating(expr):
             self._emit_constant(expr)
         elif isinstance(expr, Symbol):
@@ -277,7 +277,7 @@ class WasmCompiler:
             self._emit_expr(assignment_value(expr))
             self.tailcall_pos -= 1
             self._emit_line("(struct.set $PAIR 0)")
-            self._emit_line("(ref.null any)")
+            self._emit_line("(ref.null eq)")
         elif is_quoted(expr):
             qval = text_of_quotation(expr)
             self._emit_constant(qval)
@@ -309,7 +309,7 @@ class WasmCompiler:
             self._emit_expr(if_predicate(expr))
             self.tailcall_pos -= 1
             self._emit_line("call $is_false")
-            self._emit_line("if (result anyref)")
+            self._emit_line("if (result (ref null eq))")
             self.indent += 4
             self._emit_line(";; else branch")
             self._emit_expr(if_alternative(expr))
@@ -344,7 +344,7 @@ class WasmCompiler:
     def _emit_constant(self, expr):
         match expr:
             case None:
-                self._emit_line("(ref.null any)")
+                self._emit_line("(ref.null eq)")
             case Number(value=n):
                 self._emit_line(f"(ref.i31 (i32.const {n}))")
             case Boolean(value=b):
@@ -375,7 +375,7 @@ class WasmCompiler:
             self._emit_list(lst.second)
             self._emit_line("struct.new $PAIR")
         else:
-            self._emit_line("(ref.null any)")
+            self._emit_line("(ref.null eq)")
 
     def _emit_var(self, name: str):
         # What it leaves on the stack is not the value of the variable, but
@@ -434,7 +434,7 @@ def expr_tree_repr(expr):
 #
 # All functions (built-in and user-defined) have the same signature:
 #
-#   (func (param anyref) (param (ref null $ENV)) (result anyref))
+#   (func (param (ref null eq)) (param (ref null $ENV)) (result (ref null eq)))
 #
 # The first parameter is the argument list (as a PAIR struct), and the second
 # parameter is the environment (as an ENV struct). The first argument is
@@ -458,7 +458,7 @@ _imports = r"""
 
 _builtin_types = r"""
 ;; PAIR holds the car and cdr of a cons cell.
-(type $PAIR (struct (field (mut anyref)) (field (mut anyref))))
+(type $PAIR (struct (field (mut (ref null eq))) (field (mut (ref null eq)))))
 
 ;; BOOL represents a Scheme boolean. zero -> false, nonzero -> true.
 (type $BOOL (struct (field i32)))
@@ -468,14 +468,14 @@ _builtin_types = r"""
 (type $SYMBOL (struct (field i32) (field i32)))
 
 ;; ENV holds a reference to the parent env, and a list of values.
-(type $ENV (struct (field (ref null $ENV)) (field anyref)))
+(type $ENV (struct (field (ref null $ENV)) (field (ref null eq))))
 
 ;; CLOSURE holds a reference to the environment, and the function index in
 ;; the function table.
 (type $CLOSURE (struct (field (ref null $ENV)) (field i32)))
 
 ;; FUNC is the type of a Scheme function,
-(type $FUNC (func (param $arg anyref) (param $env (ref null $ENV)) (result anyref)))
+(type $FUNC (func (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))))
 
 ;; TOPLEVEL is the top-level function exported to the host.
 (type $TOPLEVEL (func (result i32)))
@@ -499,21 +499,21 @@ def _register_builtin(name: str, code_templ: str, code_params: dict[str, str]):
 
 
 _car_code = r"""
-(func $car (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $car (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (struct.get $PAIR 0 (ref.cast (ref $PAIR)
         (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg)))))
 )
 """
 
 _cdr_code = r"""
-(func $cdr (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $cdr (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (struct.get $PAIR 1 (ref.cast (ref $PAIR)
         (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg)))))
 )
 """
 
 _cadr_code = r"""
-(func $cadr (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $cadr (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (struct.get $PAIR 0 (ref.cast (ref $PAIR)
         (struct.get $PAIR 1 (ref.cast (ref $PAIR)
             (struct.get $PAIR 0 (ref.cast (ref $PAIR)
@@ -522,7 +522,7 @@ _cadr_code = r"""
 """
 
 _caddr_code = r"""
-(func $caddr (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $caddr (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (struct.get $PAIR 0 (ref.cast (ref $PAIR)
         (struct.get $PAIR 1 (ref.cast (ref $PAIR)
             (struct.get $PAIR 1 (ref.cast (ref $PAIR)
@@ -532,7 +532,7 @@ _caddr_code = r"""
 """
 
 _cons_code = r"""
-(func $cons (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $cons (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (struct.new $PAIR
         (struct.get $PAIR 0
             (ref.cast (ref $PAIR) (local.get $arg)))
@@ -545,39 +545,39 @@ _cons_code = r"""
 # The argument list of an application is already constructed as a list with
 # PAIR structs, so we just need to return it.
 _list_code = r"""
-(func $list (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $list (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (local.get $arg)
 )
 """
 
 _set_car_code = r"""
-(func $set-car! (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $set-car! (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (struct.set $PAIR 0
         (ref.cast (ref $PAIR)
             (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
         (struct.get $PAIR 0
             (ref.cast (ref $PAIR)
                 (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $arg))))))
-    (ref.null any)
+    (ref.null eq)
 )
 """
 
 _set_cdr_code = r"""
-(func $set-cdr! (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $set-cdr! (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (struct.set $PAIR 1
         (ref.cast (ref $PAIR)
             (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
         (struct.get $PAIR 0
             (ref.cast (ref $PAIR)
                 (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $arg))))))
-    (ref.null any)
+    (ref.null eq)
 )
 """
 
 _nullp_code = r"""
-(func $null? (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $null? (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (ref.is_null (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
-    if (result anyref)
+    if (result (ref null eq))
         (struct.new $BOOL (i32.const 1))
     else
         (struct.new $BOOL (i32.const 0))
@@ -586,9 +586,9 @@ _nullp_code = r"""
 """
 
 _numberp_code = r"""
-(func $number? (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $number? (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (ref.test (ref i31) (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
-    if (result anyref)
+    if (result (ref null eq))
         (struct.new $BOOL (i32.const 1))
     else
         (struct.new $BOOL (i32.const 0))
@@ -597,9 +597,9 @@ _numberp_code = r"""
 """
 
 _booleanp_code = r"""
-(func $boolean? (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $boolean? (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (ref.test (ref $BOOL) (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
-    if (result anyref)
+    if (result (ref null eq))
         (struct.new $BOOL (i32.const 1))
     else
         (struct.new $BOOL (i32.const 0))
@@ -608,9 +608,9 @@ _booleanp_code = r"""
 """
 
 _pairp_code = r"""
-(func $pair? (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $pair? (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (ref.test (ref $PAIR) (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
-    if (result anyref)
+    if (result (ref null eq))
         (struct.new $BOOL (i32.const 1))
     else
         (struct.new $BOOL (i32.const 0))
@@ -619,10 +619,10 @@ _pairp_code = r"""
 """
 
 _zerop_code = r"""
-(func $zero? (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $zero? (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (i31.get_s (ref.cast (ref i31) (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg)))))
     (i32.eqz)
-    if (result anyref)
+    if (result (ref null eq))
         (struct.new $BOOL (i32.const 1))
     else
         (struct.new $BOOL (i32.const 0))
@@ -631,9 +631,9 @@ _zerop_code = r"""
 """
 
 _symbolp_code = r"""
-(func $symbol? (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $symbol? (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (ref.test (ref $SYMBOL) (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
-    if (result anyref)
+    if (result (ref null eq))
         (struct.new $BOOL (i32.const 1))
     else
         (struct.new $BOOL (i32.const 0))
@@ -680,7 +680,7 @@ _write_code = r"""
     ))
 )
 
-(func $emit_value (param $v anyref)
+(func $emit_value (param $v (ref null eq))
     ;; nil
     (if (ref.is_null (local.get $v))
         (then
@@ -728,7 +728,7 @@ _write_code = r"""
 
 (func $emit_pair (param $p (ref $PAIR))
     (local $cur (ref null $PAIR))
-    (local $cdr anyref)
+    (local $cdr (ref null eq))
 
     (call $emit_lparen)
     (local.set $cur (local.get $p))
@@ -763,15 +763,15 @@ _write_code = r"""
     (call $emit_rparen)
 )
 
-(func $write (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func $write (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (call $emit_value (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
     (call $emit (i32.const 10)) ;; newline
-    (ref.null any)
+    (ref.null eq)
 )
 """
 
 _binop_arith_code = r"""
-(func ${NAME} (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func ${NAME} (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (ref.i31 ({BINOP}
         (i31.get_s
             (ref.cast (ref i31)
@@ -785,7 +785,7 @@ _binop_arith_code = r"""
 """
 
 _binop_cmp_code = r"""
-(func ${NAME} (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+(func ${NAME} (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     ({BINOP}
         (i31.get_s
             (ref.cast (ref i31)
@@ -795,7 +795,7 @@ _binop_cmp_code = r"""
                 (struct.get $PAIR 0
                     (ref.cast (ref $PAIR)
                         (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $arg))))))))
-    if (result anyref)
+    if (result (ref null eq))
         (struct.new $BOOL (i32.const 1))
     else
         (struct.new $BOOL (i32.const 0))
@@ -850,7 +850,7 @@ _register_builtin(
 )
 
 _compiler_helpers = r"""
-(func $is_false (param $v anyref) (result i32)
+(func $is_false (param $v (ref null eq)) (result i32)
     ;; if it's not a BOOL at all, it's truthy
     (ref.test (ref $BOOL) (local.get $v))
     (if (result i32)
