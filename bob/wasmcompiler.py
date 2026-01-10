@@ -163,6 +163,8 @@ class WasmCompiler:
             # they are enqueued onto the runtime environment in _emit_startfunc.
             self.lexical_env[-1].insert(0, blt.name)
 
+        self._emit_text(_compiler_helpers)
+
         self._emit_startfunc()
 
         # Emit user code, recursively, starting with the toplevel expression.
@@ -306,7 +308,7 @@ class WasmCompiler:
             self.tailcall_pos += 1
             self._emit_expr(if_predicate(expr))
             self.tailcall_pos -= 1
-            self._emit_line("ref.is_null")
+            self._emit_line("call $is_false")
             self._emit_line("if (result anyref)")
             self.indent += 4
             self._emit_line(";; else branch")
@@ -567,9 +569,43 @@ _nullp_code = r"""
 (func $null? (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
     (ref.is_null (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
     if (result anyref)
-        (ref.i31 (i32.const 1))
+        (struct.new $BOOL (i32.const 1))
     else
-        (ref.null any)
+        (struct.new $BOOL (i32.const 0))
+    end
+)
+"""
+
+_numberp_code = r"""
+(func $number? (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+    (ref.test (ref i31) (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
+    if (result anyref)
+        (struct.new $BOOL (i32.const 1))
+    else
+        (struct.new $BOOL (i32.const 0))
+    end
+)
+"""
+
+_zerop_code = r"""
+(func $zero? (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+    (i31.get_s (ref.cast (ref i31) (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg)))))
+    (i32.eqz)
+    if (result anyref)
+        (struct.new $BOOL (i32.const 1))
+    else
+        (struct.new $BOOL (i32.const 0))
+    end
+)
+"""
+
+_symbolp_code = r"""
+(func $symbol? (param $arg anyref) (param $env (ref null $ENV)) (result anyref)
+    (ref.test (ref $SYMBOL) (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
+    if (result anyref)
+        (struct.new $BOOL (i32.const 1))
+    else
+        (struct.new $BOOL (i32.const 0))
     end
 )
 """
@@ -729,9 +765,9 @@ _binop_cmp_code = r"""
                     (ref.cast (ref $PAIR)
                         (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $arg))))))))
     if (result anyref)
-        (ref.i31 (i32.const 1))
+        (struct.new $BOOL (i32.const 1))
     else
-        (ref.null any)
+        (struct.new $BOOL (i32.const 0))
     end
 )
 """
@@ -744,6 +780,9 @@ _register_builtin("list", _list_code, {})
 _register_builtin("set-car!", _set_car_code, {})
 _register_builtin("set-cdr!", _set_cdr_code, {})
 _register_builtin("null?", _nullp_code, {})
+_register_builtin("number?", _numberp_code, {})
+_register_builtin("symbol?", _symbolp_code, {})
+_register_builtin("zero?", _zerop_code, {})
 _register_builtin("write", _write_code, {})
 _register_builtin(
     "+",
@@ -775,3 +814,18 @@ _register_builtin(
     _binop_cmp_code,
     {"NAME": "_eq", "BINOP": "i32.eq"},
 )
+
+_compiler_helpers = r"""
+(func $is_false (param $v anyref) (result i32)
+    ;; if it's not a BOOL at all, it's truthy
+    (ref.test (ref $BOOL) (local.get $v))
+    (if (result i32)
+        (then
+            ;; it's a BOOL, check its value
+            (i32.eqz (struct.get $BOOL 0 (ref.cast (ref $BOOL) (local.get $v))))
+        )
+        (else
+            (i32.const 0))
+    )
+)
+"""
