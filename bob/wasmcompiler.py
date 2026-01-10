@@ -641,6 +641,75 @@ _symbolp_code = r"""
 )
 """
 
+_eqvp_code = r"""
+(func $eqv? (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
+    (local $a (ref null eq))
+    (local $b (ref null eq))
+    (local.set $a (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg))))
+    (local.set $b (struct.get $PAIR 0 (ref.cast (ref $PAIR)
+        (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $arg))))))
+
+    ;; Fast path: identical refs (covers same pair/symbol/bool object, and also both null)
+    (if (ref.eq (local.get $a) (local.get $b))
+        (then (return (struct.new $BOOL (i32.const 1))))
+    )
+
+    (if (ref.is_null (local.get $a)) (then (return (struct.new $BOOL (i32.const 0)))))
+    (if (ref.is_null (local.get $b)) (then (return (struct.new $BOOL (i32.const 0)))))
+
+    ;; Numbers: i31 value compare
+    (if (ref.test (ref i31) (local.get $a))
+        (then
+            (if (ref.test (ref i31) (local.get $b))
+                (then
+                    (return
+                        (struct.new $BOOL
+                            (i32.eq
+                                (i31.get_s (ref.cast (ref i31) (local.get $a)))
+                                (i31.get_s (ref.cast (ref i31) (local.get $b)))))))
+                (else (return (struct.new $BOOL (i32.const 0))))))
+    )
+
+    ;; Booleans: compare payload
+    (if (ref.test (ref $BOOL) (local.get $a))
+        (then
+            (if (ref.test (ref $BOOL) (local.get $b))
+                (then
+                    (return
+                        (struct.new $BOOL
+                            (i32.eq
+                                (struct.get $BOOL 0 (ref.cast (ref $BOOL) (local.get $a)))
+                                (struct.get $BOOL 0 (ref.cast (ref $BOOL) (local.get $b)))))))
+                (else (return (struct.new $BOOL (i32.const 0))))))
+    )
+
+    ;; Symbols: compare address and length
+    (if (i32.and
+            (ref.test (ref $SYMBOL) (local.get $a))
+            (ref.test (ref $SYMBOL) (local.get $b)))
+        (then
+            (return
+                (struct.new $BOOL
+                    (i32.and
+                        (i32.eq
+                            (struct.get $SYMBOL 0 (ref.cast (ref $SYMBOL) (local.get $a)))
+                            (struct.get $SYMBOL 0 (ref.cast (ref $SYMBOL) (local.get $b))))
+                        (i32.eq
+                            (struct.get $SYMBOL 1 (ref.cast (ref $SYMBOL) (local.get $a)))
+                            (struct.get $SYMBOL 1 (ref.cast (ref $SYMBOL) (local.get $b)))))))))
+
+    ;; Pairs: eqv? is identity, so since ref.eq was false above, return false
+    (struct.new $BOOL (i32.const 0))
+)
+"""
+
+# In Bobscheme, we define eq? as an alias for eqv?
+_eqp_code = r"""
+(func $eq? (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
+    (call $eqv? (local.get $arg) (local.get $env))
+)
+"""
+
 _write_code = r"""
 ;; The emit* functions use the imported write_char and write_i32 host functions.
 (func $emit (param $c i32)
@@ -817,6 +886,8 @@ _register_builtin("symbol?", _symbolp_code, {})
 _register_builtin("boolean?", _booleanp_code, {})
 _register_builtin("pair?", _pairp_code, {})
 _register_builtin("zero?", _zerop_code, {})
+_register_builtin("eqv?", _eqvp_code, {})
+_register_builtin("eq?", _eqp_code, {})
 _register_builtin("write", _write_code, {})
 _register_builtin(
     "+",

@@ -79,6 +79,7 @@ supported_tests = {
     "abasic1",
     "abasic2",
     "abasic3",
+    "equality1",
     "func1",
     "func2",
     "vars1",

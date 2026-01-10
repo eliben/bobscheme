@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Wasm debug harness</title>
 </head>
+
 <body>
   <h1>Wasm debug harness</h1>
   <pre id="out">loading...</pre>
@@ -20,8 +22,13 @@
       const bytes = await resp.arrayBuffer();
       const imports = {
         env: {
+          // Note: these emit with console.log, which appends a newline
+          // automatically.
+          write_char: n => {
+            console.log(String.fromCharCode(n));
+          },
           write_i32: n => {
-            console.log(`write_i32: ${n}`);
+            console.log(`${n}`);
           }
         }
       };
@@ -37,8 +44,8 @@
       const result = startFunc();
       // Show result on page and console
       const outEl = document.getElementById("out");
-      outEl.textContent = "main() returned: " + result;
-      console.log("main() returned:", result);
+      outEl.textContent = "start() returned: " + result;
+      console.log("start() returned:", result);
     }
 
     loadWasm().catch(err => {
@@ -47,4 +54,5 @@
     });
   </script>
 </body>
+
 </html>
