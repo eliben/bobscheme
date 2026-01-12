@@ -98,6 +98,7 @@ supported_tests = {
     "symbolic1",
     "symbolic-diff",
     "numeric1",
+    "operators1",
     "builtins",
     "builtins-list-access",
 }

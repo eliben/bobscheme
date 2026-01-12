@@ -884,34 +884,82 @@ _write_code = r"""
 
 _binop_arith_code = r"""
 (func ${NAME} (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
-    (ref.i31 ({BINOP}
+    (local $cur (ref null eq))
+    (local $acc i32)
+
+    ;; Initialize iteration over the argument list
+    (local.set $cur (local.get $arg))
+
+    ;; Handle empty arg list: return 0 by default
+    (if (ref.is_null (local.get $cur))
+        (then (return (ref.i31 (i32.const 0))))
+    )
+
+    ;; Seed accumulator with first argument
+    (local.set $acc
         (i31.get_s
             (ref.cast (ref i31)
-                (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg)))))
-        (i31.get_s
-            (ref.cast (ref i31)
-                (struct.get $PAIR 0
-                    (ref.cast (ref $PAIR)
-                        (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $arg)))))))))
+                (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $cur))))))
+
+    (local.set $cur (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $cur))))
+
+    ;; Reduce across remaining arguments using BINOP
+    (loop $loop (block $breakloop
+        (br_if $breakloop (ref.is_null (local.get $cur)))
+
+        (local.set $acc ({BINOP}
+            (local.get $acc)
+            (i31.get_s
+                (ref.cast (ref i31)
+                    (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $cur)))))))
+
+        (local.set $cur (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $cur))))
+        br $loop
+    ))
+
+    (ref.i31 (local.get $acc))
 )
 """
 
 _binop_cmp_code = r"""
 (func ${NAME} (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
-    ({BINOP}
+    (local $cur (ref null eq))
+    (local $a i32)
+    (local $b i32)
+
+    ;; Initialize iteration over the argument list
+    (local.set $cur (local.get $arg))
+
+    ;; Empty or single-arg comparisons are vacuously true
+    (if (ref.is_null (local.get $cur))
+        (then (return (struct.new $BOOL (i32.const 1))))
+    )
+
+    (local.set $a
         (i31.get_s
             (ref.cast (ref i31)
-                (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $arg)))))
-        (i31.get_s
-            (ref.cast (ref i31)
-                (struct.get $PAIR 0
-                    (ref.cast (ref $PAIR)
-                        (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $arg))))))))
-    if (result (ref null eq))
-        (struct.new $BOOL (i32.const 1))
-    else
-        (struct.new $BOOL (i32.const 0))
-    end
+                (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $cur))))))
+    (local.set $cur (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $cur))))
+
+    ;; Chain comparisons across remaining arguments
+    (loop $loop (block $breakloop
+        (br_if $breakloop (ref.is_null (local.get $cur)))
+        (local.set $b
+            (i31.get_s
+                (ref.cast (ref i31)
+                    (struct.get $PAIR 0 (ref.cast (ref $PAIR) (local.get $cur))))))
+        (if ({BINOP} (local.get $a) (local.get $b))
+            (then
+                (local.set $a (local.get $b))
+                (local.set $cur (struct.get $PAIR 1 (ref.cast (ref $PAIR) (local.get $cur))))
+                br $loop
+            )
+            (else
+                (return (struct.new $BOOL (i32.const 0)))
+            )
+        )
+    ))
+    (struct.new $BOOL (i32.const 1))
 )
 """
 
