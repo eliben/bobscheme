@@ -45,12 +45,13 @@ class WasmCompiler:
         self.symbolmap: dict[str, int] = {}
 
     def compile(self, exprlist):
+        """Compile a list of parsed expressions.
+
+        Input is what's returned by BobParser.parse; compile into WAT code
+        written to self.stream.
+        """
         nestedlist = make_nested_pairs(*exprlist)
-        # print(expr_tree_repr(nestedlist))  # TODO
-        tpl = self._expand_block(nestedlist)
-        # print("----")
-        # print(expr_tree_repr(tpl))
-        self._emit_module(tpl)
+        self._emit_module(self._expand_block(nestedlist))
 
     def _expand_block(self, exprlist):
         # Sequence of expressions. We iterate over it from the last to the first

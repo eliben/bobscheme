@@ -14,5 +14,24 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+
+      # Node.js and wasm-tools for the wasm compiler tests
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install wasm-tools
+        run: |
+          WASM_TOOLS_VERSION=1.239.0
+          WASM_TOOLS_DIR="wasm-tools-${WASM_TOOLS_VERSION}-x86_64-linux"
+          mkdir -p _tools
+          pushd _tools
+          curl -sSL "https://github.com/bytecodealliance/wasm-tools/releases/download/v${WASM_TOOLS_VERSION}/${WASM_TOOLS_DIR}.tar.gz" -o wasm-tools.tar.gz
+          tar -xzf wasm-tools.tar.gz
+          rm -f wasm-tools.tar.gz
+          popd
+          echo "$(pwd)/_tools/${WASM_TOOLS_DIR}" >> "$GITHUB_PATH"
+
       - name: Run all tests
         run: make test-all

@@ -8,6 +8,7 @@ export PYTHONPATH := $(PWD)
 PYTHON_TESTS := \
     test_interpreter \
     test_vm_compiler \
+	test_wasm_compiler \
 
 test-all: test-python test-barevm
 

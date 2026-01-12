@@ -75,42 +75,4 @@ def wasm_compiler_runner(code: str, ostream: io.StringIO) -> None:
         ostream.write(run_proc.stdout)
 
 
-supported_tests = {
-    "abasic1",
-    "abasic2",
-    "abasic3",
-    "bintree",
-    "equality1",
-    "quote1",
-    "queue",
-    "func1",
-    "func2",
-    "func3",
-    "vars1",
-    "if1",
-    "if2",
-    "let1",
-    "let2",
-    "vars1",
-    "cond1",
-    "closure1",
-    "closure2",
-    "closure3",
-    "lists1",
-    "lists2",
-    "lists3",
-    "loop1",
-    "symbolic1",
-    "recursion1",
-    "search1",
-    "sequence1",
-    "ycombinator1",
-    "ycombinator2",
-    "symbolic-diff",
-    "numeric1",
-    "operators1",
-    "builtins",
-    "builtins-list-access",
-}
-
-run_tests(runner=wasm_compiler_runner, testnames=supported_tests)
+run_tests(runner=wasm_compiler_runner)
