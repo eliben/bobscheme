@@ -427,7 +427,6 @@ def convert_let_to_application(exp):
     """
     # Extract lists of var names and values from the bindings of 'let'.
     # bindings is a (Scheme) list of 2-element (var val) lists.
-    #
     vars = []
     vals = []
 

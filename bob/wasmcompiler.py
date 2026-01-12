@@ -124,6 +124,8 @@ class WasmCompiler:
                     )
                 case "cond":
                     return self._expand_expr(convert_cond_to_ifs(expr))
+                case "let":
+                    return self._expand_expr(convert_let_to_application(expr))
                 case "begin":
                     return self._expand_block(begin_actions(expr))
                 case "set!":
