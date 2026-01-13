@@ -1,3 +1,4 @@
+<!-- Helper for debugging generated WASM code. -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -34,13 +35,11 @@
       };
       const { instance } = await WebAssembly.instantiate(bytes, imports);
 
-      // Grab the exported function
       const startFunc = instance.exports.start;
       if (typeof startFunc !== "function") {
         throw new Error("exported function 'start' not found or not callable");
       }
 
-      // Call it
       const result = startFunc();
       // Show result on page and console
       const outEl = document.getElementById("out");

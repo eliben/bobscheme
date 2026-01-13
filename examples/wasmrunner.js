@@ -2,9 +2,10 @@
 //
 // Expects a single argument: the path to a .wasm (binary) file.
 // Loads the "start" function and runs it, sending its output to stdout.
+//
 // The "start" function name is part of an ABI agreement between code emitted
-// from wasmcompiler.py and this runner.
-
+// from wasmcompiler.py and this runner. The other parts are the output
+// functions the loaded module imports through 'env'.
 const fs = require('fs');
 const path = require('path');
 
@@ -32,7 +33,6 @@ const path = require('path');
             }
         }
     };
-
     let obj = await WebAssembly.instantiate(new Uint8Array(bytes), importObject);
     let start = obj.instance.exports.start;
     start();

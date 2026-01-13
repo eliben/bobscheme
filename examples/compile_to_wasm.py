@@ -27,14 +27,12 @@ default_scheme_program = """
 (define joe '(1 2 3))
 (write (eqv? joe '(1 2 3)))
 (write (eqv? joe joe))
-
-
 """
 
 
 def main():
     ap = argparse.ArgumentParser(
-        description="Compile a Scheme snippet or file to WAT, optionally execute via Node"
+        description="Compile a Scheme snippet or file to WAT; optionally execute via Node"
     )
     ap.add_argument(
         "scheme_file",
@@ -50,10 +48,7 @@ def main():
     args = ap.parse_args()
 
     if args.scheme_file:
-        try:
-            scmprog = Path(args.scheme_file).read_text()
-        except OSError as e:
-            raise SystemExit(f"Failed to read Scheme file '{args.scheme_file}': {e}")
+        scmprog = Path(args.scheme_file).read_text()
     else:
         scmprog = default_scheme_program
 
@@ -100,7 +95,7 @@ def main():
         print(f"Compiled WASM to {wasm_path}", file=sys.stderr)
         print("------", file=sys.stderr)
 
-        # Run via Node wasmrunner.js, printing stdout
+        # Run via Node wasmrunner.js
         runner_js = Path(__file__).with_name("wasmrunner.js")
         try:
             subprocess.run([node, str(runner_js), str(wasm_path)], check=True)
