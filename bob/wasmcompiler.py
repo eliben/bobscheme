@@ -2,8 +2,9 @@
 # bob: wasmcompiler.py
 #
 # Compiles Bob expressions (parsed from Scheme text) to WAT (WebAssembly Text).
-# It's a drop-in replacement for BobCompiler - it takes a list of Expr objects
-# (as produced by BobParser) and produces WAT code (instead of Bob bytecode).
+# WasmCompiler is a drop-in replacement for BobCompiler - it takes a list of
+# Expr objects (as produced by BobParser) and produces WAT code (instead of Bob
+# bytecode).
 #
 # Eli Bendersky (eliben@gmail.com) This code is in the public domain
 # -------------------------------------------------------------------------------
@@ -16,6 +17,10 @@ from .expr import *
 
 class WasmCompiler:
     def __init__(self, stream: TextIO):
+        """Initialize the compiler.
+
+        stream: output stream where WAT code is written.
+        """
         self.stream = stream
         self.indent = 0
 
@@ -37,15 +42,17 @@ class WasmCompiler:
 
         # Symbol offset in linear memory. This is where the next allocated
         # symbol will be placed.
+        # Note that we emit memory with 16 pages (1 MiB) in total; if we ever
+        # foresee needing more space for symbols, we can increase this.
         self.symbol_offset = 2048
 
         # Symbolmap for "interning" symbols, mapping names to offsets in memory.
-        # When the compiler ecnounters the sample symbol in multiple places, it
+        # When the compiler encounters the same symbol in multiple places, it
         # uses the same offset.
         self.symbolmap: dict[str, int] = {}
 
     def compile(self, exprlist):
-        """Compile a list of parsed expressions.
+        """Compile a list of parsed expressions (Expr).
 
         Input is what's returned by BobParser.parse; compile into WAT code
         written to self.stream.
@@ -54,6 +61,29 @@ class WasmCompiler:
         self._emit_module(self._expand_block(nestedlist))
 
     def _expand_block(self, exprlist):
+        """Expand parsed Scheme code to lower-level constructs.
+
+        The _expand_* methods collectively simplify the input Scheme code to
+        a smaller subset of constructs that the _emit_* methods can handle.
+
+        For example, 'cond' is converted to nested 'if's, 'let' is converted to
+        a lambda application, etc.
+        Most importantly, internal definitions are handled as follows:
+
+            (define x value)
+            (... code using x)
+
+        is converted to:
+
+            ((lambda (x)
+                (begin
+                    (set! x value)
+                    (... code using x)))
+             '())
+
+        This is to handle mutual recursion between internal definitions, as well
+        as to ensure that the defined names are in scope for the entire block.
+        """
         # Sequence of expressions. We iterate over it from the last to the first
         # to build a nested BEGIN structure (in 'result'). For each expression,
         # if it's a definition, _expand_definition expands it and returns the
@@ -103,13 +133,9 @@ class WasmCompiler:
         return self._expand_expr(expr), None
 
     def _expand_expr(self, expr):
-        if isinstance(expr, Symbol) or expr is None:
+        if expr is None or isinstance(expr, Symbol) or is_self_evaluating(expr):
             return expr
-        elif is_self_evaluating(expr):
-            return expr
-
-        if not isinstance(expr, Pair):
-            raise ExprError("Unexpected expression type: %s" % type(expr))
+        assert isinstance(expr, Pair)
         if isinstance(expr.first, Symbol):
             match expr.first.value:
                 case "lambda":
@@ -154,7 +180,9 @@ class WasmCompiler:
         self._emit_text(_imports)
         self._emit_text(_builtin_types)
 
-        # Start a new lexical frame for the builtins.
+        # Start a new lexical frame for the builtins. This serves as the base
+        # of the lexical environment stack, mapping builtin names to their
+        # CLOSURE objects.
         self.lexical_env.append([])
 
         for blt in _builtins:
@@ -168,6 +196,8 @@ class WasmCompiler:
 
         self._emit_text(_compiler_helpers)
 
+        # The 'start' function is always generated, and it assumes that at
+        # least one user-defined function exists ($user_func_0).
         self._emit_startfunc()
 
         # Emit user code, recursively, starting with the toplevel expression.
@@ -210,6 +240,9 @@ class WasmCompiler:
         self._emit_text(")")
 
     def _emit_startfunc(self):
+        # The 'start' function invokes the top-level user-defined function
+        # $user_func_0, passing it the list of builtins in arguments and a
+        # null lexical env.
         self._emit_line("")
         self._emit_line('(func (export "start") (result i32)')
         self.indent += 4
@@ -232,8 +265,8 @@ class WasmCompiler:
         self._emit_line(")")
 
     def _emit_proc(self, expr):
-        # Create a new stream for this function's body; the current one will
-        # be restored at the end of this function.
+        # Create a new stream for a function's body; the current one will
+        # be restored at the end of this method.
         saved_stream = self.stream
         saved_indent = self.indent
         saved_tailcall_pos = self.tailcall_pos
@@ -254,7 +287,10 @@ class WasmCompiler:
         self._emit_line(
             "(local.set $env (struct.new $ENV (local.get $env) (local.get $arg)))"
         )
+
+        # Emit the function's body.
         self._emit_expr(expr)
+
         self.indent -= 4
         self._emit_line(")")
         self.indent = saved_indent
@@ -323,7 +359,6 @@ class WasmCompiler:
             self._emit_expr(if_consequent(expr))
             self.indent -= 4
             self._emit_line("end")
-
         elif is_application(expr):
             self.tailcall_pos += 1
             self._emit_list(application_operands(expr))
@@ -381,6 +416,7 @@ class WasmCompiler:
             self._emit_line("(ref.null eq)")
 
     def _emit_var(self, name: str):
+        # Emit code to lookup variable 'name' in the lexical environment.
         # What it leaves on the stack is not the value of the variable, but
         # the cons cell holding it; the caller is responsible for loading
         # the value from the cell, or for mutating it if needed (in set!).
@@ -412,6 +448,10 @@ class WasmCompiler:
 
 
 def expr_tree_repr(expr):
+    """Return a multi-line string representing the tree structure of expr.
+
+    Debugging aid.
+    """
     sbuf = StringIO()
 
     def rec(v, indent):
@@ -452,12 +492,6 @@ def expr_tree_repr(expr):
 # The run-time representation of a function is as a CLOSURE struct, holding a
 # reference to the runtime lexical environment at the time of the function's
 # creation, and the function index in the function table.
-
-
-_imports = r"""
-(import "env" "write_char" (func $write_char (param i32)))
-(import "env" "write_i32" (func $write_i32 (param i32)))
-"""
 
 _builtin_types = r"""
 ;; PAIR holds the car and cdr of a cons cell.
@@ -644,6 +678,8 @@ _symbolp_code = r"""
 )
 """
 
+# eqv? semantics for Bobscheme - compare identity for pairs and symbols,
+# values for numbers and booleans.
 _eqvp_code = r"""
 (func $eqv? (param $arg (ref null eq)) (param $env (ref null $ENV)) (result (ref null eq))
     (local $a (ref null eq))
@@ -756,6 +792,12 @@ _or_code = r"""
 )
 """
 
+# 'write' is the trickiest builtin because we have to implement pretty-printing
+# of Scheme values in WAT, and it has to match the format of expr_repr exactly,
+# because this is what the test suite expects.
+# Since WASM GC objects are opaque to the host, we can't be relying on the
+# host too much here, and end up only using the basic write_char and write_i32
+# imports.
 _write_code = r"""
 ;; The emit* functions use the imported write_char and write_i32 host functions.
 (func $emit (param $c i32)
@@ -1049,4 +1091,9 @@ _compiler_helpers = r"""
             (i32.const 0))
     )
 )
+"""
+
+_imports = r"""
+(import "env" "write_char" (func $write_char (param i32)))
+(import "env" "write_i32" (func $write_i32 (param i32)))
 """
