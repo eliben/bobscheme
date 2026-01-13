@@ -17,12 +17,13 @@ What is Bob?
 ------------
 
 Bob is a suite of implementations of the Scheme language in Python. It currently
-includes:
+includes the following Python components:
 
 * A Scheme interpreter
 * An implementation of a stack-based virtual machine called the "Bob VM"
 * A compiler from Scheme to Bob VM bytecode
 * A serializer and deserializer for Bob VM bytecode
+* A compiler from Scheme to WebAssembly
 
 In addition, Bob comes with another version of the VM, implemented in C++. It's
 called "BareVM". Bob itself is a fully usable implementation of Scheme in pure
@@ -149,6 +150,12 @@ Dependencies
 
 Bob is implemented in pure Python and is currently completely self-contained. To
 run it, you just need to have Python 3 installed.
+
+BareVM requires a C++ toolchain and ``make``.
+
+Running the WebAssembly compiler tests requires some tooling from the WASM
+ecosystem; take a look at the `CI workflow <https://github.com/eliben/bobscheme/blob/main/.github/workflows/test.yml>`__
+for details.
 
 Structure of the source tree
 ----------------------------
