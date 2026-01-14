@@ -232,9 +232,3 @@ class BobVM(object):
         str = show_stack(self.valuestack, 'Value', value_printer)
         str += '\n' + show_stack(self.framestack, 'Frame', frame_printer)
         return str
-
-
-#------------------------------------------------------------------------------
-if __name__ == '__main__':
-    pass
-

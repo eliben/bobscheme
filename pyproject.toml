@@ -1,0 +1,7 @@
+[project]
+name = "bobscheme"
+version = "0.1.0"
+description = "Bob - a suite of Scheme implementations in Python"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []

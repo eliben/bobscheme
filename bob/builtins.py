@@ -93,9 +93,8 @@ def builtin_not(args):
     else:
         return Boolean(False)
 
-# The 'and' and 'or' builtins are conforming to the definition in 
+# The 'and' and 'or' builtins are conforming to the definition in
 # R5RS, section 4.2
-#
 def builtin_and(args):
     for v in args:
         if v == Boolean(False):

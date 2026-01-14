@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # bob: tests_full/test_barevm.py
 #
 # Run the full tests for the Bob bare VM
 #
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 import os, sys
 from subprocess import Popen, PIPE
 import tempfile
-from testcases_utils import run_all_tests
+from testcases_utils import run_tests
 
 from bob.compiler import compile_code
 from bob.bytecode import Serializer
@@ -30,13 +30,14 @@ def make_runner(barevm_path):
         vm_proc = Popen([barevm_path, filename], stdout=PIPE)
         vm_output = vm_proc.stdout.read()
 
-        ostream.write(vm_output.decode('utf-8'))
+        ostream.write(vm_output.decode("utf-8"))
         os.remove(filename)
+
     return barevm_runner
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     barevm_path = "barevm/barevm"
     barevm_runner = make_runner(barevm_path)
 
-    run_all_tests(barevm_runner)
+    run_tests(barevm_runner)

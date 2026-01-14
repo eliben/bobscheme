@@ -1,4 +1,4 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # bob: expr.py
 #
 # Internal representation for parsed Scheme code. Scheme code consists of
@@ -8,7 +8,8 @@
 #
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+
 
 #
 # Classes for expression objects
@@ -16,22 +17,23 @@
 # by the None object.
 #
 class Pair(object):
-    """ Represents a Scheme pair ("cons cell"). 'first' and 'second' are
-        publicly accessible attributes.
+    """Represents a Scheme pair ("cons cell"). 'first' and 'second' are
+    publicly accessible attributes.
 
-        Scheme idiomatic accessors can be implemented as follows, given that
-        p is a Pair:
+    Scheme idiomatic accessors can be implemented as follows, given that
+    p is a Pair:
 
-        car     ==> p.first
-        cdr     ==> p.second
-        cadr    ==> p.second.first
-        caadr   ==> p.second.first.first
-        ... etc.
+    car     ==> p.first
+    cdr     ==> p.second
+    cadr    ==> p.second.first
+    caadr   ==> p.second.first.first
+    ... etc.
 
-        Note that if any of these actions is semantically invalid, a Python
-        AttributeError will be raised. This is in accord with the Scheme
-        standard, which states that (car '()) and (cdr '()) are errors.
+    Note that if any of these actions is semantically invalid, a Python
+    AttributeError will be raised. This is in accord with the Scheme
+    standard, which states that (car '()) and (cdr '()) are errors.
     """
+
     def __init__(self, first, second):
         self.first = first
         self.second = second
@@ -76,7 +78,7 @@ class Boolean(object):
         self.value = value
 
     def __repr__(self):
-        return '#t' if self.value else '#f'
+        return "#t" if self.value else "#f"
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -88,26 +90,27 @@ class Boolean(object):
 # An exception that can be raised by the various functions in this module when
 # there's an error with the Scheme expressions they're asked to process.
 #
-class ExprError(Exception): pass
+class ExprError(Exception):
+    pass
 
 
 def expr_repr(expr):
-    """ A textual representation of the given Scheme expression.
-    """
+    """A textual representation of the given Scheme expression."""
+
     def repr_rec(obj):
         if obj is None:
-            return '()'
+            return "()"
         elif isinstance(obj, (Boolean, Symbol, Number)):
             return repr(obj)
         elif isinstance(obj, Pair):
-            str = '(' + repr_rec(obj.first)
+            str = "(" + repr_rec(obj.first)
             while isinstance(obj.second, Pair):
-                str += ' ' + repr_rec(obj.second.first)
+                str += " " + repr_rec(obj.second.first)
                 obj = obj.second
             if obj.second is None:
-                str += ')'
+                str += ")"
             else:
-                str += ' . ' + repr_rec(obj.second) + ')'
+                str += " . " + repr_rec(obj.second) + ")"
             return str
         else:
             raise ExprError("Unexpected type: %s" % type(obj))
@@ -116,21 +119,42 @@ def expr_repr(expr):
 
 
 def make_nested_pairs(*args):
-    """ Given a list of arguments, creates a list in Scheme representation
-        (nested Pairs)
+    """Given a list of arguments, creates a list in Scheme representation
+    (nested Pairs)
     """
     if len(args) == 0:
         return None
     return Pair(args[0], make_nested_pairs(*args[1:]))
 
 
-def expand_nested_pairs(pair, recursive=False):
-    """ Given a list in Scheme representation (nested Pairs), expands it into
-        a Python list.
+def iter_pairs(pair):
+    """Given a list in Scheme representation (nested Pairs), yields its
+    elements in order.
+    """
+    while isinstance(pair, Pair):
+        yield pair.first
+        pair = pair.second
 
-        When recursive=True, expands nested pairs as well. I.e Scheme's
-        (1 (2 3) 4) is correctly translated to [1, [2, 3], 4]).
-        Ignores dotted-pair endings: (1 2 . 3) will be translated to [1, 2]
+
+def reverse_iter_pairs(pair):
+    """Given a list in Scheme representation (nested Pairs), yields its
+    elements in reverse order.
+    """
+    stack = []
+    while isinstance(pair, Pair):
+        stack.append(pair.first)
+        pair = pair.second
+    while stack:
+        yield stack.pop()
+
+
+def expand_nested_pairs(pair, recursive=False):
+    """Given a list in Scheme representation (nested Pairs), expands it into
+    a Python list.
+
+    When recursive=True, expands nested pairs as well. I.e Scheme's
+    (1 (2 3) 4) is correctly translated to [1, [2, 3], 4]).
+    Ignores dotted-pair endings: (1 2 . 3) will be translated to [1, 2]
     """
     lst = []
     while isinstance(pair, Pair):
@@ -144,9 +168,13 @@ def expand_nested_pairs(pair, recursive=False):
 
 
 def is_scheme_expr(exp):
-    """ Check if the given expression is a Scheme expression.
-    """
-    return exp is None or is_self_evaluating(exp) or is_variable(exp) or isinstance(exp, Pair)
+    """Check if the given expression is a Scheme expression."""
+    return (
+        exp is None
+        or is_self_evaluating(exp)
+        or is_variable(exp)
+        or isinstance(exp, Pair)
+    )
 
 
 #
@@ -156,17 +184,18 @@ def is_scheme_expr(exp):
 def is_self_evaluating(exp):
     return isinstance(exp, (Number, Boolean))
 
+
 def is_variable(exp):
     return isinstance(exp, Symbol)
 
+
 def is_tagged_list(exp, tag):
-    """ Is the expression a list starting with the given symbolic tag?
-    """
+    """Is the expression a list starting with the given symbolic tag?"""
     return isinstance(exp, Pair) and exp.first == tag
 
 
 def is_quoted(exp):
-    return is_tagged_list(exp, 'quote')
+    return is_tagged_list(exp, "quote")
 
 
 def text_of_quotation(exp):
@@ -174,7 +203,7 @@ def text_of_quotation(exp):
 
 
 def is_assignment(exp):
-    return is_tagged_list(exp, 'set!')
+    return is_tagged_list(exp, "set!")
 
 
 def assignment_variable(exp):
@@ -183,6 +212,10 @@ def assignment_variable(exp):
 
 def assignment_value(exp):
     return exp.second.second.first
+
+
+def make_assignment(variable, value):
+    return make_nested_pairs(Symbol("set!"), variable, value)
 
 
 #
@@ -199,7 +232,8 @@ def assignment_value(exp):
 #       <body>))
 #
 def is_definition(exp):
-    return is_tagged_list(exp, 'define')
+    return is_tagged_list(exp, "define")
+
 
 def definition_variable(exp):
     if isinstance(exp.second.first, Symbol):
@@ -207,36 +241,43 @@ def definition_variable(exp):
     else:
         return exp.second.first.first
 
+
 def definition_value(exp):
     if isinstance(exp.second.first, Symbol):
         return exp.second.second.first
     else:
         return make_lambda(
-                    exp.second.first.second,    # formal parameters
-                    exp.second.second)          # body
+            exp.second.first.second, exp.second.second  # formal parameters
+        )  # body
 
 
 def is_lambda(exp):
-    return is_tagged_list(exp, 'lambda')
+    return is_tagged_list(exp, "lambda")
+
 
 def lambda_parameters(exp):
     return exp.second.first
 
+
 def lambda_body(exp):
     return exp.second.second
 
+
 def make_lambda(parameters, body):
-    return Pair(Symbol('lambda'), Pair(parameters, body))
+    return Pair(Symbol("lambda"), Pair(parameters, body))
 
 
 def is_if(exp):
-    return is_tagged_list(exp, 'if')
+    return is_tagged_list(exp, "if")
+
 
 def if_predicate(exp):
     return exp.second.first
 
+
 def if_consequent(exp):
     return exp.second.second.first
+
 
 def if_alternative(exp):
     alter_exp = exp.second.second.second
@@ -245,21 +286,26 @@ def if_alternative(exp):
     else:
         return alter_exp.first
 
+
 def make_if(predicate, consequent, alternative):
-    return make_nested_pairs(Symbol('if'), predicate, consequent, alternative)
+    return make_nested_pairs(Symbol("if"), predicate, consequent, alternative)
 
 
 def is_begin(exp):
-    return is_tagged_list(exp, 'begin')
+    return is_tagged_list(exp, "begin")
+
 
 def begin_actions(exp):
     return exp.second
 
+
 def is_last_exp(seq):
     return seq.second is None
 
+
 def first_exp(seq):
     return seq.first
+
 
 def rest_exps(seq):
     return seq.second
@@ -271,54 +317,65 @@ def rest_exps(seq):
 def is_application(exp):
     return isinstance(exp, Pair)
 
+
 def application_operator(exp):
     return exp.first
+
 
 def application_operands(exp):
     return exp.second
 
+
 def has_no_operands(ops):
     return ops is None
 
+
 def first_operand(ops):
     return ops.first
+
 
 def rest_operands(ops):
     return ops.second
 
 
 def sequence_to_exp(seq):
-    """ Convert a sequence of expressions to a single expression, adding 'begin
-        if required.
+    """Convert a sequence of expressions to a single expression, adding 'begin
+    if required.
     """
     if seq is None:
         return None
     elif is_last_exp(seq):
         return first_exp(seq)
     else:
-        return Pair(Symbol('begin'), seq)
+        return Pair(Symbol("begin"), seq)
 
 
 #
 # 'cond' is a derived expression and is expanded into a series of nested 'if's.
 #
 def is_cond(exp):
-    return is_tagged_list(exp, 'cond')
+    return is_tagged_list(exp, "cond")
+
 
 def cond_clauses(exp):
     return exp.second
 
+
 def cond_predicate(clause):
     return clause.first
+
 
 def cond_actions(clause):
     return clause.second
 
+
 def is_cond_else_clause(clause):
-    return cond_predicate(clause) == Symbol('else')
+    return cond_predicate(clause) == Symbol("else")
+
 
 def convert_cond_to_ifs(exp):
     return expand_cond_clauses(cond_clauses(exp))
+
 
 def expand_cond_clauses(clauses):
     if clauses is None:
@@ -329,12 +386,13 @@ def expand_cond_clauses(clauses):
         if rest is None:
             return sequence_to_exp(cond_actions(first))
         else:
-            raise ExprError('ELSE clause is not last: %s' % expr_repr(clauses))
+            raise ExprError("ELSE clause is not last: %s" % expr_repr(clauses))
     else:
         return make_if(
-                    predicate=cond_predicate(first),
-                    consequent=sequence_to_exp(cond_actions(first)),
-                    alternative=expand_cond_clauses(rest))
+            predicate=cond_predicate(first),
+            consequent=sequence_to_exp(cond_actions(first)),
+            alternative=expand_cond_clauses(rest),
+        )
 
 
 #
@@ -352,21 +410,23 @@ def expand_cond_clauses(clauses):
 #   expN)
 #
 def is_let(exp):
-    return is_tagged_list(exp, 'let')
+    return is_tagged_list(exp, "let")
+
 
 def let_bindings(exp):
     return exp.second.first
 
+
 def let_body(exp):
     return exp.second.second
 
+
 def convert_let_to_application(exp):
-    """ Given a Scheme 'let' expression converts it to the appropriate
-        application of an anonymous procedure.
+    """Given a Scheme 'let' expression converts it to the appropriate
+    application of an anonymous procedure.
     """
     # Extract lists of var names and values from the bindings of 'let'.
     # bindings is a (Scheme) list of 2-element (var val) lists.
-    #
     vars = []
     vals = []
 

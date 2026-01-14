@@ -6,22 +6,16 @@ $(if $(PYTHON),,$(error No python or python3 binary found))
 export PYTHONPATH := $(PWD)
 
 PYTHON_TESTS := \
-    test_interpreter \
-    test_vm_compiler \
-
-BAREVM_TESTS := \
-    test_barevm \
-    barevm_unittest \
-
-default:
-
-test: test-python
+	test_interpreter \
+	test_vm_compiler \
+	test_wasm_compiler \
 
 test-all: test-python test-barevm
 
 test-python: $(PYTHON_TESTS)
 
-test-barevm: $(BAREVM_TESTS)
+test-barevm: barevm/barevm
+	$(PYTHON) tests_full/test_barevm.py
 
 clean:
 	git clean -dXf
@@ -29,15 +23,5 @@ clean:
 $(PYTHON_TESTS)::
 	$(PYTHON) tests_full/$@.py
 
-$(BAREVM_TESTS):: barevm/barevm
-
-test_barevm:: barevm/barevm
-	$(PYTHON) tests_full/$@.py
-
-barevm_unittest::
-	$(MAKE) --no-print-directory -C barevm -f CMakeFiles/Makefile2 barevm_unittest
-	./barevm/barevm_unittest
-
-barevm/barevm: barevm/src/*.cpp barevm/src/*.h
-	$(if $(shell command -v cmake),,$(error No cmake binary found))
-	cd barevm && cmake . && $(MAKE)
+barevm/barevm: barevm/*.cpp barevm/*.h
+	cd barevm && $(MAKE)

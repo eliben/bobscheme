@@ -1,0 +1,57 @@
+<!-- Helper for debugging generated WASM code. -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Wasm debug harness</title>
+</head>
+
+<body>
+  <h1>Wasm debug harness</h1>
+  <pre id="out">loading...</pre>
+
+  Serve this file on localhost alongside try.wasm; then load it in Chrome,
+  open DevTools console to see the output. It should be possible to set
+  breakpoints in the WASM code, and/or ask DevTools to break when exceptions
+  happen.
+
+  <script type="module">
+    async function loadWasm() {
+      // Fetch the wasm binary
+      const resp = await fetch("./try.wasm");
+      const bytes = await resp.arrayBuffer();
+      const imports = {
+        env: {
+          // Note: these emit with console.log, which appends a newline
+          // automatically.
+          write_char: n => {
+            console.log(String.fromCharCode(n));
+          },
+          write_i32: n => {
+            console.log(`${n}`);
+          }
+        }
+      };
+      const { instance } = await WebAssembly.instantiate(bytes, imports);
+
+      const startFunc = instance.exports.start;
+      if (typeof startFunc !== "function") {
+        throw new Error("exported function 'start' not found or not callable");
+      }
+
+      const result = startFunc();
+      // Show result on page and console
+      const outEl = document.getElementById("out");
+      outEl.textContent = "start() returned: " + result;
+      console.log("start() returned:", result);
+    }
+
+    loadWasm().catch(err => {
+      console.error(err);
+      document.getElementById("out").textContent = "error: " + err;
+    });
+  </script>
+</body>
+
+</html>

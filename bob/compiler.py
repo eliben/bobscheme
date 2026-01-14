@@ -283,4 +283,3 @@ def compile_code(code_str):
     compiled = BobCompiler().compile(parsed_exprs)
 
     return BobAssembler().assemble(compiled)
-

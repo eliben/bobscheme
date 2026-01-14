@@ -2,10 +2,6 @@
  Bob bytecode reference
 ========================
 
-:Author: Eli Bendersky
-:Contact: eliben@gmail.com
-:Updated: 09-Apr-2011
-
 .. contents:: Table of Contents
     :backlinks: none
 

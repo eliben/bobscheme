@@ -1,14 +1,15 @@
-Bob is a suite of implementations of the Scheme language in Python. It currently
-includes:
+Bob is a suite of implementations of the Scheme language in Python and C++. It currently
+includes the following Python components:
 
 * A Scheme interpreter
 * An implementation of a stack-based virtual machine called the "Bob VM"
 * A compiler from Scheme to Bob VM bytecode
 * A serializer and deserializer for Bob VM bytecode
+* A compiler from Scheme to WebAssembly
 
 In addition, Bob comes with another version of the VM, implemented in C++. It's
-called "BareVM". BareVM is an optional component - Bob is fully usable as an
-implementation of Scheme in pure Python.
+called "BareVM". Bob itself is a fully usable implementation of Scheme in pure
+Python; BareVM is an optional component.
 
 There's some documentation in the ``doc/`` directory in the source.
 [Getting Started](https://github.com/eliben/bobscheme/blob/master/doc/bob_getting_started.rst).
